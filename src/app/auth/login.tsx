@@ -40,11 +40,10 @@ export default function Login() {
                 setResultData(response.data.msg);
                 reset();
 
-                const { id, token } = response.data;
+                const { token } = response.data;
                 await AsyncStorage.setItem('jwtToken', token);
-                await AsyncStorage.setItem('userId', id);
 
-                router.replace('user/home');
+                router.replace('(tabs)');
             })
             .catch(function (error) {
                 console.log(error.response.data);
@@ -119,7 +118,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#593C9D",
         borderRadius: 5,
         paddingVertical: 10,
-        color: "#fff",
         width: "100%",
         alignItems: "center",
         marginTop: 50,

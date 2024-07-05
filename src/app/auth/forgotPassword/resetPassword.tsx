@@ -162,9 +162,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         gap: 10
     },
-    button: {
-
-    },
     input: {
         backgroundColor: "#fff",
         padding: 10,
