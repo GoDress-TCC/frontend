@@ -1,22 +1,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
-import Api from '@/src/services/api';
+import { Clothing } from '@/src/services/types/types';
+import { useCats } from '@/src/services/contexts/catsContext';
 import Modal from '../components/modals/modal';
 import ModalScreen from '../components/modals/modalScreen';
+import { ClothesList } from '../components/flatLists/clothesList';
+import Api from '@/src/services/api';
+
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 type FormData = {
-    name: string;
-};
-
-type Category = {
-    _id: string;
     name: string;
 };
 
@@ -24,17 +24,19 @@ const addCatSchema = yup.object({
     name: yup.string().required('Nome é obrigatório')
 }).required();
 
+const { width } = Dimensions.get('window');
+
 export default function Home() {
     // getUser
     const [name, setName] = useState<string | null>(null);
     const [surname, setSurname] = useState<string | null>(null);
 
-    // getCat
-    const [cats, setCats] = useState<Category[]>([]);
+    // getCatClothes
+    const [catClothes, setCatClothes] = useState<Clothing[]>([]);
 
     // modals
-    const [modalOpen, setModalOpen] = useState(false);
-    const [catScreenOpen, setCatScreenOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [catScreenOpen, setCatScreenOpen] = useState<boolean>(false);
     const [openCatId, setOpenCatId] = useState<string | null>(null);
 
     // buttons
@@ -42,6 +44,8 @@ export default function Home() {
 
     // data
     const [resultData, setResultData] = useState<string | null>(null);
+
+    const { cats, getCats } = useCats();
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -80,17 +84,6 @@ export default function Home() {
             });
     };
 
-    const getCats = async () => {
-        await Api.get('/cat')
-            .then(response => {
-                console.log(response);
-                setCats(response.data);
-            })
-            .catch(error => {
-                console.log(error.response.data);
-            });
-    };
-
     const onSubmitUpdateCat: SubmitHandler<FormData> = async (data) => {
         await Api.put(`/cat/${openCatId}`, data)
             .then(response => {
@@ -114,21 +107,47 @@ export default function Home() {
             })
             .catch(error => {
                 console.log(error.response.data);
+            });
+    };
+
+    const getCatClothes = async () => {
+        await Api.get(`/clothing/${openCatId}`)
+            .then(response => {
+                setCatClothes(response.data);
+                console.log(response.data);
             })
-    }
+            .catch(error => {
+                console.log(error.response.data);
+            })
+    };
 
     useEffect(() => {
         getUser();
         getCats();
     }, []);
 
+    useEffect(() => {
+        if (openCatId) {
+            getCatClothes();
+        }
+    }, [openCatId]);
+
     const handleLogout = async () => {
         await AsyncStorage.removeItem('jwtToken');
         router.replace('/');
     };
 
-    const handleOpenCat = (id: string) => setOpenCatId(id);
-    const handleCloseCat = () => setOpenCatId(null);
+    const handleOpenCat = (id: string) => {
+        setOpenCatId(id);
+        setCatScreenOpen(true);
+        setShowButton("");
+    };
+
+    const handleCloseCat = () => {
+        setCatScreenOpen(false), 
+        setOpenCatId(null), 
+        setResultData(null)
+    }
 
     return (
         <View style={styles.container}>
@@ -141,7 +160,17 @@ export default function Home() {
                 <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
             </TouchableOpacity>
 
-            <View style={{ backgroundColor: "#fff", padding: 10, marginTop: 20, borderRadius: 10, gap: 5 }}>
+            <TouchableOpacity onPress={() => { router.push('/clothes/favClothes') }}>
+                <View style={[styles.functionContainer, { flexDirection: "row", justifyContent: "space-between" }]}>
+                    <View style={{ flexDirection: "row", gap: 10 }}>
+                        <MaterialIcons name="favorite" size={24} color="#000" />
+                        <Text style={{ fontSize: 18, fontWeight: "500" }}>Favoritos</Text>
+                    </View>
+                    <MaterialIcons name="keyboard-arrow-right" size={24} color="#000" />
+                </View>
+            </TouchableOpacity>
+
+            <View style={styles.functionContainer}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                     <Text style={{ fontSize: 16, fontWeight: "500" }}>Minhas Categorias:</Text>
                     <TouchableOpacity onPress={() => { setModalOpen(true), reset() }}>
@@ -151,15 +180,15 @@ export default function Home() {
                 <View style={{ marginTop: 10, gap: 10 }}>
                     {cats.map((category) => (
                         <View key={category._id}>
-                            <TouchableOpacity onPress={() => { handleOpenCat(category._id), setCatScreenOpen(true) }}>
+                            <TouchableOpacity onPress={() => { handleOpenCat(category._id) }}>
                                 <Text style={{ fontSize: 16, fontWeight: "400" }}>{category.name}</Text>
                             </TouchableOpacity>
 
                             {openCatId === category._id && (
-                                <ModalScreen isOpen={catScreenOpen}>
+                                <ModalScreen isOpen={catScreenOpen} onRequestClose={handleCloseCat}>
                                     <View style={styles.modalScreenContent}>
-                                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                                            <TouchableOpacity onPress={() => { setCatScreenOpen(false), handleCloseCat, setResultData(null), setShowButton("") }}>
+                                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", paddingHorizontal: 20 }}>
+                                            <TouchableOpacity onPress={handleCloseCat}>
                                                 <FontAwesome5 name="arrow-left" size={18} />
                                             </TouchableOpacity>
                                             <Controller
@@ -188,10 +217,13 @@ export default function Home() {
                                         )}
 
                                         {showButton !== category.name && showButton !== "" && (
-                                            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitUpdateCat)}>
-                                                <Text style={styles.textButton}>Atualizar</Text>
-                                            </TouchableOpacity>
+                                            <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+                                                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitUpdateCat)}>
+                                                    <Text style={styles.textButton}>Atualizar</Text>
+                                                </TouchableOpacity>
+                                            </View>
                                         )}
+                                        <ClothesList clothes={catClothes} canOpen={false} />
                                     </View>
                                 </ModalScreen>
                             )}
@@ -199,8 +231,8 @@ export default function Home() {
                     ))}
                 </View>
 
-                <Modal isOpen={modalOpen}>
-                    <View>
+                <Modal isOpen={modalOpen} withInput={true} onRequestClose={() => { setModalOpen(false), setResultData(null) }}>
+                    <View style={{ width: width * 0.5 }}>
                         <View style={styles.modalContent}>
                             <Text style={{ fontSize: 14, fontWeight: "500" }}>Adicionar Categoria</Text>
 
@@ -263,16 +295,14 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderRadius: 10,
         gap: 10,
-        padding: 20
+        padding: 20,
     },
     modalScreenContent: {
         backgroundColor: "#fff",
         width: "100%",
         height: "95%",
         paddingTop: 40,
-        paddingHorizontal: 20,
         borderRadius: 10,
-        alignItems: "center",
         gap: 10
     },
     input: {
@@ -301,8 +331,15 @@ const styles = StyleSheet.create({
     },
     error: {
         color: 'red',
-        alignSelf: 'flex-start',
+        alignSelf: 'center',
         fontSize: 10,
-        fontWeight: '500'
+        fontWeight: "500"
+    },
+    functionContainer: {
+        backgroundColor: "#fff",
+        padding: 10,
+        marginTop: 20,
+        borderRadius: 10,
+        gap: 5
     },
 });

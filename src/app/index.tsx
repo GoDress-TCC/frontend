@@ -1,18 +1,30 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, Text, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { useEffect } from 'react';
 
 export default function Index() {
+    const hasToken = async () => {
+        const token = await AsyncStorage.getItem('jwtToken')
+
+        if (token) { router.replace('(tabs)') }
+    };
+
+    useEffect(() => {
+        hasToken();
+    }, []);
+
     return (
         <View style={styles.container}>
             <View style={styles.subcontainer}>
-                <Text style={{ fontSize: 26, fontWeight: 700, color:"#593C9D" }}>Teste de integração</Text>
+                <Text style={{ fontSize: 26, fontWeight: "700", color: "#593C9D" }}>Teste de integração</Text>
                 <Text>backend - frontend</Text>
             </View>
             <View style={styles.subcontainer}>
                 <Link href={"/auth/login"} style={styles.button}>Login</Link>
                 <Link href={"/auth/register"} style={styles.button}>Registro</Link>
             </View>
-            <Text style={{ color: "grey", fontSize: 10 }}>powered by GoDress</Text> 
+            <Text style={{ color: "grey", fontSize: 10 }}>powered by GoDress</Text>
         </View>
     );
 }
@@ -26,7 +38,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20
     },
     subcontainer: {
-        alignItems: "center", 
+        alignItems: "center",
         width: "100%",
         gap: 10
     },
@@ -35,7 +47,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         color: "#fff",
-        fontWeight: 500,
+        fontWeight: "500",
         width: "100%",
         textAlign: "center"
     }

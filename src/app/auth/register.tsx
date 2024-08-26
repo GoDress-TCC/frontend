@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import Api from '@/src/services/api';
+import { router } from 'expo-router';
 
 type FormData = {
     name: string;
@@ -54,6 +55,7 @@ export default function Register() {
             .then(function (response) {
                 console.log(response.data);
                 setResultData(response.data.msg);
+                router.navigate('/auth/login')
                 reset();
             })
             .catch(function (error) {
@@ -152,7 +154,7 @@ export default function Register() {
 
             {resultData && (
                 <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: 500, marginBottom: 10 }}>Status:</Text>
+                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
                     <Text style={styles.resultText}>{resultData}</Text>
                 </View>
             )}
@@ -189,7 +191,7 @@ const styles = StyleSheet.create({
         color: 'red',
         alignSelf: 'flex-start',
         fontSize: 10,
-        fontWeight: '500'
+        fontWeight: "500"
     },
     resultContainer: {
         marginTop: 20,

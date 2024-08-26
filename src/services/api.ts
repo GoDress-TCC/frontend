@@ -12,7 +12,7 @@ const getToken = async () => {
 };
 
 const Api = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: `${process.env.EXPO_PUBLIC_API_URL}/api`
 });
 
 Api.interceptors.request.use(

@@ -7,7 +7,7 @@ type PROPS = ModalProps & {
 
 export default function Modal({ isOpen, withInput, children, ...rest }: PROPS) {
     const content = withInput ? (
-        <KeyboardAvoidingView style={styles.modal}>{children}</KeyboardAvoidingView>
+        <KeyboardAvoidingView style={styles.modal} behavior="padding">{children}</KeyboardAvoidingView>
     ) : (
         <View style={styles.modal}>{children}</View>
     )

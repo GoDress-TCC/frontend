@@ -1,0 +1,30 @@
+export const clothingKind = [
+    { label: 'Camisa', value: 'shirt' },
+    { label: 'Camiseta', value: 'tshirt' },
+    { label: 'Calça', value: 'pants' },
+    { label: 'Shorts', value: 'shorts' },
+    { label: 'Saia', value: 'skirt' },
+    { label: 'Bermuda', value: 'bermuda' },
+    { label: 'Jaqueta', value: 'jacket' },
+    { label: 'Casaco', value: 'coat' },
+    { label: 'Suéter', value: 'sweater' },
+    { label: 'Vestido', value: 'dress' },
+    { label: 'Blusa', value: 'blouse' },
+    { label: 'Blazer', value: 'blazer' },
+    { label: 'Macacão', value: 'jumpsuit' },
+    { label: 'Tênis', value: 'sneakers' },
+    { label: 'Bota', value: 'boots' },
+    { label: 'Meia', value: 'socks' },
+    { label: 'Cueca', value: 'underwear' },
+    { label: 'Roupa de Banho', value: 'swimwear' },
+    { label: 'Maiô', value: 'swimsuit' },
+    { label: 'Óculos', value: 'glasses' },
+    { label: 'Chapéu', value: 'hat' },
+];
+
+export const clothingFit = [
+    { label: 'Justo', value: 'tight' },
+    { label: 'Solto', value: 'loose' },
+    { label: 'Regular', value: 'regular' },
+    { label: 'Oversized', value: 'oversized' },
+];
