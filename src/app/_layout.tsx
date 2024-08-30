@@ -1,8 +1,16 @@
 import { Stack } from "expo-router";
 import { ClothesProvider } from '@/src/services/contexts/clothesContext';
 import { CatsProvider } from "../services/contexts/catsContext";
+import { useFonts } from "expo-font"
+import fonts from "../services/fonts";
 
 export default function Layout() {
+    const [fontsLoaded] = useFonts(fonts);
+
+    if (!fontsLoaded) {
+        return null;
+    }
+
     return (
         <ClothesProvider>
         <CatsProvider>

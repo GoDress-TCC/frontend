@@ -24,6 +24,6 @@ export default function favClothes() {
     }, []);
     
     return (
-        <ClothesList clothes={clothes} canOpen={false}/>       
+        <ClothesList clothes={clothes} canOpen={true}/>       
     );
 }

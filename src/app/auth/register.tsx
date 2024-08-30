@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+
+import Fonts from '@/src/services/utils/Fonts';
 
 import Api from '@/src/services/api';
 import { router } from 'expo-router';
@@ -66,6 +68,12 @@ export default function Register() {
 
     return (
         <View style={styles.container}>
+
+            <View style={styles.containlogotxt}>
+                <Text style={styles.titulo} >Cadastre-se</Text>
+                <Image style={styles.logoimg} source={require('../../../assets/images/logoGpreta.png')} />
+            </View>
+
             <Controller
                 control={control}
                 name="name"
@@ -148,8 +156,8 @@ export default function Register() {
             />
 
 
-            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                <Text style={{ color: "#fff", fontWeight: "500" }}>Cadastrar-se</Text>
+            <TouchableOpacity style={styles.BNTcadastro} onPress={handleSubmit(onSubmit)}>
+                <Text style={styles.txtBNT}>Cadastrar-se</Text>
             </TouchableOpacity>
 
             {resultData && (
@@ -165,12 +173,45 @@ export default function Register() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: "center",
         justifyContent: "center",
-        paddingVertical: 40,
-        paddingHorizontal: 20,
+        padding:20,
         gap: 10
     },
+
+    containlogotxt:{
+        display:'flex',
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:'flex-start',
+        marginBottom:40,
+    },
+
+    titulo:{
+        fontFamily:Fonts['montserrat-black'],
+        fontSize:32,
+        color:'#593C9D',
+        paddingRight:15,
+    },
+
+    logoimg:{
+        height:60,
+        width:60,
+        resizeMode:'contain',
+    },
+
+    
+
+    input: {
+        backgroundColor: "#fff",
+        padding: 10,
+        width: "100%",
+        borderWidth: 1,
+        borderRadius: 10,
+        borderColor:'#A7A7A7',
+        fontFamily: Fonts['montserrat-regular'],
+        fontSize:16,
+    },
+
     button: {
         backgroundColor: "#593C9D",
         borderRadius: 5,
@@ -180,13 +221,20 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 50,
     },
-    input: {
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1,
-        borderRadius: 5,
+
+    BNTcadastro:{
+        backgroundColor:'#593C9D',
+        borderRadius:10,
+        alignItems:'center',
+        paddingVertical:15,
+        marginTop:20,
     },
+
+    txtBNT:{
+        color:'#fff',
+        fontFamily:Fonts['montserrat-black'],
+    },
+
     error: {
         color: 'red',
         alignSelf: 'flex-start',

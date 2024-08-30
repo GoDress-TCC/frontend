@@ -13,4 +13,4 @@ export type Clothing = {
     gender: string,
     tissue: string,
     fav: boolean
-}
+};

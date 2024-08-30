@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useEffect } from 'react';
+import Fonts from '../services/utils/Fonts';
 
 export default function Index() {
     const hasToken = async () => {
@@ -17,14 +18,20 @@ export default function Index() {
     return (
         <View style={styles.container}>
             <View style={styles.subcontainer}>
-                <Text style={{ fontSize: 26, fontWeight: "700", color: "#593C9D" }}>Teste de integração</Text>
-                <Text>backend - frontend</Text>
+                <Text style={styles.text}>Bem-vindo a GoDress</Text>
+                <Image source={require('../../assets/images/goroxo.png')} />
+              
             </View>
-            <View style={styles.subcontainer}>
-                <Link href={"/auth/login"} style={styles.button}>Login</Link>
-                <Link href={"/auth/register"} style={styles.button}>Registro</Link>
+
+            <View style={styles.miniContainer}>
+                <Link href={"/auth/register"} style={styles.button}>cadastre-se</Link>
+                <View style={styles.containtext}>
+                <Link href={"/auth/login"} style={styles.txtlogin}>ja possui cadastro?</Link>
+                <Link href={"/auth/login"} style={styles.txtlogin}>entrar</Link>
+
+                </View>
             </View>
-            <Text style={{ color: "grey", fontSize: 10 }}>powered by GoDress</Text>
+
         </View>
     );
 }
@@ -33,22 +40,66 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 40,
-        paddingHorizontal: 20
+        backgroundColor: '#593C9D',
     },
+
     subcontainer: {
         alignItems: "center",
-        width: "100%",
-        gap: 10
+        marginTop: "35%",
     },
+
+    text: {
+        fontSize: 18,
+        fontFamily: Fonts['montserrat-light'],
+        color: '#fff',
+        paddingHorizontal: 140,
+        textAlign: 'center',
+        marginBottom:40,
+    },
+
+    positioncamaleao: {
+        position: 'absolute',
+        top: 365,
+        right: 20,
+        resizeMode: 'contain',
+        zIndex: 1,
+    },
+
+
+    miniContainer: {
+        position: 'absolute',
+        paddingHorizontal: 20,
+        bottom: 0,
+        height: '40%',
+        width: '100%',
+        backgroundColor: '#fff',
+        borderTopEndRadius: 50,
+        borderTopLeftRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+
     button: {
         backgroundColor: "#593C9D",
-        borderRadius: 5,
-        paddingVertical: 10,
+        borderRadius: 10,
+        paddingVertical: 22,
         color: "#fff",
         fontWeight: "500",
         width: "100%",
-        textAlign: "center"
-    }
+        textAlign: "center",
+        marginBottom: 20,
+        fontFamily:Fonts['montserrat-black'],
+        fontSize: 18,
+    },
+
+    txtlogin: {
+        fontSize:16,
+    },  
+
+    containtext:{
+        alignItems:'center',
+        justifyContent:'center',
+        fontFamily:Fonts['montserrat-regular'],
+        fontSize:16,
+    },
 });

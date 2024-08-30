@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, ImageBackground } from "react-native";
-import { useForm, SubmitHandler } from 'react-hook-form';
+import React, { useRef, useState } from "react";
+import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Text, ImageBackground, ScrollView, Animated, Easing } from "react-native";
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import _isEqual from 'lodash/isEqual';
 
 import { Clothing } from "@/src/services/types/types";
 import { useClothes } from "@/src/services/contexts/clothesContext";
@@ -13,52 +14,119 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 const { width } = Dimensions.get('window');
 
 type FormData = {
-    fav?: boolean
+    kind?: string,
+    color?: string,
+    fit?: string,
+    gender?: string,
+    tissue?: string,
+    fav?: boolean,
 }
 
 export const ClothesList = React.memo(({ clothes, canOpen }: { clothes: Clothing[], canOpen: boolean }) => {
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [openClothing, setOpenClothing] = useState<Clothing | null>(null);
+    const [editClothing, setEditClothing] = useState<boolean>(false);
     const { getClothes } = useClothes();
 
     const form = useForm<FormData>({
         defaultValues: {
-            fav: openClothing?.fav
+            kind: openClothing?.kind ?? '',
+            color: openClothing?.color ?? '',
+            fit: openClothing?.color ?? '',
+            gender: openClothing?.color ?? '',
+            tissue: openClothing?.color ?? '',
+            fav: openClothing?.fav ?? false,
         },
     });
 
-    const { watch, setValue, handleSubmit, reset } = form;
+    const { watch, setValue, handleSubmit, reset, getValues } = form;
 
     const favoriteValue = watch('fav');
 
+    const editAnimation = useRef(new Animated.Value(0)).current;
+    const favAnimation = useRef(new Animated.Value(0)).current;
+
     const handleOpenClothing = (clothing: Clothing) => {
         setOpenClothing(clothing);
-        reset({ fav: clothing.fav });
+        reset(clothing);
         setOpenModal(true);
     };
 
-    const onSubmitUpdateClothing: SubmitHandler<FormData> = async (data) => {
-        if (openClothing) {
-            const { fav: currentFav } = openClothing;
+    const hasFormChanged = (initialData: FormData, currentData: FormData) => {
+        return !_isEqual(initialData, currentData);
+    };    
 
-            if (currentFav !== data.fav) {
-                await Api.put(`/clothing/${openClothing?._id}`, data)
-                    .then(response => {
-                        console.log(response.data);
-                        setOpenClothing((prev) => prev ? { ...prev, ...data } : null);
-                        getClothes();
-                    })
-                    .catch(error => {
-                        console.log(error.response.data)
-                    })
-            }
+    const onSubmitUpdateClothing: SubmitHandler<FormData> = async (data) => {
+        if (openClothing && hasFormChanged(openClothing, data)) {
+            await Api.put(`/clothing/${openClothing._id}`, data)
+                .then(response => {
+                    console.log(response.data);
+                    setOpenClothing((prev) => prev ? { ...prev, ...data } : null);
+                    getClothes();
+                })
+                .catch(error => {
+                    console.log(error.response.data);
+                });
         }
+    };
+
+    const handleEditClothing = () => {
+        Animated.timing(editAnimation, {
+            toValue: editClothing ? 0 : 1,
+            duration: 300,
+            easing: Easing.ease,
+            useNativeDriver: false,
+        }).start(() => {
+            setEditClothing(!editClothing);
+        });
+    };
+
+    const editClothingStyle = {
+        height: editAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: ["100%", "40%"],
+        }),
+        borderBottomWidth: editAnimation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 3],
+        }),
+    };
+
+    const handleFavClothing = () => {
+        Animated.sequence([
+            Animated.timing(favAnimation, {
+                toValue: 1,
+                duration: 150,
+                useNativeDriver: true,
+            }),
+            Animated.timing(favAnimation, {
+                toValue: 0,
+                duration: 150,
+                useNativeDriver: true,
+            }),
+        ]).start(() => {
+            setValue('fav', !favoriteValue);
+        });
+    }
+
+    const favClothingStyle = {
+        transform: [
+            {
+                scale: favAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 1.5],
+                }),
+            },
+        ],
     }
 
     const handleCloseModal = async () => {
         await handleSubmit(onSubmitUpdateClothing)();
         setOpenModal(false);
         setOpenClothing(null);
+        setEditClothing(false);
+        editAnimation.setValue(0);
+        favAnimation.setValue(0);
     };
 
     return (
@@ -84,21 +152,31 @@ export const ClothesList = React.memo(({ clothes, canOpen }: { clothes: Clothing
                 <View key={openClothing._id}>
                     <Modal isOpen={openModal} onRequestClose={handleCloseModal}>
                         <View style={styles.modalContent}>
-                            <View style={{ borderRadius: 5, overflow: 'hidden', flex: 1 }}>
-                                <ImageBackground source={{ uri: openClothing.image }} style={{ flex: 1, padding: 5 }} resizeMode='stretch'>
+                            <Animated.View style={[{ borderRadius: 5, overflow: 'hidden', paddingBottom: 10 }, editClothingStyle]}>
+                                <ImageBackground source={{ uri: openClothing.image }} style={{ flex: 1, padding: 5 }} resizeMode="contain">
                                     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                                         <TouchableOpacity onPress={handleCloseModal}>
-                                            <FontAwesome5 name="arrow-left" size={22} />
+                                            <FontAwesome5 name="arrow-left" style={styles.icon} size={22} />
                                         </TouchableOpacity>
-                                        <TouchableOpacity>
-                                            <FontAwesome5 name="edit" size={22} />
+                                        <TouchableOpacity onPress={handleEditClothing}>
+                                            <MaterialIcons name={editClothing === true ? "close" : "edit"} size={22} style={styles.icon} />
                                         </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity style={{ position: 'absolute', right: 10, bottom: 10 }} onPress={() => { setValue('fav', !favoriteValue) }}>
-                                        <MaterialIcons name={favoriteValue === true ? "favorite" : "favorite-border"} color={favoriteValue === true ? "red" : "#000"} size={30} />
+                                    <TouchableOpacity style={{ position: 'absolute', right: 10, bottom: 10 }} onPress={handleFavClothing}>
+                                        <Animated.View style={favClothingStyle}>
+                                            <MaterialIcons name={favoriteValue === true ? "favorite" : "favorite-border"} color={favoriteValue === true ? "red" : styles.icon.color} size={26} />
+                                        </Animated.View>
                                     </TouchableOpacity>
                                 </ImageBackground>
-                            </View>
+                            </Animated.View>
+
+                            {editClothing === true &&
+                                <ScrollView>
+                                    <View style={{ marginTop: 20 }}>
+                                        <Text>Teste</Text>
+                                    </View>
+                                </ScrollView>
+                            }
                         </View>
                     </Modal>
                 </View>
@@ -134,4 +212,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10
     },
+    icon: {
+        color: "rgba(0, 0, 0, 0.70)",
+    }
 });

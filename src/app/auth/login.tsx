@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { router, Link } from 'expo-router';
@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Api from '@/src/services/api';
 import { useClothes } from '@/src/services/contexts/clothesContext';
+import Fonts from '@/src/services/utils/Fonts';
 
 type FormData = {
     email: string;
@@ -57,11 +58,18 @@ export default function Login() {
 
     return (
         <View style={styles.container}>
+
+            <View style={styles.containlogotxt}>
+                <Text style={styles.titulo} >Faça Login</Text>
+                <Image style={styles.logoimg} source={require('../../../assets/images/logoGpreta.png')} />
+            </View>
+
             <Controller
                 control={control}
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
+
                         <TextInput
                             style={styles.input}
                             onChangeText={onChange}
@@ -96,7 +104,7 @@ export default function Login() {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                <Text style={{ color: "#fff", fontWeight: "500" }}>Entrar</Text>
+                <Text style={{ color: "#fff", fontFamily:Fonts['montserrat-black'], }}>Entrar</Text>
             </TouchableOpacity>
 
             {resultData && (
@@ -112,25 +120,51 @@ export default function Login() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
+        paddingTop:"45%",
         paddingVertical: 40,
         paddingHorizontal: 20,
-        gap: 10
+        gap: 10,
+
     },
+
+    containlogotxt:{
+        display:'flex',
+        flexDirection:'row',
+        alignItems:'center',
+        marginBottom:70,
+    },
+
+    titulo:{
+        fontFamily:Fonts['montserrat-black'],
+        fontSize:32,
+        color:'#593C9D',
+        paddingRight:15,
+    },
+
+    logoimg:{
+        height:60,
+        width:60,
+        resizeMode:'contain',
+    },
+
     button: {
         backgroundColor: "#593C9D",
-        borderRadius: 5,
-        paddingVertical: 10,
+        borderRadius: 10,
+        paddingVertical: 15,
         width: "100%",
         alignItems: "center",
-        marginTop: 50,
+        marginTop: 20,
     },
+
     input: {
         backgroundColor: "#fff",
         padding: 10,
         width: "100%",
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
+        borderColor:'#A7A7A7',
+        fontFamily: Fonts['montserrat-regular'],
+        fontSize:16,
     },
     error: {
         color: 'red',

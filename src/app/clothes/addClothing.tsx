@@ -5,15 +5,15 @@ import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Picker } from '@react-native-picker/picker';
-import { Dropdown } from 'react-native-element-dropdown'
+import { Dropdown } from 'react-native-element-dropdown';
 import * as yup from 'yup';
-import * as ImagePicker from 'expo-image-picker'
+import * as ImagePicker from 'expo-image-picker';
 
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
-import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';;
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-import { STORAGE } from '@/firebaseConfig';
+import { STORAGE } from '@/src/services/firebase/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Category } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
@@ -51,13 +51,15 @@ export default function CameraScreen() {
     const [hasGalleryPermission, setHasGalleryPermission] = useState<boolean>(false);
 
     // photo
-    const [image, setImage] = useState<string>();
+    const [image, setImage] = useState<string | undefined>();
     const [flash, setFlash] = useState<FlashMode>('off');
 
     // saveClothingScreen
     const [saveClothingScreenOpen, setSaveClothingScreenOpen] = useState<boolean>(false);
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
+
+    // contexts
     const { cats, getCats } = useCats();
     const { getClothes } = useClothes();
 
@@ -137,20 +139,38 @@ export default function CameraScreen() {
         const response = await fetch(uri);
         const blob = await response.blob();
 
-        const storageRef = ref(STORAGE, `images/${Date.now()}`);
+        const storageRef = ref(STORAGE, `removebg/${Date.now()}`);
         const snapshot = await uploadBytes(storageRef, blob);
 
         return await getDownloadURL(snapshot.ref);
     };
 
-    const onSubmitCreateClothing: SubmitHandler<FormData> = async (data) => {
-
+    const removeImageBackground = async (): Promise<string | null> => {
         if (image) {
-            const imageUrl = await uploadImage(image);
-            if (imageUrl) {
-                data.image = imageUrl;
+            const uploadedImageUrl = await uploadImage(image);
+
+            if (uploadedImageUrl) {
+                try {
+                    const response = await Api.post('/clothing/remove_background', { image: uploadedImageUrl });
+                    console.log(response.data.message);
+                    return response.data.imageUrl;
+                } catch (error) {
+                    console.log(error);
+                    return null;
+                }
             }
         }
+
+        return null;
+    };
+
+    const onSubmitCreateClothing: SubmitHandler<FormData> = async (data) => {
+        const processedImage = await removeImageBackground();
+        console.log(processedImage);
+
+        if (processedImage) {
+            data.image = processedImage;
+        };
 
         if (!data.catId) { delete data.catId };
 
@@ -217,7 +237,7 @@ export default function CameraScreen() {
                     </ImageBackground>
                 </View >
             }
-            <ModalScreen isOpen={saveClothingScreenOpen} withInput={true} onRequestClose={() => {setSaveClothingScreenOpen(false)}}>
+            <ModalScreen isOpen={saveClothingScreenOpen} withInput={true} onRequestClose={() => { setSaveClothingScreenOpen(false) }}>
                 <View style={styles.modalScreenContent}>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", width: "100%", marginHorizontal: 20 }}>
                         <TouchableOpacity onPress={() => { setSaveClothingScreenOpen(false) }} style={{ position: "absolute", left: 20 }}>

@@ -223,7 +223,7 @@ export default function Home() {
                                                 </TouchableOpacity>
                                             </View>
                                         )}
-                                        <ClothesList clothes={catClothes} canOpen={false} />
+                                        <ClothesList clothes={catClothes} canOpen={true} />
                                     </View>
                                 </ModalScreen>
                             )}
