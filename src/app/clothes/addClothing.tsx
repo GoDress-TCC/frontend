@@ -135,11 +135,11 @@ export default function CameraScreen() {
         }
     };
 
-    const uploadImage = async (uri: string): Promise<string | null> => {
+    const uploadImage = async (uri: string, removed: boolean): Promise<string | undefined> => {
         const response = await fetch(uri);
         const blob = await response.blob();
 
-        const storageRef = ref(STORAGE, `removebg/${Date.now()}`);
+        const storageRef = ref(STORAGE, removed === false ? `removebg/${Date.now()}` : `images/${Date.now()}`);
         const snapshot = await uploadBytes(storageRef, blob);
 
         return await getDownloadURL(snapshot.ref);
@@ -147,7 +147,7 @@ export default function CameraScreen() {
 
     const removeImageBackground = async (): Promise<string | null> => {
         if (image) {
-            const uploadedImageUrl = await uploadImage(image);
+            const uploadedImageUrl = await uploadImage(image, false);
 
             if (uploadedImageUrl) {
                 try {
@@ -168,9 +168,16 @@ export default function CameraScreen() {
         const processedImage = await removeImageBackground();
         console.log(processedImage);
 
-        if (processedImage) {
-            data.image = processedImage;
-        };
+        if (image) {
+            if (processedImage !== null && processedImage !== undefined) {
+                data.image = processedImage;
+            }
+            else {
+                const uploadedImageUrl = await uploadImage(image, true);
+                alert("RemoveBG sem créditos.");
+                data.image = uploadedImageUrl;
+            }
+        }
 
         if (!data.catId) { delete data.catId };
 
