@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { router, Link } from 'expo-router';
@@ -7,6 +7,9 @@ import * as yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Api from '@/src/services/api';
+import { globalColors } from '@/src/styles/global';
+import Fonts from '@/src/services/utils/Fonts';
+import { MyButton } from '../../components/button/button';
 
 type FormData = {
     token: string;
@@ -85,6 +88,14 @@ export default function resetPassword() {
     return (
         <View style={styles.container}>
 
+            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
+                <Image style={styles.imgVoltar} source={require('../../../../assets/icons/voltar.png')} />
+            </TouchableOpacity >
+
+            <View>
+                <Text style={styles.title}>Codigo enviado para seu email</Text>
+            </View>
+
             <Controller
                 control={control}
                 name="token"
@@ -136,12 +147,11 @@ export default function resetPassword() {
                 )}
             />
             <View style={{ marginTop: 50, gap: 10 }}>
-                <TouchableOpacity style={{ borderRadius: 5, paddingVertical: 10, width: "100%", alignItems: "center", backgroundColor: "grey" }} onPress={resendToken}>
-                    <Text style={{ color: "#fff", fontWeight: "500" }}>Reenviar código</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ borderRadius: 5, paddingVertical: 10, width: "100%", alignItems: "center", backgroundColor: "#593C9D" }} onPress={handleSubmit(onSubmit)}>
-                    <Text style={{ color: "#fff", fontWeight: "500" }}>Alterar senha</Text>
-                </TouchableOpacity>
+
+                <MyButton onPress={resendToken} title='Reenviar código' />
+
+                <MyButton onPress={handleSubmit(onSubmit)} title='Alterar senha'/>
+
             </View>
 
             {resultData && (
@@ -157,17 +167,38 @@ export default function resetPassword() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
         paddingVertical: 40,
         paddingHorizontal: 20,
         gap: 10
     },
+
+    containVoltar: {
+        paddingTop: '15%',
+    },
+
+    imgVoltar: {
+        height: 30,
+        width: 30,
+    },
+
+    title: {
+        marginTop:"30%",
+        marginBottom:20,
+
+        color: globalColors.primary,
+        fontSize: 32,
+        fontFamily: Fonts['montserrat-extrabold'],
+    },
+
     input: {
         backgroundColor: "#fff",
         padding: 10,
         width: "100%",
-        borderWidth: 1,
-        borderRadius: 5,
+        borderWidth: 1.5,
+        borderRadius: 10,
+        borderColor: globalColors.primary,
+        fontFamily: Fonts['montserrat-regular'],
+        fontSize: 16,
     },
     error: {
         color: 'red',

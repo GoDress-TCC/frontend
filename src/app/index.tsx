@@ -2,12 +2,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet, Text, View, Image } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useEffect } from 'react';
+
 import Fonts from '../services/utils/Fonts';
+import { globalColors, globalStyles } from '../styles/global';
+import { MainButton } from './components/button/button';
 
 export default function Index() {
     const hasToken = async () => {
         const token = await AsyncStorage.getItem('jwtToken')
-
         if (token) { router.replace('(tabs)') }
     };
 
@@ -20,15 +22,14 @@ export default function Index() {
             <View style={styles.subcontainer}>
                 <Text style={styles.text}>Bem-vindo a GoDress</Text>
                 <Image source={require('../../assets/images/goroxo.png')} />
-              
+
             </View>
 
             <View style={styles.miniContainer}>
                 <Link href={"/auth/register"} style={styles.button}>cadastre-se</Link>
                 <View style={styles.containtext}>
-                <Link href={"/auth/login"} style={styles.txtlogin}>ja possui cadastro?</Link>
-                <Link href={"/auth/login"} style={styles.txtlogin}>entrar</Link>
-
+                    <Link href={"/auth/login"} style={styles.txtlogin}>ja possui cadastro?</Link>
+                    <Link href={"/auth/login"} style={styles.txtentrar}>entrar</Link>
                 </View>
             </View>
 
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: "center",
-        backgroundColor: '#593C9D',
+        backgroundColor: globalColors.primary,
     },
 
     subcontainer: {
@@ -52,9 +53,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontFamily: Fonts['montserrat-light'],
         color: '#fff',
-        paddingHorizontal: 140,
+        paddingHorizontal: 100,
         textAlign: 'center',
-        marginBottom:40,
+        marginBottom: 40,
     },
 
     positioncamaleao: {
@@ -88,18 +89,29 @@ const styles = StyleSheet.create({
         width: "100%",
         textAlign: "center",
         marginBottom: 20,
-        fontFamily:Fonts['montserrat-black'],
+        fontFamily: Fonts['montserrat-black'],
         fontSize: 18,
     },
 
     txtlogin: {
-        fontSize:16,
-    },  
-
-    containtext:{
-        alignItems:'center',
-        justifyContent:'center',
+        fontSize: 16,
         fontFamily:Fonts['montserrat-regular'],
-        fontSize:16,
+
+    },
+    txtentrar:{
+        color:globalColors.primary, 
+        fontSize: 16,
+        fontFamily:Fonts['montserrat-semibold'],
+        textDecorationLine:'underline',
+
+    },
+
+    containtext: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: Fonts['montserrat-regular'],
+        fontSize: 16,
+        gap:10,
+        flexDirection:'row',
     },
 });
