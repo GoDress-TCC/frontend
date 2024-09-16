@@ -80,11 +80,7 @@ export default function sendEmail() {
 
             <Text style={styles.texto}>Você irá receber um e-mail no endereçoinformado acima contendo o procedimento para criar uma nova senha para esse usúario</Text>
 
-            <TouchableOpacity style={styles.button} onPress={handleSubmit(onSubmit)}>
-                <Text style={{ color: "#fff", fontWeight: "500" }}>Enviar</Text>
-            </TouchableOpacity>
-
-            <MyButton onPress={handleSubmit(onSubmit)} title='Enviar Component'/>
+            <MyButton onPress={handleSubmit(onSubmit)} title='Enviar'/>
 
 
             {resultData && (

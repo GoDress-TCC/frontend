@@ -147,15 +147,8 @@ export default function resetPassword() {
                 )}
             />
             <View style={{ marginTop: 50, gap: 10 }}>
-                <TouchableOpacity style={{ borderRadius: 5, paddingVertical: 10, width: "100%", alignItems: "center", backgroundColor: "grey" }} onPress={resendToken}>
-                    <Text style={{ color: "#fff", fontWeight: "500" }}>Reenviar código</Text>
-                </TouchableOpacity>
 
                 <MyButton onPress={resendToken} title='Reenviar código' />
-
-                <TouchableOpacity style={{ borderRadius: 5, paddingVertical: 10, width: "100%", alignItems: "center", backgroundColor: "#593C9D" }} onPress={handleSubmit(onSubmit)}>
-                    <Text style={{ color: "#fff", fontWeight: "500" }}>Alterar senha</Text>
-                </TouchableOpacity>
 
                 <MyButton onPress={handleSubmit(onSubmit)} title='Alterar senha'/>
 

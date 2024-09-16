@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'reac
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import Feather from '@expo/vector-icons/Feather';
+
 
 import Fonts from '@/src/services/utils/Fonts';
 
@@ -32,6 +34,8 @@ const registerSchema = yup.object({
         .required('Senha é obrigatória'),
     confirm_password: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'As senhas devem ser iguais!')
 }).required();
+
+
 
 export default function Register() {
     const [resultData, setResultData] = useState(null);
@@ -68,6 +72,8 @@ export default function Register() {
             });
     };
 
+    const [hidepass, setHidepass] = useState(true);
+
     return (
         <View style={styles.container}>
 
@@ -86,12 +92,14 @@ export default function Register() {
                 name="name"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Nome"
-                            onChangeText={onChange}
-                            value={value}
-                        />
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Nome"
+                                onChangeText={onChange}
+                                value={value}
+                            />
+                        </View>
                         {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
                     </>
                 )}
@@ -101,12 +109,14 @@ export default function Register() {
                 name="surname"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Sobrenome"
-                            onChangeText={onChange}
-                            value={value}
-                        />
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Sobrenome"
+                                onChangeText={onChange}
+                                value={value}
+                            />
+                        </View>
                         {errors.surname && <Text style={styles.error}>{errors.surname.message}</Text>}
                     </>
                 )}
@@ -116,13 +126,15 @@ export default function Register() {
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={onChange}
-                            placeholder="Email"
-                            value={value}
-                            autoCapitalize="none"
-                        />
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={onChange}
+                                placeholder="Email"
+                                value={value}
+                                autoCapitalize="none"
+                            />
+                        </View>
                         {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
                     </>
                 )}
@@ -132,14 +144,24 @@ export default function Register() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Senha"
-                            onChangeText={onChange}
-                            value={value}
-                            secureTextEntry={true}
-                            autoCapitalize="none"
-                        />
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Senha"
+                                onChangeText={onChange}
+                                value={value}
+                                secureTextEntry={hidepass}
+                                autoCapitalize="none"
+                            />
+                            <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
+                                { hidepass ?
+                                    <Feather name="eye-off" size={24} color="#593C9D" />
+                                    :
+                                    <Feather name="eye" size={24} color="#593C9D" />    
+                            }
+
+                            </TouchableOpacity>
+                        </View>
                         {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
                     </>
                 )}
@@ -149,25 +171,23 @@ export default function Register() {
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Confirmar senha"
-                            onChangeText={onChange}
-                            value={value}
-                            secureTextEntry={true}
-                            autoCapitalize="none"
-                        />
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Confirmar senha"
+                                onChangeText={onChange}
+                                value={value}
+                                secureTextEntry={hidepass}
+                                autoCapitalize="none"
+                            />
+                        </View>
+
                         {errors.confirm_password && <Text style={styles.error}>{errors.confirm_password.message}</Text>}
                     </>
                 )}
             />
 
-
-            <TouchableOpacity style={styles.BNTcadastro} onPress={handleSubmit(onSubmit)}>
-                <Text style={styles.txtBNT}>Cadastrar-se</Text>
-            </TouchableOpacity>
-
-            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se Component'/>
+            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' />
 
             {resultData && (
                 <View style={styles.resultContainer}>
@@ -218,17 +238,25 @@ const styles = StyleSheet.create({
     },
 
 
-
-    input: {
+    inputarea: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: "#fff",
         padding: 10,
         width: "100%",
-        borderWidth: 1.5,
+        borderWidth: 1,
         borderRadius: 10,
         borderColor: globalColors.primary,
+        justifyContent: 'space-between',
+
+    },
+
+    input: {
+
         fontFamily: Fonts['montserrat-regular'],
         fontSize: 16,
-
+        flexDirection: 'row',
+        width: '90%',
     },
 
     button: {

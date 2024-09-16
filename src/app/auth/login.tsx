@@ -35,6 +35,9 @@ export default function Login() {
         resolver: yupResolver(registerSchema),
     });
 
+    const [hidepass, setHidepass] = useState(true);
+
+
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
@@ -76,35 +79,46 @@ export default function Login() {
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={onChange}
-                            placeholder="Email"
-                            value={value}
-                            autoCapitalize="none"
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={onChange}
+                                placeholder="Email"
+                                value={value}
+                                autoCapitalize="none"
 
-                        />
-                        
-                        </>
+                            />
+
+                        </View >
                         {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
                     </>
                 )}
-                
+
             />
             <Controller
                 control={control}
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Senha"
-                            onChangeText={onChange}
-                            value={value}
-                            secureTextEntry={true}
-                            autoCapitalize="none"
-                        />
+                        <View style={styles.inputarea}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Senha"
+                                onChangeText={onChange}
+                                value={value}
+                                secureTextEntry={hidepass}
+                                autoCapitalize="none"
+                            />
+                            <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
+                                { hidepass ?
+                                    <Feather name="eye-off" size={24} color="#593C9D" />
+                                    :
+                                    <Feather name="eye" size={24} color="#593C9D" />    
+                            }
+
+                            </TouchableOpacity>
+                        </View>
+
                         {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
                     </>
                 )}
@@ -174,17 +188,25 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 20,
     },
-
-    input: {
+    inputarea: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: "#fff",
         padding: 10,
         width: "100%",
         borderWidth: 1,
         borderRadius: 10,
-        borderColor: '#A7A7A7',
+        borderColor: globalColors.primary,
+        justifyContent: 'space-between',
+
+    },
+
+    input: {
+
         fontFamily: Fonts['montserrat-regular'],
         fontSize: 16,
-        flexDirection:'row',
+        flexDirection: 'row',
+        width: '90%',
     },
 
     containsenha: {
