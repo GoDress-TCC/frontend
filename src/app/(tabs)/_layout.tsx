@@ -20,6 +20,14 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="tshirt" color={color} />,
                 }}
             />
+             <Tabs.Screen
+                name="outfits"
+                options={{
+                    headerShown: false,
+                    title: 'Outfits',
+                    tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="plus" color={color} />,
+                }}
+            />
         </Tabs>
     );
 }

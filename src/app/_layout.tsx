@@ -3,6 +3,7 @@ import { ClothesProvider } from '@/src/services/contexts/clothesContext';
 import { CatsProvider } from "../services/contexts/catsContext";
 import { useFonts } from "expo-font"
 import fonts from "../services/fonts";
+import { UserProvider } from "../services/contexts/userContext";
 
 export default function Layout() {
     const [fontsLoaded] = useFonts(fonts);
@@ -12,6 +13,7 @@ export default function Layout() {
     }
 
     return (
+        <UserProvider>
         <ClothesProvider>
         <CatsProvider>
             <Stack >
@@ -29,5 +31,6 @@ export default function Layout() {
             </Stack>
         </CatsProvider>
         </ClothesProvider>
+        </UserProvider>
     );
 }

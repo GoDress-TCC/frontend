@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontWeight: "500",
-        fontSize: 22
+        fontSize: 22,
     },
     label: {
         color: 'black',

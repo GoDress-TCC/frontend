@@ -8,6 +8,7 @@ import * as yup from 'yup';
 
 import { Clothing } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
+import { useUser } from '@/src/services/contexts/userContext';
 import Modal from '../components/modals/modal';
 import ModalScreen from '../components/modals/modalScreen';
 import { ClothesList } from '../components/flatLists/clothesList';
@@ -27,10 +28,6 @@ const addCatSchema = yup.object({
 const { width } = Dimensions.get('window');
 
 export default function Home() {
-    // getUser
-    const [name, setName] = useState<string | null>(null);
-    const [surname, setSurname] = useState<string | null>(null);
-
     // getCatClothes
     const [catClothes, setCatClothes] = useState<Clothing[]>([]);
 
@@ -46,6 +43,7 @@ export default function Home() {
     const [resultData, setResultData] = useState<string | null>(null);
 
     const { cats, getCats } = useCats();
+    const { user, getUser } = useUser();
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -55,19 +53,6 @@ export default function Home() {
     });
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
-
-    const getUser = async () => {
-        Api.get('/user')
-            .then(response => {
-                console.log(response);
-                setName(response.data.user.name);
-                setSurname(response.data.user.surname);
-            })
-            .catch(error => {
-                console.log(error.response.data);
-                router.replace('/auth/login');
-            });
-    };
 
     const onSubmitCreateCat: SubmitHandler<FormData> = async (data) => {
         await Api.post('/cat', data)
@@ -122,8 +107,8 @@ export default function Home() {
     };
 
     useEffect(() => {
-        getUser();
         getCats();
+        getUser();
     }, []);
 
     useEffect(() => {
@@ -153,8 +138,8 @@ export default function Home() {
         <View style={styles.container}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.title}>Olá, </Text>
-                <Text style={styles.title}>{name ? name : "..."} </Text>
-                <Text style={styles.title}>{surname ? surname : "..."}</Text>
+                <Text style={styles.title}>{user?.name ? user.name : "..."} </Text>
+                <Text style={styles.title}>{user?.surname? user.surname : "..."}</Text>
             </View>
             <TouchableOpacity onPress={handleLogout}>
                 <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
