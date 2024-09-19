@@ -72,8 +72,8 @@ export default function Outfits() {
       </View>
 
       <View style={{ width: "100%", gap: 10 }}>
-        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} />
-        <MyButton title={"Salvar outfit"} onPress={() => console.log("maneiro")} />
+        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)}  loading={false}/>
+        <MyButton title={"Salvar outfit"} onPress={() => console.log("maneiro")}  loading={false}/>
       </View>
     </View>
   )

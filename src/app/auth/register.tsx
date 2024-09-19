@@ -12,6 +12,7 @@ import Api from '@/src/services/api';
 import { router } from 'expo-router';
 import { globalColors } from '@/src/styles/global';
 import { MyButton } from '../components/button/button';
+import Toast from 'react-native-toast-message';
 
 type FormData = {
     name: string;
@@ -38,7 +39,7 @@ const registerSchema = yup.object({
 
 
 export default function Register() {
-    const [resultData, setResultData] = useState(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -52,8 +53,10 @@ export default function Register() {
     });
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
+    
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
+        setLoading(true);
         await Api.post('/auth/register', {
             name: data.name,
             surname: data.surname,
@@ -62,14 +65,25 @@ export default function Register() {
         })
             .then(function (response) {
                 console.log(response.data);
-                setResultData(response.data.msg);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Sucesso',
+                    text2: 'Faça login para continuar'
+                }); 
                 router.navigate('/auth/login')
                 reset();
             })
             .catch(function (error) {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
-            });
+                Toast.show({
+                    type: 'error',
+                    text1: error.response.data.msg,
+                    text2: 'Tente novamente'
+                }); 
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     };
 
     const [hidepass, setHidepass] = useState(true);
@@ -187,14 +201,8 @@ export default function Register() {
                 )}
             />
 
-            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' />
-
-            {resultData && (
-                <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
-                    <Text style={styles.resultText}>{resultData}</Text>
-                </View>
-            )}
+            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' loading={loading} />
+            
         </View>
     );
 }

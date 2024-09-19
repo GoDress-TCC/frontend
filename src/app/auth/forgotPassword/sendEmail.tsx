@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { router, Link } from 'expo-router';
 import * as yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 import Api from '@/src/services/api';
 import { globalColors, globalStyles } from '@/src/styles/global';
@@ -20,7 +21,7 @@ const registerSchema = yup.object({
 }).required();
 
 export default function sendEmail() {
-    const [resultData, setResultData] = useState(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -32,21 +33,32 @@ export default function sendEmail() {
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
+        setLoading(true); 
         await Api.post('/auth/forgot_password', {
             ...data
         })
             .then(async function (response) {
                 console.log(response.data);
-                setResultData(response.data.msg);
                 reset();
-
+                Toast.show({
+                    type: 'success',
+                    text1: 'Sucesso',
+                    text2: 'Email enviado com sucesso'
+                });
                 await AsyncStorage.setItem('userEmail', data.email)
 
                 router.navigate('/auth/forgotPassword/resetPassword')
             })
             .catch(function (error) {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
+                Toast.show({
+                    type: 'error',
+                    text1: error.response.data.msg,
+                    text2: 'Tente novamente'
+                });
+            })
+            .finally(() => {
+                setLoading(false);
             });
 
     };
@@ -80,15 +92,7 @@ export default function sendEmail() {
 
             <Text style={styles.texto}>Você irá receber um e-mail no endereçoinformado acima contendo o procedimento para criar uma nova senha para esse usúario</Text>
 
-            <MyButton onPress={handleSubmit(onSubmit)} title='Enviar'/>
-
-
-            {resultData && (
-                <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
-                    <Text style={styles.resultText}>{resultData}</Text>
-                </View>
-            )}
+            <MyButton onPress={handleSubmit(onSubmit)} title='Enviar' loading={loading}/>
         </View>
     );
 }
@@ -149,16 +153,5 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         fontSize: 10,
         fontWeight: "500"
-    },
-    resultContainer: {
-        marginTop: 20,
-        padding: 10,
-        borderRadius: 5,
-        backgroundColor: '#f5f5f5',
-        width: '100%',
-        gap: 10
-    },
-    resultText: {
-        fontSize: 14,
     },
 });

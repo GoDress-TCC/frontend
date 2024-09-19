@@ -1,4 +1,6 @@
 import { Stack } from "expo-router";
+import Toast from "react-native-toast-message";
+
 import { ClothesProvider } from '@/src/services/contexts/clothesContext';
 import { CatsProvider } from "../services/contexts/catsContext";
 import { useFonts } from "expo-font"
@@ -31,6 +33,7 @@ export default function Layout() {
             </Stack>
         </CatsProvider>
         </ClothesProvider>
+        <Toast />
         </UserProvider>
     );
 }

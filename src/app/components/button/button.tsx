@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { globalStyles } from '@/src/styles/global'
 import { Clothing } from '@/src/services/types/types'
@@ -7,10 +7,11 @@ import Fonts from '@/src/services/utils/Fonts'
 interface ButtonProps {
     onPress: () => void;
     title: string;
+    loading: boolean;
 }
 
-export const MyButton: React.FC<ButtonProps> = ({ onPress, title}) => {
-    
+export const MyButton: React.FC<ButtonProps> = ({ onPress, title, loading }) => {
+
     return (
 
         <TouchableOpacity style={{
@@ -20,13 +21,13 @@ export const MyButton: React.FC<ButtonProps> = ({ onPress, title}) => {
             width: "100%",
             alignItems: "center",
         }}
-        onPress={onPress}
+            onPress={onPress}
         >
-
-
-            <Text style={{ color:'#fff', fontFamily:Fonts['montserrat-black'],}}>
-                {title}
-            </Text>
+            {loading === true ? 
+                <ActivityIndicator size="small" color="#fff" /> 
+                : 
+                <Text style={{ color: '#fff', fontFamily: Fonts['montserrat-black'], }}>{title}</Text>
+            }
         </TouchableOpacity>
     )
 }

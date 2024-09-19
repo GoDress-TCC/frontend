@@ -39,9 +39,6 @@ export default function Home() {
     // buttons
     const [showButton, setShowButton] = useState<string>("");
 
-    // data
-    const [resultData, setResultData] = useState<string | null>(null);
-
     const { cats, getCats } = useCats();
     const { user, getUser } = useUser();
 
@@ -59,13 +56,11 @@ export default function Home() {
             .then(response => {
                 console.log(response.data);
                 setModalOpen(false);
-                setResultData(null);
                 getCats();
                 reset();
             })
             .catch(error => {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
             });
     };
 
@@ -73,13 +68,11 @@ export default function Home() {
         await Api.put(`/cat/${openCatId}`, data)
             .then(response => {
                 console.log(response.data);
-                setResultData(null);
                 setCatScreenOpen(false);
                 getCats();
             })
             .catch(error => {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
             });
     };
 
@@ -130,8 +123,7 @@ export default function Home() {
 
     const handleCloseCat = () => {
         setCatScreenOpen(false), 
-        setOpenCatId(null), 
-        setResultData(null)
+        setOpenCatId(null)
     }
 
     return (
@@ -183,7 +175,7 @@ export default function Home() {
                                                     <>
                                                         <TextInput
                                                             style={{ textAlign: "center", fontSize: 18, fontWeight: "500" }}
-                                                            onChangeText={(text) => { onChange(text), setResultData(null), setShowButton(text) }}
+                                                            onChangeText={(text) => { onChange(text), setShowButton(text) }}
                                                             defaultValue={category.name}
                                                             autoCapitalize="none"
                                                         />
@@ -194,12 +186,6 @@ export default function Home() {
                                                 <FontAwesome5 name="trash" size={18} color="red" />
                                             </TouchableOpacity>
                                         </View>
-
-                                        {resultData && (
-                                            <View>
-                                                <Text style={styles.error}>{resultData}</Text>
-                                            </View>
-                                        )}
 
                                         {showButton !== category.name && showButton !== "" && (
                                             <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
@@ -216,7 +202,7 @@ export default function Home() {
                     ))}
                 </View>
 
-                <Modal isOpen={modalOpen} withInput={true} onRequestClose={() => { setModalOpen(false), setResultData(null) }}>
+                <Modal isOpen={modalOpen} withInput={true} onRequestClose={() => { setModalOpen(false) }}>
                     <View style={{ width: width * 0.5 }}>
                         <View style={styles.modalContent}>
                             <Text style={{ fontSize: 14, fontWeight: "500" }}>Adicionar Categoria</Text>
@@ -228,7 +214,7 @@ export default function Home() {
                                     <>
                                         <TextInput
                                             style={styles.input}
-                                            onChangeText={(text) => { onChange(text), setResultData(null) }}
+                                            onChangeText={(text) => { onChange(text) }}
                                             placeholder="Nome"
                                             value={value}
                                             autoCapitalize="none"
@@ -238,17 +224,11 @@ export default function Home() {
                                 )}
                             />
 
-                            {resultData && (
-                                <View>
-                                    <Text style={styles.error}>{resultData}</Text>
-                                </View>
-                            )}
-
                             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitCreateCat)}>
                                 <Text style={styles.textButton}>Adicionar</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.closeButton} onPress={() => { setModalOpen(false), setResultData(null) }}>
+                            <TouchableOpacity style={styles.closeButton} onPress={() => { setModalOpen(false) }}>
                                 <Text style={styles.textButton}>Cancelar</Text>
                             </TouchableOpacity>
                         </View>
