@@ -154,11 +154,11 @@ export default function Register() {
                                 autoCapitalize="none"
                             />
                             <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
-                                { hidepass ?
+                                {hidepass ?
                                     <Feather name="eye-off" size={24} color="#593C9D" />
                                     :
-                                    <Feather name="eye" size={24} color="#593C9D" />    
-                            }
+                                    <Feather name="eye" size={24} color="#593C9D" />
+                                }
 
                             </TouchableOpacity>
                         </View>
@@ -171,7 +171,7 @@ export default function Register() {
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={[styles.inputarea, { marginBottom: 20 }]}>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Confirmar senha"

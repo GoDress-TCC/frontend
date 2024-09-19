@@ -19,7 +19,6 @@ export const MyButton: React.FC<ButtonProps> = ({ onPress, title}) => {
             paddingVertical: 15,
             width: "100%",
             alignItems: "center",
-            marginTop: 20,
         }}
         onPress={onPress}
         >

@@ -25,6 +25,7 @@ const registerSchema = yup.object({
 
 export default function Login() {
     const [resultData, setResultData] = useState(null);
+    const [hidepass, setHidepass] = useState(true);
     const { getClothes } = useClothes()
 
     const form = useForm<FormData>({
@@ -34,9 +35,6 @@ export default function Login() {
         },
         resolver: yupResolver(registerSchema),
     });
-
-    const [hidepass, setHidepass] = useState(true);
-
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
@@ -100,7 +98,7 @@ export default function Login() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={[styles.inputarea, { marginBottom: 20 }]}>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Senha"
@@ -110,11 +108,11 @@ export default function Login() {
                                 autoCapitalize="none"
                             />
                             <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
-                                { hidepass ?
+                                {hidepass ?
                                     <Feather name="eye-off" size={24} color="#593C9D" />
                                     :
-                                    <Feather name="eye" size={24} color="#593C9D" />    
-                            }
+                                    <Feather name="eye" size={24} color="#593C9D" />
+                                }
 
                             </TouchableOpacity>
                         </View>

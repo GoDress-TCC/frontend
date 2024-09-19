@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 
 import Fonts from '../services/utils/Fonts';
 import { globalColors, globalStyles } from '../styles/global';
-import { MainButton } from './components/button/button';
 
 export default function Index() {
     const hasToken = async () => {
