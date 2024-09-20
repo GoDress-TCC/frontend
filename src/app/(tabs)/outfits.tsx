@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ImageBackground } from 'react-native'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Picker } from '@react-native-picker/picker';
+import Toast from 'react-native-toast-message';
+import Checkbox from 'expo-checkbox';
 
 import { MyButton } from '../components/button/button';
 import { Clothing } from '@/src/services/types/types';
 import { clothingStyle, clothingTemperature } from '@/src/services/local-data/dropDownData';
 import { useCats } from '@/src/services/contexts/catsContext';
+import { useClothes } from '@/src/services/contexts/clothesContext';
+import { globalColors } from '@/src/styles/global';
 import Modal from '../components/modals/modal';
 import Api from '@/src/services/api';
 
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import Ionicons from '@expo/vector-icons/Ionicons'
-
+import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import ModalScreen from '../components/modals/modalScreen';
+import { ClothesList } from '../components/flatLists/clothesList';
 
 const { width } = Dimensions.get('window');
 
@@ -28,10 +32,9 @@ const outfitClothing = (clothing: Clothing | null) => {
   return (
     <View style={styles.clothingContainer}>
       {clothing ? (
-        <Image
-          source={{ uri: clothing.image }}
-          style={styles.clothingImage}
-        />
+        <ImageBackground source={{ uri: clothing.image }} style={styles.clothingImage}>
+          {clothing.fav === true && <MaterialIcons name="favorite" color="red" size={16} style={{ marginRight: 5, marginBottom: 5 }} />}
+        </ImageBackground>
       ) : (
         <FontAwesome5 name="plus-circle" size={28} />
       )}
@@ -40,11 +43,13 @@ const outfitClothing = (clothing: Clothing | null) => {
 }
 
 export default function Outfits() {
-  const [clothes, setClothes] = useState<Clothing[]>([]);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [isChecked, setIsChecked] = useState<boolean>(false);
+  const [outfitClothes, setOutfitClothes] = useState<Clothing[] | undefined>([]);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openSelectClothing, setOpenSelectClothing] = useState<boolean>(false);
+  const [selectedType, setSelectedType] = useState<string>('');
 
   const { cats, getCats } = useCats();
+  const { clothes, getClothes, selectedClothingId } = useClothes();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -56,7 +61,7 @@ export default function Outfits() {
     }
   });
 
-  const { handleSubmit, control, formState: { errors }, reset } = form;
+  const { handleSubmit, control, formState: { errors }, reset, setValue } = form;
 
   const generateOutfit: SubmitHandler<FormData> = async (data) => {
     await Api.post('/outfit/generate_outfit', {
@@ -64,50 +69,72 @@ export default function Outfits() {
     })
       .then(response => {
         console.log(response.data)
-        setClothes(response.data.outfit);
+        setOutfitClothes(response.data.outfit);
       })
       .catch(error => {
         console.log(error.response.data)
+        Toast.show({
+          type: 'error',
+          text1: error.response.data.msg,
+          text2: 'Tente novamente'
+        });
       });
   };
 
   useEffect(() => {
     getCats();
+    getClothes();
   }, []);
 
-  const upperBody = clothes.find(item => item.type === 'upperBody') || null;
-  const lowerBody = clothes.find(item => item.type === 'lowerBody') || null;
-  const footwear = clothes.find(item => item.type === 'footwear') || null;
+  useEffect(() => {
+    if (selectedClothingId) {
+      setOpenSelectClothing(false)
+    }
+  }, [selectedClothingId]);
+
+  const upperBody = outfitClothes?.find(item => item.type === 'upperBody') || null;
+  const lowerBody = outfitClothes?.find(item => item.type === 'lowerBody') || null;
+  const footwear = outfitClothes?.find(item => item.type === 'footwear') || null;
+
+  const resetOutfit = () => {
+    reset();
+    setOutfitClothes(undefined);
+    Toast.show({
+      type: "info",
+      text1: "Outfit resetado",
+      text2: "Todos os filtros e roupas foram resetados"
+    })
+  }
 
   return (
     <View style={styles.container}>
       <View style={{ width: "100%", flexDirection: "row", alignItems: "center" }}>
         <Text style={[styles.title, { flex: 1, textAlign: "center" }]}>Outfits</Text>
-        <TouchableOpacity onPress={() => { setModalOpen(true) }} style={{ position: "absolute", right: 0 }}>
-          <Ionicons name="options" size={28} color={"#000"} />
-        </TouchableOpacity>
+        <View style={{ position: "absolute", right: 0, flexDirection: "column", alignItems: "center", alignSelf: "flex-start" }}>
+          <TouchableOpacity onPress={() => { setOpenModal(true) }} style={{ marginBottom: 10 }}>
+            <Ionicons name="options" size={28} color={"#000"} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { console.log('maneiro') }} style={{ marginBottom: 30 }}>
+            <FontAwesome name='bookmark' size={28} color={"#000"} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { resetOutfit() }}>
+            <FontAwesome5 name='trash' size={24} color={"#000"} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={{ backgroundColor: "#fff", padding: 5, borderRadius: 10, flexDirection: "column", gap: 5, alignItems: "center" }}>
-        <TouchableOpacity style={styles.clothingContainer}>
-          {outfitClothing(upperBody)}
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.clothingContainer}>
-          {outfitClothing(lowerBody)}
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.clothingContainer}>
-          {outfitClothing(footwear)}
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>{outfitClothing(upperBody)}</TouchableOpacity>
+        <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>{outfitClothing(lowerBody)}</TouchableOpacity>
+        <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>{outfitClothing(footwear)}</TouchableOpacity>
       </View>
 
       <View style={{ width: "100%", gap: 10 }}>
-        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} loading={false} />
-        <MyButton title={"Salvar outfit"} onPress={() => console.log("maneiro")} loading={false} />
+        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} />
+        <MyButton title={"Salvar outfit"} onPress={() => console.log("maneiro")} />
       </View>
 
-      <Modal isOpen={modalOpen} onRequestClose={() => setModalOpen(false)}>
+      <Modal isOpen={openModal} onRequestClose={() => setOpenModal(false)}>
         <View style={styles.modalContent}>
 
           <Controller
@@ -173,9 +200,31 @@ export default function Outfits() {
             )}
           />
 
+          <Controller
+            control={control}
+            name="fav"
+            render={({ field: { onChange, value } }) => (
+              <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
+                <Checkbox
+                  value={!!value}
+                  onValueChange={(itemValue) => onChange(itemValue)}
+                  color={value === true ? globalColors.primary : undefined}
+                />
+                <Text>Usar apenas roupas favoritas</Text>
+              </View>
+            )}
+          />
+
         </View>
       </Modal>
-    </View>
+
+      <ModalScreen isOpen={openSelectClothing} onRequestClose={() => setOpenSelectClothing(false)}>
+        <View style={styles.modalScreenContent}>
+          <Text style={[styles.title, { textAlign: "center" }]}>{selectedType}</Text>
+          <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} />
+        </View>
+      </ModalScreen>
+    </View >
   )
 }
 
@@ -199,12 +248,14 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 10,
+    overflow: 'hidden',
   },
   clothingImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-    borderRadius: 10,
+    height: "100%",
+    width: "100%",
+    resizeMode: "cover",
+    alignItems: 'flex-end',
+    justifyContent: "flex-end",
   },
   modalContent: {
     backgroundColor: "#fff",
@@ -224,5 +275,13 @@ const styles = StyleSheet.create({
   picker: {
     width: "100%",
     height: "100%"
-  }
+  },
+  modalScreenContent: {
+    backgroundColor: "#fff",
+    width: "100%",
+    height: "95%",
+    paddingTop: 40,
+    borderRadius: 10,
+    gap: 10
+  },
 });

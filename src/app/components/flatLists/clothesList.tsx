@@ -14,27 +14,30 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 const { width } = Dimensions.get('window');
 
 type FormData = {
-    kind?: string,
-    color?: string,
-    fit?: string,
-    gender?: string,
-    tissue?: string,
-    fav?: boolean,
+    catId?: string;
+    image?: string;
+    kind?: string;
+    color?: string;
+    style?: string;
+    temperature?: string;
+    gender?: string;
+    tissue?: string;
+    fav?: boolean
 }
 
-export const ClothesList = React.memo(({ clothes, canOpen }: { clothes: Clothing[], canOpen: boolean }) => {
+export const ClothesList = React.memo(({ clothes, canOpen, typeFilter, canPick }: { clothes: Clothing[], canOpen?: boolean, typeFilter?: string, canPick?: boolean }) => {
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [openClothing, setOpenClothing] = useState<Clothing | null>(null);
     const [editClothing, setEditClothing] = useState<boolean>(false);
-    const { getClothes } = useClothes();
+    const { getClothes, setSelectedClothingId } = useClothes();
 
     const form = useForm<FormData>({
         defaultValues: {
-            kind: openClothing?.kind ?? '',
+            catId: openClothing?.catId ?? '',
             color: openClothing?.color ?? '',
-            fit: openClothing?.color ?? '',
-            gender: openClothing?.color ?? '',
-            tissue: openClothing?.color ?? '',
+            gender: openClothing?.gender ?? '',
+            temperature: openClothing?.temperature ?? '',
+            tissue: openClothing?.tissue ?? '',
             fav: openClothing?.fav ?? false,
         },
     });
@@ -47,14 +50,16 @@ export const ClothesList = React.memo(({ clothes, canOpen }: { clothes: Clothing
     const favAnimation = useRef(new Animated.Value(0)).current;
 
     const handleOpenClothing = (clothing: Clothing) => {
-        setOpenClothing(clothing);
-        reset(clothing);
-        setOpenModal(true);
+        if (canOpen === true) {
+            setOpenClothing(clothing);
+            reset(clothing);
+            setOpenModal(true);
+        }
     };
 
     const hasFormChanged = (initialData: FormData, currentData: FormData) => {
         return !_isEqual(initialData, currentData);
-    };    
+    };
 
     const onSubmitUpdateClothing: SubmitHandler<FormData> = async (data) => {
         if (openClothing && hasFormChanged(openClothing, data)) {
@@ -129,12 +134,20 @@ export const ClothesList = React.memo(({ clothes, canOpen }: { clothes: Clothing
         favAnimation.setValue(0);
     };
 
+    const filteredClothes = clothes.filter(item => item.type === typeFilter);
+
+    const handleSelectClothing = (clothingId: string) => {
+        if (canPick === true) {
+            setSelectedClothingId(clothingId);
+        }
+    };
+
     return (
         <View style={{ alignItems: "center" }}>
             <FlatList
-                data={[...clothes].reverse()}
+                data={typeFilter ? filteredClothes.reverse() : [...clothes].reverse()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.itemContainer} onPress={() => handleOpenClothing(item)}>
+                    <TouchableOpacity style={styles.itemContainer} onPress={() => { handleOpenClothing(item), handleSelectClothing(item._id) }}>
                         <View style={styles.imageContainer}>
                             <ImageBackground source={{ uri: item.image }} style={styles.image}>
                                 {item.fav === true && <MaterialIcons name="favorite" color="red" size={16} />}
