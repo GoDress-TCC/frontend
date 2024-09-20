@@ -123,7 +123,7 @@ export default function Outfits() {
         </View>
       </View>
 
-      <View style={{ backgroundColor: "#fff", padding: 5, borderRadius: 10, flexDirection: "column", gap: 5, alignItems: "center" }}>
+      <View style={styles.containfit}>
         <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>{outfitClothing(upperBody)}</TouchableOpacity>
         <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>{outfitClothing(lowerBody)}</TouchableOpacity>
         <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>{outfitClothing(footwear)}</TouchableOpacity>
@@ -236,6 +236,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between"
   },
+
+  containfit: {
+    backgroundColor: "#fff",
+    padding: 5,
+    borderRadius: 10,
+    flexDirection: "column",
+    gap: 5,
+    alignItems: "center",
+    borderColor:globalColors.primary,
+    borderLeftWidth:8,
+    borderBottomWidth:8,
+  },
+
   title: {
     fontWeight: "500",
     fontSize: 22,
@@ -245,9 +258,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: width * 0.4,
     width: width * 0.4,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
     overflow: 'hidden',
   },
   clothingImage: {

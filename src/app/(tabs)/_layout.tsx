@@ -1,9 +1,15 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { Tabs } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+import ButtonNew from '../components/button/buttonNew';
+
 
 export default function TabLayout() {
     return (
-        <Tabs screenOptions={{ tabBarActiveTintColor: '#593C9D' }}>
+        <Tabs screenOptions={{ tabBarActiveTintColor: '#593C9D',}}>
+
+
             <Tabs.Screen
                 name="index"
                 options={{
@@ -20,12 +26,28 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="tshirt" color={color} />,
                 }}
             />
-             <Tabs.Screen
+            <Tabs.Screen
                 name="outfits"
                 options={{
+                    tabBarLabel: '',
                     headerShown: false,
-                    title: 'Outfits',
-                    tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="plus" color={color} />,
+                    tabBarIcon: ({ color }) => <ButtonNew/>,
+                }}
+            />
+            <Tabs.Screen
+                name="events"
+                options={{
+                    headerShown: false,
+                    title: 'Eventos',
+                    tabBarIcon: ({ color }) => <Ionicons size={22} name="planet" color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    headerShown: false,
+                    title: 'Profile',
+                    tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="user-alt" color={color} />,
                 }}
             />
         </Tabs>
