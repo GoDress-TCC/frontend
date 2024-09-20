@@ -53,7 +53,7 @@ export default function Register() {
     });
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
-    
+
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
         setLoading(true);
@@ -69,7 +69,7 @@ export default function Register() {
                     type: 'success',
                     text1: 'Sucesso',
                     text2: 'Faça login para continuar'
-                }); 
+                });
                 router.navigate('/auth/login')
                 reset();
             })
@@ -79,7 +79,7 @@ export default function Register() {
                     type: 'error',
                     text1: error.response.data.msg,
                     text2: 'Tente novamente'
-                }); 
+                });
             })
             .finally(() => {
                 setLoading(false)
@@ -184,8 +184,8 @@ export default function Register() {
                 control={control}
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
-                    <>
-                        <View style={[styles.inputarea, { marginBottom: 20 }]}>
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={styles.inputarea}>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Confirmar senha"
@@ -197,12 +197,12 @@ export default function Register() {
                         </View>
 
                         {errors.confirm_password && <Text style={styles.error}>{errors.confirm_password.message}</Text>}
-                    </>
+                    </View>
                 )}
             />
 
             <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' loading={loading} />
-            
+
         </View>
     );
 }

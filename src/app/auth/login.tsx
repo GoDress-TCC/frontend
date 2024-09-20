@@ -110,8 +110,8 @@ export default function Login() {
                 control={control}
                 name="password"
                 render={({ field: { value, onChange } }) => (
-                    <>
-                        <View style={[styles.inputarea, { marginBottom: 20 }]}>
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={styles.inputarea}>
                             <TextInput
                                 style={styles.input}
                                 placeholder="Senha"
@@ -131,7 +131,7 @@ export default function Login() {
                         </View>
 
                         {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
-                    </>
+                    </View>
                 )}
             />
 

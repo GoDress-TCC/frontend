@@ -28,18 +28,20 @@ export default function Clothes() {
 
     const renderScene = useMemo(() => SceneMap(
         routes.reduce((scenes, route) => {
-            scenes[route.key] = () => <ClothesList clothes={filterClothes(route.key)} canOpen={true}/>;
+            scenes[route.key] = () => <ClothesList clothes={filterClothes(route.key)} canOpen={true} />;
             return scenes;
         }, {} as Record<string, React.FC<{ clothes: Clothing[] }>>)
     ), [routes, filterClothes]);
 
     return (
         <View style={styles.container}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 40, paddingHorizontal: 20 }}>
-                <Text style={styles.title}>Armário</Text>
-                <TouchableOpacity onPress={() => { router.push('/clothes/addClothing') }}>
-                    <   FontAwesome5 name="camera" size={22} />
-                </TouchableOpacity>
+            <View style={{ width: "100%", flexDirection: "row", alignItems: "center", paddingTop: 40, paddingHorizontal: 20 }}>
+                <View style={{ width: "100%" }}>
+                    <Text style={[styles.title, { textAlign: "center" }]}>Armário</Text>
+                    <TouchableOpacity onPress={() => { router.navigate("/clothes/addClothing") }} style={{ position: "absolute", right: 0 }}>
+                        <FontAwesome5 name="camera" size={22} color={"#000"} />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <TabView
