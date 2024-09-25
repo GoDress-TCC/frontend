@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ImageBackground } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ImageBackground, ScrollView, TextInput } from 'react-native'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import Checkbox from 'expo-checkbox';
+import * as yup from 'yup';
 
 import { MyButton } from '../components/button/button';
 import { Clothing } from '@/src/services/types/types';
@@ -17,22 +18,26 @@ import Api from '@/src/services/api';
 import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import ModalScreen from '../components/modals/modalScreen';
 import { ClothesList } from '../components/flatLists/clothesList';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const { width } = Dimensions.get('window');
 
 type FormData = {
   clothingId?: Array<string | undefined>,
   catId?: string,
+  name?: string,
   style?: string,
   temperature?: string,
   fav: boolean
 };
 
 export default function Outfits() {
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [openSelectClothing, setOpenSelectClothing] = useState<boolean>(false);
+  const [openSaveClothing, setOpenSaveClothing] = useState<boolean>(false);
   const [selectedType, setSelectedType] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
   const [upperBody, setUpperBody] = useState<Clothing | undefined>(undefined);
   const [lowerBody, setLowerBody] = useState<Clothing | undefined>(undefined);
@@ -45,10 +50,11 @@ export default function Outfits() {
     defaultValues: {
       clothingId: [],
       catId: "",
+      name: "",
       style: "",
       temperature: "",
       fav: false
-    }
+    },
   });
 
   const { handleSubmit, control, reset, setValue, getValues } = form;
@@ -81,6 +87,62 @@ export default function Outfits() {
       .finally(() => {
         setLoading(false)
       })
+  };
+
+  const handleOpenSaveOutfit = () => {
+    let clothingIds = [upperBody, lowerBody, footwear];
+
+    const filteredClothingIds = Array.isArray(clothingIds)
+      ? clothingIds.filter(id => id !== undefined && id !== null)
+      : [];
+
+    if (filteredClothingIds.length < 3) {
+      Toast.show({
+        type: 'error',
+        text1: 'O outfit deve conter 3 peças de roupa',
+        text2: 'Tente novamente'
+      });
+    } else {
+      setOpenSaveClothing(true)
+    }
+
+  }
+
+  const onSubmitSaveOutfit: SubmitHandler<FormData> = async (data) => {
+    setSaveLoading(true);
+
+    if (!data.catId) { delete data.catId };
+
+    await Api.post('/outfit', {
+      ...data,
+      clothingId: [upperBody?._id, lowerBody?._id, footwear?._id]
+    })
+      .then(response => {
+        console.log(response.data);
+        setOpenSaveClothing(false);
+        reset();
+        setUpperBody(undefined);
+        setLowerBody(undefined);
+        setFootwear(undefined);
+        setSelectedClothingId(undefined);
+        Toast.show({
+          type: 'success',
+          text1: 'Outfit salvo com sucesso',
+          text2: 'Tenha um bom proveito!'
+        });
+      })
+      .catch(error => {
+        setOpenSaveClothing(false)
+        console.log(error.response.data)
+        Toast.show({
+          type: 'error',
+          text1: error.response.data.msg,
+          text2: 'Tente novamente'
+        });
+      })
+      .finally(() => {
+        setSaveLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -130,26 +192,40 @@ export default function Outfits() {
     })
   }
 
-  const outfitClothing = (clothing: Clothing | undefined, clothingIndex: number) => {
+  const outfitClothing = (clothing: Clothing | undefined, clothingIndex: number, saving: boolean) => {
     const clothingIds = (getValues('clothingId') as string[]);
 
     return (
       <View style={styles.clothingContainer}>
         {clothing ? (
           <ImageBackground source={{ uri: clothing.image }} style={styles.clothingImage}>
-            {clothing.fav === true && <MaterialIcons name="favorite" color="red" size={16} style={{ position: "absolute", right: 1, bottom: 1 }}/>}
-            <View style={{ position: "absolute", right: 1, top: 1 }}>
-              <FontAwesome5
-                name={clothingIds[clothingIndex] !== undefined ? "lock" : "unlock"}
-                size={18}
-                color={"#000"}
-              />
-            </View>
+            {saving === false && (
+              <>
+                {clothing.fav === true && (
+                  <MaterialIcons
+                    name="favorite"
+                    color="red"
+                    size={16}
+                    style={{ position: "absolute", right: 1, bottom: 1 }}
+                  />
+                )}
+
+                <View style={{ position: "absolute", right: 1, top: 1 }}>
+                  <FontAwesome5
+                    name={clothingIds[clothingIndex] !== undefined ? "lock" : "unlock"}
+                    size={18}
+                    color={"#000"}
+                  />
+                </View>
+              </>
+            )}
+
           </ImageBackground>
         ) : (
           <FontAwesome5 name="plus-circle" size={28} />
-        )}
-      </View>
+        )
+        }
+      </View >
     );
   }
 
@@ -162,18 +238,18 @@ export default function Outfits() {
       <View style={{ flexDirection: "row", width: "100%", justifyContent: "center" }}>
         <View style={styles.containfit}>
           <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>
-            {outfitClothing(upperBody, 0)}
+            {outfitClothing(upperBody, 0, false)}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>
-            {outfitClothing(lowerBody, 1)}
+            {outfitClothing(lowerBody, 1, false)}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>
-            {outfitClothing(footwear, 2)}
+            {outfitClothing(footwear, 2, false)}
           </TouchableOpacity>
         </View>
 
         <View style={{ position: "absolute", right: 0, alignItems: "center" }}>
-          <TouchableOpacity onPress={() => { setOpenModal(true) }} style={{ marginBottom: 10 }}>
+          <TouchableOpacity onPress={() => { setOpenFilter(true) }} style={{ marginBottom: 10 }}>
             <Ionicons name="options" size={28} color={"#000"} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => { console.log('maneiro') }} style={{ marginBottom: 30 }}>
@@ -186,11 +262,11 @@ export default function Outfits() {
       </View>
 
       <View style={{ width: "100%", gap: 10 }}>
-        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} loading={loading}/>
-        <MyButton title={"Salvar outfit"} onPress={() => console.log("maneiro")} />
+        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} loading={loading} />
+        <MyButton title={"Salvar outfit"} onPress={handleOpenSaveOutfit} />
       </View>
 
-      <Modal isOpen={openModal} onRequestClose={() => setOpenModal(false)}>
+      <Modal isOpen={openFilter} onRequestClose={() => setOpenFilter(false)}>
         <View style={styles.modalContent}>
 
           <Controller
@@ -276,8 +352,44 @@ export default function Outfits() {
 
       <ModalScreen isOpen={openSelectClothing} onRequestClose={() => setOpenSelectClothing(false)}>
         <View style={styles.modalScreenContent}>
-          <Text style={[styles.title, { textAlign: "center" }]}>{selectedType}</Text>
-          <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} clothingBg={globalColors.secundary} pickParam={getValues('clothingId')}/>
+          <Text style={styles.title}>{selectedType}</Text>
+          <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} clothingBg={globalColors.secundary} pickParam={getValues('clothingId')} />
+        </View>
+      </ModalScreen>
+
+      <ModalScreen isOpen={openSaveClothing} onRequestClose={() => setOpenSaveClothing(false)} withInput={true}>
+        <View style={[styles.modalScreenContent, { paddingHorizontal: 20 }]}>
+          <Text style={styles.title}>Salvar Outfit</Text>
+          <ScrollView>
+            <View style={[styles.containfit, { marginTop: 20 }]}>
+              {outfitClothing(upperBody, 0, true)}
+              {outfitClothing(lowerBody, 1, true)}
+              {outfitClothing(footwear, 2, true)}
+            </View>
+
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <View style={[styles.inputarea, { marginTop: 20 }]}>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={onChange}
+                      placeholder="Nome"
+                      value={value}
+                      autoCapitalize="none"
+                    />
+
+                  </View >
+                </>
+              )}
+            />
+          </ScrollView>
+          
+          <View style={{ paddingBottom: 20 }}>
+            <MyButton title='Salvar' onPress={handleSubmit(onSubmitSaveOutfit)} loading={saveLoading} />
+          </View>
         </View>
       </ModalScreen>
     </View >
@@ -308,6 +420,7 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: "500",
     fontSize: 22,
+    textAlign: "center"
   },
   clothingContainer: {
     alignItems: "center",
@@ -348,4 +461,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 10
   },
+  inputarea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "#fff",
+    padding: 10,
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: globalColors.primary,
+    justifyContent: 'space-between',
+
+  },
+  input: {
+    fontSize: 16,
+    flexDirection: 'row',
+    width: '90%',
+  },
+
 });

@@ -206,7 +206,6 @@ const styles = StyleSheet.create({
     },
 
     input: {
-
         fontFamily: Fonts['montserrat-regular'],
         fontSize: 16,
         flexDirection: 'row',
