@@ -9,9 +9,6 @@ export const globalColors = {
     secundary:"#F8F7F4",
     black:"#000",
     white:"#fff",
-
-
-
 };
 
 export const globalStyles = StyleSheet.create({

@@ -16,6 +16,8 @@ import Api from '@/src/services/api';
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { MyButton } from '../components/button/button';
+import { globalColors } from '@/src/styles/global';
 
 type FormData = {
     name: string;
@@ -38,6 +40,7 @@ export default function Home() {
 
     // buttons
     const [showButton, setShowButton] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
 
     const { cats, getCats } = useCats();
     const { user, getUser } = useUser();
@@ -52,6 +55,8 @@ export default function Home() {
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
     const onSubmitCreateCat: SubmitHandler<FormData> = async (data) => {
+        setLoading(true);
+
         await Api.post('/cat', data)
             .then(response => {
                 console.log(response.data);
@@ -61,10 +66,15 @@ export default function Home() {
             })
             .catch(error => {
                 console.log(error.response.data);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 
     const onSubmitUpdateCat: SubmitHandler<FormData> = async (data) => {
+        setLoading(true);
+
         await Api.put(`/cat/${openCatId}`, data)
             .then(response => {
                 console.log(response.data);
@@ -73,6 +83,9 @@ export default function Home() {
             })
             .catch(error => {
                 console.log(error.response.data);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 
@@ -122,8 +135,8 @@ export default function Home() {
     };
 
     const handleCloseCat = () => {
-        setCatScreenOpen(false), 
-        setOpenCatId(null)
+        setCatScreenOpen(false),
+            setOpenCatId(null)
     }
 
     return (
@@ -131,7 +144,7 @@ export default function Home() {
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.title}>Olá, </Text>
                 <Text style={styles.title}>{user?.name ? user.name : "..."} </Text>
-                <Text style={styles.title}>{user?.surname? user.surname : "..."}</Text>
+                <Text style={styles.title}>{user?.surname ? user.surname : "..."}</Text>
             </View>
             <TouchableOpacity onPress={handleLogout}>
                 <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
@@ -188,13 +201,11 @@ export default function Home() {
                                         </View>
 
                                         {showButton !== category.name && showButton !== "" && (
-                                            <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
-                                                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitUpdateCat)}>
-                                                    <Text style={styles.textButton}>Atualizar</Text>
-                                                </TouchableOpacity>
+                                            <View style={{ marginHorizontal: 20, marginTop: 10 }}>
+                                                <MyButton title='Atualizar' onPress={handleSubmit(onSubmitUpdateCat)} loading={loading} />
                                             </View>
                                         )}
-                                        <ClothesList clothes={catClothes} canOpen={true} />
+                                        <ClothesList clothes={catClothes} canOpen={true} clothingBg={globalColors.secundary} />
                                     </View>
                                 </ModalScreen>
                             )}
@@ -224,13 +235,10 @@ export default function Home() {
                                 )}
                             />
 
-                            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitCreateCat)}>
-                                <Text style={styles.textButton}>Adicionar</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={styles.closeButton} onPress={() => { setModalOpen(false) }}>
-                                <Text style={styles.textButton}>Cancelar</Text>
-                            </TouchableOpacity>
+                            <View style={{ marginTop: 10, gap: 10 }}>
+                                <MyButton title='Criar' onPress={handleSubmit(onSubmitCreateCat)} loading={loading} />
+                                <MyButton title='Cancelar' onPress={() => { setModalOpen(false) }} type='cancel' />
+                            </View>
                         </View>
                     </View>
                 </Modal>
@@ -275,20 +283,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         paddingVertical: 10
-    },
-    submitButton: {
-        backgroundColor: "#593C9D",
-        borderRadius: 5,
-        paddingVertical: 10,
-        width: "100%",
-        alignItems: "center",
-    },
-    closeButton: {
-        backgroundColor: "grey",
-        borderRadius: 5,
-        paddingVertical: 10,
-        width: "100%",
-        alignItems: "center",
     },
     textButton: {
         color: "#fff",

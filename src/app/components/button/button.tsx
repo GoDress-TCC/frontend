@@ -1,22 +1,22 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
-import { globalStyles } from '@/src/styles/global'
-import { Clothing } from '@/src/services/types/types'
+import { globalColors } from '@/src/styles/global'
 import Fonts from '@/src/services/utils/Fonts'
 
 interface ButtonProps {
     onPress?: () => void;
     title: string;
     loading?: boolean;
-    disabled?: boolean
+    disabled?: boolean;
+    type?: string;
 }
 
-export const MyButton: React.FC<ButtonProps> = ({ onPress, title, loading, disabled }) => {
+export const MyButton: React.FC<ButtonProps> = ({ onPress, title, loading, disabled, type }) => {
 
     return (
 
         <TouchableOpacity style={{
-            backgroundColor: "#593C9D",
+            backgroundColor: type === "cancel" ? "gray" : globalColors.primary,
             borderRadius: 10,
             paddingVertical: 15,
             width: "100%",

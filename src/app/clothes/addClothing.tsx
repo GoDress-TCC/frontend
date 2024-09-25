@@ -24,6 +24,7 @@ import { useClothes } from '@/src/services/contexts/clothesContext';
 import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
+import { MyButton } from '../components/button/button';
 
 type FormData = {
     catId?: string;
@@ -64,6 +65,7 @@ export default function CameraScreen() {
     const [saveClothingScreenOpen, setSaveClothingScreenOpen] = useState<boolean>(false);
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
 
     // contexts
     const { cats, getCats } = useCats();
@@ -100,10 +102,9 @@ export default function CameraScreen() {
 
             const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
             setHasGalleryPermission(galleryStatus.status === 'granted');
-
+        
             getCats();
             getUser();
-            setValue('gender', user?.gender);
         })();
     }, []);
 
@@ -120,10 +121,10 @@ export default function CameraScreen() {
 
     const takePicture = async () => {
         if (cameraRef) {
-            try {                
+            try {
                 const data = await cameraRef.current?.takePictureAsync();
                 const colorThief = new ColorThief();
-                
+
                 console.log(data);
                 setImage(data?.uri);
             }
@@ -178,6 +179,8 @@ export default function CameraScreen() {
     };
 
     const onSubmitCreateClothing: SubmitHandler<FormData> = async (data) => {
+        setLoading(true);
+
         const processedImage = await removeImageBackground();
         console.log(processedImage);
 
@@ -204,7 +207,9 @@ export default function CameraScreen() {
             .catch(error => {
                 console.log(error.response.data)
             })
-
+            .finally(() => {
+                setLoading(false);
+            })
     };
 
 
@@ -248,7 +253,7 @@ export default function CameraScreen() {
                                     <FontAwesome6 name="repeat" size={28} color="white" />
                                     <Text style={styles.buttonText}>Alterar foto</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.textCameraButton} onPress={() => setSaveClothingScreenOpen(true)}>
+                                <TouchableOpacity style={styles.textCameraButton} onPress={() => {setSaveClothingScreenOpen(true), setValue('gender', user?.gender)}}>
                                     <FontAwesome5 name="check" size={28} color="white" />
                                     <Text style={styles.buttonText}>Salvar</Text>
                                 </TouchableOpacity>
@@ -444,10 +449,8 @@ export default function CameraScreen() {
 
                     </ScrollView>
 
-                    <View style={{ width: "100%", paddingHorizontal: 20 }}>
-                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitCreateClothing)}>
-                            <Text style={styles.submitButtonText}>Salvar</Text>
-                        </TouchableOpacity>
+                    <View style={{ width: "100%", paddingHorizontal: 20, paddingBottom: 20 }}>
+                        <MyButton title='Salvar' onPress={handleSubmit(onSubmitCreateClothing)} loading={loading} />
                     </View>
                 </View>
             </ModalScreen >
@@ -505,14 +508,6 @@ const styles = StyleSheet.create({
     },
     fav: {
         margin: 20
-    },
-    submitButton: {
-        backgroundColor: "#593C9D",
-        borderRadius: 5,
-        paddingVertical: 10,
-        width: "100%",
-        alignItems: "center",
-        marginBottom: 20,
     },
     submitButtonText: {
         color: "#fff",

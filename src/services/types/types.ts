@@ -22,5 +22,6 @@ export type Clothing = {
     temperature: string; 
     gender: string;
     tissue: string;
-    fav: boolean
+    fav: boolean;
+    dirty: boolean
 };

@@ -24,6 +24,6 @@ export default function favClothes() {
     }, []);
     
     return (
-        <ClothesList clothes={clothes} canOpen={true}/>       
+        <ClothesList clothes={clothes} canOpen={true} clothingBg='#fff'/>       
     );
 }

@@ -5,15 +5,15 @@ import Api from '@/src/services/api';
 interface ClothesContextProps {
     clothes: Clothing[];
     getClothes: () => void;
-    selectedClothingId: string | null;
-    setSelectedClothingId: (id: string) => void;
+    selectedClothingId: string | undefined;
+    setSelectedClothingId: (id: string | undefined) => void;
 }
 
 const ClothesContext = createContext<ClothesContextProps | undefined>(undefined);
 
 export function ClothesProvider({ children }: { children: ReactNode }) {
     const [clothes, setClothes] = useState<Clothing[]>([]);
-    const [selectedClothingId, setSelectedClothingId] = useState<string | null>(null);
+    const [selectedClothingId, setSelectedClothingId] = useState<string | undefined>(undefined);
 
     const getClothes = async () => {
         await Api.get('/clothing')

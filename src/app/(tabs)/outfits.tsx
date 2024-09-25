@@ -21,39 +21,29 @@ import { ClothesList } from '../components/flatLists/clothesList';
 const { width } = Dimensions.get('window');
 
 type FormData = {
-  clothingId?: Array<string>,
+  clothingId?: Array<string | undefined>,
   catId?: string,
   style?: string,
   temperature?: string,
   fav: boolean
 };
 
-const outfitClothing = (clothing: Clothing | null) => {
-  return (
-    <View style={styles.clothingContainer}>
-      {clothing ? (
-        <ImageBackground source={{ uri: clothing.image }} style={styles.clothingImage}>
-          {clothing.fav === true && <MaterialIcons name="favorite" color="red" size={16} style={{ marginRight: 5, marginBottom: 5 }} />}
-        </ImageBackground>
-      ) : (
-        <FontAwesome5 name="plus-circle" size={28} />
-      )}
-    </View>
-  );
-}
-
 export default function Outfits() {
-  const [outfitClothes, setOutfitClothes] = useState<Clothing[] | undefined>([]);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openSelectClothing, setOpenSelectClothing] = useState<boolean>(false);
   const [selectedType, setSelectedType] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [upperBody, setUpperBody] = useState<Clothing | undefined>(undefined);
+  const [lowerBody, setLowerBody] = useState<Clothing | undefined>(undefined);
+  const [footwear, setFootwear] = useState<Clothing | undefined>(undefined);
 
   const { cats, getCats } = useCats();
-  const { clothes, getClothes, selectedClothingId } = useClothes();
+  const { clothes, getClothes, selectedClothingId, setSelectedClothingId } = useClothes();
 
   const form = useForm<FormData>({
     defaultValues: {
-      clothingId: undefined,
+      clothingId: [],
       catId: "",
       style: "",
       temperature: "",
@@ -61,15 +51,24 @@ export default function Outfits() {
     }
   });
 
-  const { handleSubmit, control, formState: { errors }, reset, setValue } = form;
+  const { handleSubmit, control, reset, setValue, getValues } = form;
 
   const generateOutfit: SubmitHandler<FormData> = async (data) => {
+    setLoading(true);
+
     await Api.post('/outfit/generate_outfit', {
       ...data
     })
       .then(response => {
-        console.log(response.data)
-        setOutfitClothes(response.data.outfit);
+        console.log(response.data);
+
+        const upperBody = response.data.outfit.find((item: { type: string }) => item.type === "upperBody") || undefined;
+        const lowerBody = response.data.outfit.find((item: { type: string }) => item.type === "lowerBody") || undefined;
+        const footwear = response.data.outfit.find((item: { type: string }) => item.type === "footwear") || undefined;
+
+        setUpperBody(upperBody);
+        setLowerBody(lowerBody);
+        setFootwear(footwear);
       })
       .catch(error => {
         console.log(error.response.data)
@@ -78,7 +77,10 @@ export default function Outfits() {
           text1: error.response.data.msg,
           text2: 'Tente novamente'
         });
-      });
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   };
 
   useEffect(() => {
@@ -87,18 +89,40 @@ export default function Outfits() {
   }, []);
 
   useEffect(() => {
-    if (selectedClothingId) {
+    if (selectedType) {
+      const selectedClothing = clothes.find(item => item._id === selectedClothingId);
+
+      const currentClothingIds = getValues('clothingId') as (string | undefined)[];
+
+      if (selectedType === 'upperBody') {
+        if (selectedClothingId !== undefined) {
+          setUpperBody(selectedClothing);
+        }
+        currentClothingIds[0] = selectedClothing?._id || undefined;
+      } else if (selectedType === 'lowerBody') {
+        if (selectedClothingId !== undefined) {
+          setLowerBody(selectedClothing);
+        }
+        currentClothingIds[1] = selectedClothing?._id || undefined;
+      } else if (selectedType === 'footwear') {
+        if (selectedClothingId !== undefined) {
+          setFootwear(selectedClothing);
+        }
+        currentClothingIds[2] = selectedClothing?._id || undefined;
+      }
+
+      setValue('clothingId', [...currentClothingIds]);
+
       setOpenSelectClothing(false)
     }
-  }, [selectedClothingId]);
-
-  const upperBody = outfitClothes?.find(item => item.type === 'upperBody') || null;
-  const lowerBody = outfitClothes?.find(item => item.type === 'lowerBody') || null;
-  const footwear = outfitClothes?.find(item => item.type === 'footwear') || null;
+  }, [selectedClothingId, clothes]);
 
   const resetOutfit = () => {
     reset();
-    setOutfitClothes(undefined);
+    setUpperBody(undefined);
+    setLowerBody(undefined);
+    setFootwear(undefined);
+    setSelectedClothingId(undefined);
     Toast.show({
       type: "info",
       text1: "Outfit resetado",
@@ -106,11 +130,49 @@ export default function Outfits() {
     })
   }
 
+  const outfitClothing = (clothing: Clothing | undefined, clothingIndex: number) => {
+    const clothingIds = (getValues('clothingId') as string[]);
+
+    return (
+      <View style={styles.clothingContainer}>
+        {clothing ? (
+          <ImageBackground source={{ uri: clothing.image }} style={styles.clothingImage}>
+            {clothing.fav === true && <MaterialIcons name="favorite" color="red" size={16} style={{ position: "absolute", right: 1, bottom: 1 }}/>}
+            <View style={{ position: "absolute", right: 1, top: 1 }}>
+              <FontAwesome5
+                name={clothingIds[clothingIndex] !== undefined ? "lock" : "unlock"}
+                size={18}
+                color={"#000"}
+              />
+            </View>
+          </ImageBackground>
+        ) : (
+          <FontAwesome5 name="plus-circle" size={28} />
+        )}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={{ width: "100%", flexDirection: "row", alignItems: "center" }}>
         <Text style={[styles.title, { flex: 1, textAlign: "center" }]}>Outfits</Text>
-        <View style={{ position: "absolute", right: 0, flexDirection: "column", alignItems: "center", alignSelf: "flex-start" }}>
+      </View>
+
+      <View style={{ flexDirection: "row", width: "100%", justifyContent: "center" }}>
+        <View style={styles.containfit}>
+          <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>
+            {outfitClothing(upperBody, 0)}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>
+            {outfitClothing(lowerBody, 1)}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>
+            {outfitClothing(footwear, 2)}
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ position: "absolute", right: 0, alignItems: "center" }}>
           <TouchableOpacity onPress={() => { setOpenModal(true) }} style={{ marginBottom: 10 }}>
             <Ionicons name="options" size={28} color={"#000"} />
           </TouchableOpacity>
@@ -123,14 +185,8 @@ export default function Outfits() {
         </View>
       </View>
 
-      <View style={styles.containfit}>
-        <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>{outfitClothing(upperBody)}</TouchableOpacity>
-        <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>{outfitClothing(lowerBody)}</TouchableOpacity>
-        <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>{outfitClothing(footwear)}</TouchableOpacity>
-      </View>
-
       <View style={{ width: "100%", gap: 10 }}>
-        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} />
+        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} loading={loading}/>
         <MyButton title={"Salvar outfit"} onPress={() => console.log("maneiro")} />
       </View>
 
@@ -221,7 +277,7 @@ export default function Outfits() {
       <ModalScreen isOpen={openSelectClothing} onRequestClose={() => setOpenSelectClothing(false)}>
         <View style={styles.modalScreenContent}>
           <Text style={[styles.title, { textAlign: "center" }]}>{selectedType}</Text>
-          <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} />
+          <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} clothingBg={globalColors.secundary} pickParam={getValues('clothingId')}/>
         </View>
       </ModalScreen>
     </View >
@@ -244,9 +300,9 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 5,
     alignItems: "center",
-    borderColor:globalColors.primary,
-    borderLeftWidth:8,
-    borderBottomWidth:8,
+    borderColor: globalColors.primary,
+    borderLeftWidth: 8,
+    borderBottomWidth: 8,
   },
 
   title: {
@@ -264,8 +320,6 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
     resizeMode: "cover",
-    alignItems: 'flex-end',
-    justifyContent: "flex-end",
   },
   modalContent: {
     backgroundColor: "#fff",

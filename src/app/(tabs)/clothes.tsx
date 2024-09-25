@@ -28,7 +28,7 @@ export default function Clothes() {
 
     const renderScene = useMemo(() => SceneMap(
         routes.reduce((scenes, route) => {
-            scenes[route.key] = () => <ClothesList clothes={filterClothes(route.key)} canOpen={true} />;
+            scenes[route.key] = () => <ClothesList clothes={filterClothes(route.key)} canOpen={true} clothingBg='#fff' />;
             return scenes;
         }, {} as Record<string, React.FC<{ clothes: Clothing[] }>>)
     ), [routes, filterClothes]);
