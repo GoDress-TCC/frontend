@@ -18,6 +18,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { MyButton } from '../components/button/button';
 import { globalColors } from '@/src/styles/global';
+import { useClothes } from '@/src/services/contexts/clothesContext';
 
 type FormData = {
     name: string;
@@ -44,6 +45,7 @@ export default function Home() {
 
     const { cats, getCats } = useCats();
     const { user, getUser } = useUser();
+    const { clothes, getClothes } = useClothes();
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -141,14 +143,16 @@ export default function Home() {
 
     return (
         <View style={styles.container}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.title}>Olá, </Text>
-                <Text style={styles.title}>{user?.name ? user.name : "..."} </Text>
-                <Text style={styles.title}>{user?.surname ? user.surname : "..."}</Text>
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <View style={{ flexDirection: "row" }}>
+                    <Text style={styles.title}>Olá, </Text>
+                    <Text style={styles.title}>{user?.name ? user.name : "..."} </Text>
+                    <Text style={styles.title}>{user?.surname ? user.surname : "..."}</Text>
+                </View>
+                <TouchableOpacity onPress={handleLogout}>
+                    <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
+                </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={handleLogout}>
-                <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity onPress={() => { router.push('/clothes/favClothes') }}>
                 <View style={[styles.functionContainer, { flexDirection: "row", justifyContent: "space-between" }]}>

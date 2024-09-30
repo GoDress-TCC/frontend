@@ -202,7 +202,7 @@ export default function CameraScreen() {
                 console.log(response.data);
                 reset();
                 getClothes();
-                router.back();
+                router.replace("clothes");
             })
             .catch(error => {
                 console.log(error.response.data)
@@ -218,12 +218,6 @@ export default function CameraScreen() {
             {!image ?
                 <CameraView style={{ flex: 1 }} facing='back' flash={flash} ref={cameraRef}>
                     <View style={styles.cameraContainer}>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.cameraButton} onPress={router.back}>
-                                <FontAwesome5 name="arrow-left" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
-
                         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                             <View style={[styles.buttonContainer, { justifyContent: "center" }]}>
                                 <TouchableOpacity style={[styles.cameraButton, { position: "absolute", left: 1 }]} onPress={pickImage}>

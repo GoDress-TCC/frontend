@@ -27,7 +27,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="outfits"
+                name="addClothing"
                 options={{
                     tabBarLabel: '',
                     headerShown: false,

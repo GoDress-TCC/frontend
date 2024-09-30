@@ -12,7 +12,17 @@ export const globalColors = {
 };
 
 export const globalStyles = StyleSheet.create({
-
+    styledContainer: {
+        backgroundColor: "#fff",
+        padding: 5,
+        borderRadius: 10,
+        flexDirection: "column",
+        gap: 5,
+        alignItems: "center",
+        borderColor: globalColors.primary,
+        borderLeftWidth: 8,
+        borderBottomWidth: 8,
+      },
 
     button:{
         backgroundColor:globalColors.primary,

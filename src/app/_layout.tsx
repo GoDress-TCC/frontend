@@ -28,8 +28,9 @@ export default function Layout() {
 
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-                <Stack.Screen name="clothes/addClothing" options={{ headerShown: false }} />
                 <Stack.Screen name="clothes/favClothes" options={{ title: "Roupas favoritas" }} />
+
+                <Stack.Screen name="outfits/generateOutfit" options={{ headerShown: false }} />
             </Stack>
         </CatsProvider>
         </ClothesProvider>

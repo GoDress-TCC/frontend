@@ -38,9 +38,6 @@ export default function Clothes() {
             <View style={{ width: "100%", flexDirection: "row", alignItems: "center", paddingTop: 40, paddingHorizontal: 20 }}>
                 <View style={{ width: "100%" }}>
                     <Text style={[styles.title, { textAlign: "center" }]}>Armário</Text>
-                    <TouchableOpacity onPress={() => { router.navigate("/clothes/addClothing") }} style={{ position: "absolute", right: 0 }}>
-                        <FontAwesome5 name="camera" size={22} color={"#000"} />
-                    </TouchableOpacity>
                 </View>
             </View>
 

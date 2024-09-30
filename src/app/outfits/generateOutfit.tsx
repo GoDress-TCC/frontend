@@ -11,7 +11,7 @@ import { Clothing } from '@/src/services/types/types';
 import { clothingStyle, clothingTemperature } from '@/src/services/local-data/dropDownData';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useClothes } from '@/src/services/contexts/clothesContext';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 import Modal from '../components/modals/modal';
 import Api from '@/src/services/api';
 
@@ -214,7 +214,8 @@ export default function Outfits() {
                   <FontAwesome5
                     name={clothingIds[clothingIndex] !== undefined ? "lock" : "unlock"}
                     size={18}
-                    color={"#000"}
+                    color={globalColors.primary}
+                    style={{ backgroundColor: "#fff", borderRadius: 50, padding: 5 }}
                   />
                 </View>
               </>
@@ -236,7 +237,7 @@ export default function Outfits() {
       </View>
 
       <View style={{ flexDirection: "row", width: "100%", justifyContent: "center" }}>
-        <View style={styles.containfit}>
+        <View style={globalStyles.styledContainer}>
           <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>
             {outfitClothing(upperBody, 0, false)}
           </TouchableOpacity>
@@ -361,7 +362,7 @@ export default function Outfits() {
         <View style={[styles.modalScreenContent, { paddingHorizontal: 20 }]}>
           <Text style={styles.title}>Salvar Outfit</Text>
           <ScrollView>
-            <View style={[styles.containfit, { marginTop: 20 }]}>
+            <View style={[globalStyles.styledContainer, { marginTop: 20 }]}>
               {outfitClothing(upperBody, 0, true)}
               {outfitClothing(lowerBody, 1, true)}
               {outfitClothing(footwear, 2, true)}
@@ -404,19 +405,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between"
   },
-
-  containfit: {
-    backgroundColor: "#fff",
-    padding: 5,
-    borderRadius: 10,
-    flexDirection: "column",
-    gap: 5,
-    alignItems: "center",
-    borderColor: globalColors.primary,
-    borderLeftWidth: 8,
-    borderBottomWidth: 8,
-  },
-
   title: {
     fontWeight: "500",
     fontSize: 22,
