@@ -4,7 +4,6 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import Checkbox from 'expo-checkbox';
-import * as yup from 'yup';
 
 import { MyButton } from '../components/button/button';
 import { Clothing } from '@/src/services/types/types';
@@ -18,7 +17,6 @@ import Api from '@/src/services/api';
 import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import ModalScreen from '../components/modals/modalScreen';
 import { ClothesList } from '../components/flatLists/clothesList';
-import { yupResolver } from '@hookform/resolvers/yup';
 
 const { width } = Dimensions.get('window');
 

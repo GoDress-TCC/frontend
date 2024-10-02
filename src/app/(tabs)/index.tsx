@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -40,7 +40,12 @@ export default function Home() {
     const [openCatId, setOpenCatId] = useState<string | null>(null);
 
     // buttons
-    const [showButton, setShowButton] = useState<string>("");
+    const [showUpdateCatButton, setShowUpdateCatButton] = useState<string>("");
+    const [showGenerateOutfitButton, setShowGenerateOutfitButton] = useState<boolean>(false);
+    const [neededClothes, setNeededClothes] = useState<number>(3);
+    const [upperBody, setUpperBody] = useState<Clothing[]>([]);
+    const [lowerBody, setLowerBody] = useState<Clothing[]>([]);
+    const [footwear, setFootwear] = useState<Clothing[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
     const { cats, getCats } = useCats();
@@ -114,17 +119,6 @@ export default function Home() {
             })
     };
 
-    useEffect(() => {
-        getCats();
-        getUser();
-    }, []);
-
-    useEffect(() => {
-        if (openCatId) {
-            getCatClothes();
-        }
-    }, [openCatId]);
-
     const handleLogout = async () => {
         await AsyncStorage.removeItem('jwtToken');
         router.replace('/');
@@ -133,12 +127,55 @@ export default function Home() {
     const handleOpenCat = (id: string) => {
         setOpenCatId(id);
         setCatScreenOpen(true);
-        setShowButton("");
+        setShowUpdateCatButton("");
     };
 
     const handleCloseCat = () => {
         setCatScreenOpen(false),
             setOpenCatId(null)
+    };
+
+    const outfitClothes = () => {
+        const filteredUpperBody = clothes.filter(item => item.type === "upperBody");
+        const filteredLowerBody = clothes.filter(item => item.type === "lowerBody");
+        const filteredFootwear = clothes.filter(item => item.type === "footwear");
+    
+        setUpperBody(filteredUpperBody);
+        setLowerBody(filteredLowerBody);
+        setFootwear(filteredFootwear);
+    
+        const remainingClothes = 3 - (filteredUpperBody.length > 0 ? 1 : 0) - (filteredLowerBody.length > 0 ? 1 : 0) - (filteredFootwear.length > 0 ? 1 : 0);
+        setNeededClothes(remainingClothes);
+        
+        if (upperBody.length > 0 && lowerBody.length > 0 && footwear.length > 0 ) {
+            setShowGenerateOutfitButton(true);
+        } else {
+            setShowGenerateOutfitButton(false)
+        }   
+    };
+
+    useEffect(() => {
+        getCats();
+        getUser();
+        getClothes();
+    }, []);
+
+    useEffect(() => {
+        if (openCatId) {
+            getCatClothes();
+        }
+    }, [openCatId]);
+
+    useEffect(() => {
+        outfitClothes();
+    }, [clothes]);
+
+    const check = () => {
+        return (
+            <>
+                <MaterialIcons name="check-circle" color={globalColors.primary} size={22} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
+            </>
+        )
     }
 
     return (
@@ -152,6 +189,36 @@ export default function Home() {
                 <TouchableOpacity onPress={handleLogout}>
                     <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
                 </TouchableOpacity>
+            </View>
+
+            <View style={{ marginVertical: 20 }}>
+                {showGenerateOutfitButton === false ?
+                    <View>
+                        <Text style={{ textAlign: "center" }}>Adicione mais {neededClothes} {neededClothes < 2 ? "peça" : "peças"} de roupa para gerar combinações incríveis</Text>
+
+                        <View style={{ flexDirection: "row", marginVertical: 20, gap: 10, justifyContent: "space-between" }}>
+                            <View style={styles.outfitClothing}>
+                                <FontAwesome5 name="tshirt" size={width * 0.2} />
+                                <Text>Parte Superior</Text>
+                                {upperBody.length > 0 && check()}
+                            </View>
+                            <View style={styles.outfitClothing}>
+                                <FontAwesome5 name="tshirt" size={width * 0.2} />
+                                <Text>Parte Inferior</Text>
+                                {lowerBody.length > 0 && check()}
+                            </View>
+                            <View style={styles.outfitClothing}>
+                                <FontAwesome5 name="tshirt" size={width * 0.2} />
+                                <Text>Calçados</Text>
+                                {footwear.length > 0 && check()}
+                            </View>
+                        </View>
+                    </View>
+                    :
+                    <View>
+                        <MyButton title="Criar Outfit" onPress={() => router.navigate("/outfits/generateOutfit")} />
+                    </View>
+                }
             </View>
 
             <TouchableOpacity onPress={() => { router.push('/clothes/favClothes') }}>
@@ -192,7 +259,7 @@ export default function Home() {
                                                     <>
                                                         <TextInput
                                                             style={{ textAlign: "center", fontSize: 18, fontWeight: "500" }}
-                                                            onChangeText={(text) => { onChange(text), setShowButton(text) }}
+                                                            onChangeText={(text) => { onChange(text), setShowUpdateCatButton(text) }}
                                                             defaultValue={category.name}
                                                             autoCapitalize="none"
                                                         />
@@ -204,7 +271,7 @@ export default function Home() {
                                             </TouchableOpacity>
                                         </View>
 
-                                        {showButton !== category.name && showButton !== "" && (
+                                        {showUpdateCatButton !== category.name && showUpdateCatButton !== "" && (
                                             <View style={{ marginHorizontal: 20, marginTop: 10 }}>
                                                 <MyButton title='Atualizar' onPress={handleSubmit(onSubmitUpdateCat)} loading={loading} />
                                             </View>
@@ -305,4 +372,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         gap: 5
     },
+    outfitClothing: {
+        borderWidth: 1,
+        padding: 5,
+        borderRadius: 10,
+        alignItems: "center"
+    }
 });

@@ -1,14 +1,12 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import ButtonNew from '../components/button/buttonNew';
 
-
 export default function TabLayout() {
     return (
         <Tabs screenOptions={{ tabBarActiveTintColor: '#593C9D',}}>
-
 
             <Tabs.Screen
                 name="index"
@@ -27,12 +25,18 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="addClothing"
-                options={{
-                    tabBarLabel: '',
-                    headerShown: false,
-                    tabBarIcon: ({ color }) => <ButtonNew/>,
-                }}
+              name="whiteScreen" 
+              options={{
+                  tabBarLabel: '',
+                  headerShown: false,
+                  tabBarIcon: ({ color }) => <ButtonNew />, 
+              }}
+              listeners={{
+                  tabPress: (e) => {
+                      e.preventDefault();
+                      router.navigate('/clothes/addClothing'); 
+                  },
+              }}
             />
             <Tabs.Screen
                 name="events"

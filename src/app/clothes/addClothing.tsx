@@ -25,6 +25,7 @@ import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
 import { MyButton } from '../components/button/button';
+import { globalColors } from '@/src/styles/global';
 
 type FormData = {
     catId?: string;
@@ -66,6 +67,7 @@ export default function CameraScreen() {
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+    const [devMode, setDevMode] = useState<boolean>(true);
 
     // contexts
     const { cats, getCats } = useCats();
@@ -102,7 +104,7 @@ export default function CameraScreen() {
 
             const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
             setHasGalleryPermission(galleryStatus.status === 'granted');
-        
+
             getCats();
             getUser();
         })();
@@ -123,7 +125,6 @@ export default function CameraScreen() {
         if (cameraRef) {
             try {
                 const data = await cameraRef.current?.takePictureAsync();
-                const colorThief = new ColorThief();
 
                 console.log(data);
                 setImage(data?.uri);
@@ -181,18 +182,24 @@ export default function CameraScreen() {
     const onSubmitCreateClothing: SubmitHandler<FormData> = async (data) => {
         setLoading(true);
 
-        const processedImage = await removeImageBackground();
-        console.log(processedImage);
+        if (devMode === false) {
+            const processedImage = await removeImageBackground();
+            console.log(processedImage);
 
-        if (image) {
-            if (processedImage !== null && processedImage !== undefined) {
-                data.image = processedImage;
+            if (image) {
+                if (processedImage !== null && processedImage !== undefined) {
+                    data.image = processedImage;
+                }
+                else {
+                    const uploadedImageUrl = await uploadImage(image, true);
+                    alert("RemoveBG sem créditos.");
+                    data.image = uploadedImageUrl;
+                }
             }
-            else {
-                const uploadedImageUrl = await uploadImage(image, true);
-                alert("RemoveBG sem créditos.");
-                data.image = uploadedImageUrl;
-            }
+        } else if (image) {
+            const uploadedImageUrl = await uploadImage(image, true);
+            alert("DevMode ativo, créditos do RemoveBg salvos :)");
+            data.image = uploadedImageUrl;
         }
 
         if (!data.catId) { delete data.catId };
@@ -218,6 +225,12 @@ export default function CameraScreen() {
             {!image ?
                 <CameraView style={{ flex: 1 }} facing='back' flash={flash} ref={cameraRef}>
                     <View style={styles.cameraContainer}>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.cameraButton} onPress={router.back}>
+                                <FontAwesome5 name="arrow-left" size={20} color="white" />
+                            </TouchableOpacity>
+                        </View>
+
                         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                             <View style={[styles.buttonContainer, { justifyContent: "center" }]}>
                                 <TouchableOpacity style={[styles.cameraButton, { position: "absolute", left: 1 }]} onPress={pickImage}>
@@ -247,7 +260,7 @@ export default function CameraScreen() {
                                     <FontAwesome6 name="repeat" size={28} color="white" />
                                     <Text style={styles.buttonText}>Alterar foto</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.textCameraButton} onPress={() => {setSaveClothingScreenOpen(true), setValue('gender', user?.gender)}}>
+                                <TouchableOpacity style={styles.textCameraButton} onPress={() => { setSaveClothingScreenOpen(true), setValue('gender', user?.gender) }}>
                                     <FontAwesome5 name="check" size={28} color="white" />
                                     <Text style={styles.buttonText}>Salvar</Text>
                                 </TouchableOpacity>

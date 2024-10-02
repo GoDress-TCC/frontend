@@ -1,9 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
-import { router } from 'expo-router';
+import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5"
 
 import { Clothing } from '@/src/services/types/types';
 import { useClothes } from '@/src/services/contexts/clothesContext';
