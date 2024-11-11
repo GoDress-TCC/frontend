@@ -17,7 +17,7 @@ import Api from '@/src/services/api';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { MyButton } from '../components/button/button';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 
 type FormData = {
@@ -119,11 +119,6 @@ export default function Home() {
             })
     };
 
-    const handleLogout = async () => {
-        await AsyncStorage.removeItem('jwtToken');
-        router.replace('/');
-    };
-
     const handleOpenCat = (id: string) => {
         setOpenCatId(id);
         setCatScreenOpen(true);
@@ -139,19 +134,19 @@ export default function Home() {
         const filteredUpperBody = clothes.filter(item => item.type === "upperBody");
         const filteredLowerBody = clothes.filter(item => item.type === "lowerBody");
         const filteredFootwear = clothes.filter(item => item.type === "footwear");
-    
+
         setUpperBody(filteredUpperBody);
         setLowerBody(filteredLowerBody);
         setFootwear(filteredFootwear);
-    
+
         const remainingClothes = 3 - (filteredUpperBody.length > 0 ? 1 : 0) - (filteredLowerBody.length > 0 ? 1 : 0) - (filteredFootwear.length > 0 ? 1 : 0);
         setNeededClothes(remainingClothes);
-        
-        if (upperBody.length > 0 && lowerBody.length > 0 && footwear.length > 0 ) {
+
+        if (upperBody.length > 0 && lowerBody.length > 0 && footwear.length > 0) {
             setShowGenerateOutfitButton(true);
         } else {
             setShowGenerateOutfitButton(false)
-        }   
+        }
     };
 
     useEffect(() => {
@@ -179,16 +174,13 @@ export default function Home() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={globalStyles.containerGlobal}>
             <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <View style={{ flexDirection: "row" }}>
                     <Text style={styles.title}>Olá, </Text>
                     <Text style={styles.title}>{user?.name ? user.name : "..."} </Text>
                     <Text style={styles.title}>{user?.surname ? user.surname : "..."}</Text>
                 </View>
-                <TouchableOpacity onPress={handleLogout}>
-                    <Text style={{ color: "grey", fontWeight: "500" }}>Logout</Text>
-                </TouchableOpacity>
             </View>
 
             <View style={{ marginVertical: 20 }}>
@@ -197,22 +189,22 @@ export default function Home() {
                         <Text style={{ textAlign: "center" }}>Adicione mais {neededClothes} {neededClothes < 2 ? "peça" : "peças"} de roupa para gerar combinações incríveis</Text>
 
                         <View style={{ flexDirection: "row", marginVertical: 20, gap: 10, justifyContent: "space-between" }}>
-                            <View style={styles.outfitClothing}>
-                                <FontAwesome5 name="tshirt" size={width * 0.2} />
+                            <View style={styles.boxTop}>
+                                <FontAwesome5 name="tshirt" size={width * 0.3} />
                                 <Text>Parte Superior</Text>
                                 {upperBody.length > 0 && check()}
                             </View>
-                            <View style={styles.outfitClothing}>
-                                <FontAwesome5 name="tshirt" size={width * 0.2} />
+                            <View style={styles.boxTop}>
+                                <FontAwesome5 name="tshirt" size={width * 0.3} />
                                 <Text>Parte Inferior</Text>
                                 {lowerBody.length > 0 && check()}
                             </View>
-                            <View style={styles.outfitClothing}>
-                                <FontAwesome5 name="tshirt" size={width * 0.2} />
+                        </View>
+                            <View style={styles.boxLower}>
+                                <FontAwesome5 name="tshirt" size={width * 0.3} />
                                 <Text>Calçados</Text>
                                 {footwear.length > 0 && check()}
                             </View>
-                        </View>
                     </View>
                     :
                     <View>
@@ -321,12 +313,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingVertical: 40,
-        paddingHorizontal: 20,
-        gap: 5
-    },
+
     title: {
         fontWeight: "500",
         fontSize: 22
@@ -372,10 +359,22 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         gap: 5
     },
-    outfitClothing: {
-        borderWidth: 1,
+    boxTop: {
+        borderLeftWidth: 10,
+        borderBottomWidth: 10,
+        borderWidth: 1.5,
+        borderColor: globalColors.primary,
         padding: 5,
-        borderRadius: 10,
+        borderRadius: 22,
+        alignItems: "center"
+    },
+    boxLower: {
+        borderLeftWidth: 10,
+        borderBottomWidth: 10,
+        borderWidth: 1.5,
+        borderColor: globalColors.primary,
+        padding: 5,
+        borderRadius: 22,
         alignItems: "center"
     }
 });

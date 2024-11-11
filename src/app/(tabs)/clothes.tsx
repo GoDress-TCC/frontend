@@ -6,6 +6,7 @@ import { Clothing } from '@/src/services/types/types';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import { clothingKind } from '@/src/services/local-data/dropDownData';
 import { ClothesList } from '../components/flatLists/clothesList';
+import { globalStyles } from '@/src/styles/global';
 
 const { width } = Dimensions.get('window');
 
@@ -31,10 +32,10 @@ export default function Clothes() {
     ), [routes, filterClothes]);
 
     return (
-        <View style={styles.container}>
+        <View style={globalStyles.containerGlobal}>
             <View style={{ width: "100%", flexDirection: "row", alignItems: "center", paddingTop: 40, paddingHorizontal: 20 }}>
                 <View style={{ width: "100%" }}>
-                    <Text style={[styles.title, { textAlign: "center" }]}>Armário</Text>
+                    <Text style={[globalStyles.mainTitle, { textAlign: "center" }]}>Armário</Text>
                 </View>
             </View>
 
@@ -59,10 +60,7 @@ export default function Clothes() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        gap: 5
-    },
+
     title: {
         fontWeight: "500",
         fontSize: 22,

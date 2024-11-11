@@ -25,7 +25,7 @@ import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
 import { MyButton } from '../components/button/button';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 
 type FormData = {
     catId?: string;
@@ -67,7 +67,7 @@ export default function CameraScreen() {
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [devMode, setDevMode] = useState<boolean>(true);
+    const [devMode, setDevMode] = useState<boolean>(false);
 
     // contexts
     const { cats, getCats } = useCats();
@@ -276,22 +276,27 @@ export default function CameraScreen() {
                             <FontAwesome5 name="arrow-left" size={18} />
                         </TouchableOpacity>
 
-                        <Text style={{ fontSize: 18, fontWeight: "500" }}>Salvar peça de roupa</Text>
+                        <Text style={globalStyles.subTitle}>Salvar peça de roupa</Text>
                     </View>
                     <ScrollView showsVerticalScrollIndicator={true} style={{ flex: 1, width: "100%", paddingHorizontal: 20 }}>
+
                         <View style={{ width: "100%", height: 450, marginTop: 10, borderRadius: 10, overflow: 'hidden' }}>
+
                             <ImageBackground source={{ uri: image }} style={{ alignItems: "flex-end", justifyContent: "flex-end", flex: 1 }} resizeMode='stretch'>
                                 <TouchableOpacity onPress={() => { setValue('fav', !favoriteValue) }}>
                                     <MaterialIcons name={favoriteValue ? 'favorite' : 'favorite-border'} size={24} color={favoriteValue ? 'red' : '#fff'} style={styles.fav} />
                                 </TouchableOpacity>
                             </ImageBackground>
+
                         </View>
 
-                        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 20 }}>
+                        <View style={styles.informacoes}>
+
                             <Controller
                                 control={control}
                                 name="kind"
                                 render={({ field: { value, onChange } }) => (
+                                    
                                     <View style={[styles.controllerContainer, { width: "40%" }]}>
                                         <View style={styles.pickerContainer}>
                                             <Picker
@@ -347,7 +352,7 @@ export default function CameraScreen() {
                                 render={({ field: { value, onChange } }) => (
                                     <View style={[styles.controllerContainer, { width: "16%" }]}>
                                         <TextInput
-                                            style={[styles.input, { textAlign: "center", height: 70 }, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: "#000", borderWidth: 1 }]}
+                                            style={[styles.input, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: globalColors.primary, borderWidth: 1 }]}
                                             onChangeText={(text) => { onChange(text), setColor(text) }}
                                             placeholder="Cor"
                                             value={value}
@@ -436,7 +441,7 @@ export default function CameraScreen() {
                                     render={({ field: { onChange, value } }) => (
                                         <>
                                             <Dropdown
-                                                style={styles.input}
+                                                style={styles.inputCategoria}
                                                 data={cats}
                                                 labelField="name"
                                                 valueField="_id"
@@ -470,6 +475,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
+
+    informacoes: {
+        flexDirection: 'row',
+        gap:4,
+    },
+
     cameraContainer: {
         flex: 1,
         paddingVertical: 40,
@@ -521,12 +532,26 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     input: {
-        backgroundColor: "#fff",
-        padding: 10,
+        alignItems:'center',
+        textAlign:'center',
+        justifyContent: "center",
         borderWidth: 1,
-        borderRadius: 5,
-        width: "100%",
+        borderColor: globalColors.primary,
+        borderRadius: 10,
+        paddingVertical:8,
+        
     },
+
+    inputCategoria:{
+        marginTop:10,
+        borderRadius:10,
+        borderColor:globalColors.primary,
+        borderWidth:1,
+        height:45,
+        paddingHorizontal:20,
+        marginBottom:20,
+    },
+
     error: {
         color: 'red',
         fontSize: 10,
@@ -540,13 +565,15 @@ const styles = StyleSheet.create({
     },
     controllerContainer: {
         flexDirection: "column",
-        gap: 2,
+
+        marginTop:10,
     },
     pickerContainer: {
         borderWidth: 1,
-        borderColor: "#000",
-        borderRadius: 5,
-        height: 70
+        borderColor: globalColors.primary,
+        borderRadius: 10,
+        height: 45,
+        justifyContent: "center",
     },
     picker: {
         width: "100%",

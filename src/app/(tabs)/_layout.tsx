@@ -1,6 +1,7 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { router, Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Fontisto from '@expo/vector-icons/Fontisto';
 
 import ButtonNew from '../components/button/buttonNew';
 
@@ -43,8 +44,7 @@ export default function TabLayout() {
                 options={{
                     headerShown: false,
                     title: 'Eventos',
-                    tabBarIcon: ({ color }) => <Ionicons size={22} name="planet" color={color} />,
-                }}
+                    tabBarIcon: ({ color }) =>  <Fontisto name="calendar" size={22} color={color} />, }}
             />
             <Tabs.Screen
                 name="profile"

@@ -12,6 +12,24 @@ export const globalColors = {
 };
 
 export const globalStyles = StyleSheet.create({
+    containerGlobal:{
+        backgroundColor:globalColors.secundary,
+        flex: 1,
+        paddingVertical: 40,
+        paddingHorizontal: 20,
+
+    },
+
+    mainTitle:{
+        fontFamily:Fonts['montserrat-extrabold'],
+        fontSize:22,
+    },
+
+    subTitle:{
+        fontFamily:Fonts['montserrat-bold'],
+        fontSize:18,
+    },
+
     styledContainer: {
         backgroundColor: "#fff",
         padding: 5,
@@ -22,8 +40,7 @@ export const globalStyles = StyleSheet.create({
         borderColor: globalColors.primary,
         borderLeftWidth: 8,
         borderBottomWidth: 8,
-      },
-
+    },
     button:{
         backgroundColor:globalColors.primary,
         fontFamily:fonts['montserrat-black'],
