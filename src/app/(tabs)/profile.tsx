@@ -10,17 +10,12 @@ import { router } from 'expo-router';
 
 export default function Profile() {
 
-  const { user, getUser } = useUser();
-
+  const { user } = useUser();
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('jwtToken');
     router.replace('/');
   };
-
-  useEffect(() => {
-    getUser();
-  }, []);
 
   return (
     <View style={globalStyles.containerGlobal}>

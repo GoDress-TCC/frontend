@@ -32,12 +32,9 @@ export default function Clothes() {
     ), [routes, filterClothes]);
 
     return (
-        <View style={globalStyles.containerGlobal}>
-            <View style={{ width: "100%", flexDirection: "row", alignItems: "center", paddingTop: 40, paddingHorizontal: 20 }}>
-                <View style={{ width: "100%" }}>
-                    <Text style={[globalStyles.mainTitle, { textAlign: "center" }]}>Armário</Text>
-                </View>
-            </View>
+        <View style={{ flex: 1, paddingTop: 60 }}>
+
+            <Text style={[globalStyles.mainTitle, { textAlign: "center" }]}>Armário</Text>
 
             <TabView
                 navigationState={{ index, routes }}
@@ -48,7 +45,7 @@ export default function Clothes() {
                     <TabBar
                         {...props}
                         indicatorStyle={{ backgroundColor: '#593C9D' }}
-                        style={{ backgroundColor: "rgba(52, 52, 52, alpha)", marginTop: 5, elevation: 0, borderBottomWidth: 1, borderBottomColor: "rgba(0, 0, 0, 0.37)" }}
+                        style={{ backgroundColor: "rgba(52, 52, 52, alpha)", marginTop: 5, elevation: 0, borderBottomWidth: 1, borderBottomColor: "rgba(0, 0, 0, 0.37)", marginHorizontal: 20 }}
                         labelStyle={styles.label}
                         scrollEnabled={true}
                         tabStyle={styles.tabStyle}
