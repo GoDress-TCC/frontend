@@ -19,6 +19,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { MyButton } from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import { useClothes } from '@/src/services/contexts/clothesContext';
+import Fonts from '@/src/services/utils/Fonts';
 
 type FormData = {
     name: string;
@@ -213,21 +214,11 @@ export default function Home() {
                 }
             </View>
 
-            <TouchableOpacity onPress={() => { router.push('/clothes/favClothes') }}>
-                <View style={[styles.functionContainer, { flexDirection: "row", justifyContent: "space-between" }]}>
-                    <View style={{ flexDirection: "row", gap: 10 }}>
-                        <MaterialIcons name="favorite" size={24} color="#000" />
-                        <Text style={{ fontSize: 18, fontWeight: "500" }}>Favoritos</Text>
-                    </View>
-                    <MaterialIcons name="keyboard-arrow-right" size={24} color="#000" />
-                </View>
-            </TouchableOpacity>
-
             <View style={styles.functionContainer}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingBottom:8, borderBottomWidth:1, borderColor:globalColors.primary, }}>
                     <Text style={{ fontSize: 16, fontWeight: "500" }}>Minhas Categorias:</Text>
-                    <TouchableOpacity onPress={() => { setModalOpen(true), reset() }}>
-                        <FontAwesome5 name="plus" size={14} />
+                    <TouchableOpacity style={styles.plusBnt}  onPress={() => { setModalOpen(true), reset() }}>
+                        <FontAwesome5 name="plus" size={14} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
                 <View style={{ marginTop: 10, gap: 10 }}>
@@ -277,9 +268,9 @@ export default function Home() {
                 </View>
 
                 <Modal isOpen={modalOpen} withInput={true} onRequestClose={() => { setModalOpen(false) }}>
-                    <View style={{ width: width * 0.5 }}>
+                    <View style={{ width: width * 0.9 }}>
                         <View style={styles.modalContent}>
-                            <Text style={{ fontSize: 14, fontWeight: "500" }}>Adicionar Categoria</Text>
+                            <Text style={{ fontSize: 16, fontFamily:Fonts['montserrat-bold'], }}>Adicionar Categoria</Text>
 
                             <Controller
                                 control={control}
@@ -338,7 +329,7 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        borderRadius: 5,
+        borderRadius: 10,
         paddingHorizontal: 10,
         paddingVertical: 10
     },
@@ -375,6 +366,16 @@ const styles = StyleSheet.create({
         borderColor: globalColors.primary,
         padding: 5,
         borderRadius: 22,
+        alignItems: "center"
+    },
+
+    plusBnt: {
+        backgroundColor: globalColors.primary,
+        height: 30,
+        width: 30,
+        padding: 5,
+        borderRadius: 100,
+        justifyContent: "center",
         alignItems: "center"
     }
 });

@@ -5,6 +5,9 @@ import { useUser } from '@/src/services/contexts/userContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Fonts from '@/src/services/utils/Fonts';
 import { router } from 'expo-router';
 
@@ -45,18 +48,50 @@ export default function Profile() {
         </View>
 
         <View>
-          <Text style={[styles.title, { marginBottom: 10 }]}>Configurações</Text>
-          <View>
-            <TouchableOpacity onPress={handleLogout}>
-              <Text style={{ fontWeight: "600", textDecorationLine: "underline", fontSize: 16  }}>Sair da conta</Text>
+          <Text style={[styles.title, { marginBottom: 16 }]}>Configurações</Text>
+          <View style={styles.configBox}>
+
+            <TouchableOpacity style={styles.bottom}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Ionicons name="information-circle-outline" size={24} color="black" />
+                <Text style={styles.txt}>Informações pessoais</Text>
+                </View>
+              <Ionicons name="chevron-forward-outline" size={24} color="black" />
+
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bottom}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <MaterialIcons name="security" size={24} color="black" />
+                <Text style={styles.txt}>Login e segurança</Text>
+              </View>
+              <Ionicons name="chevron-forward-outline" size={24} color="black" />
+
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bottom}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Ionicons name="accessibility-outline" size={24} color="black" />
+                <Text style={styles.txt}>Acessibilidade</Text>
+              </View>
+
+              <Ionicons name="chevron-forward-outline" size={24} color="black" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bottom} onPress={handleLogout}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <AntDesign name="logout" size={20} color="black" />
+                <Text style={styles.txt}>Sair da conta</Text>
+              </View>
+              <Ionicons name="chevron-forward-outline" size={24} color="black" />
+            </TouchableOpacity>
+
           </View>
+
         </View>
 
-
-
       </View>
-    </View>
+    </View >
   )
 }
 
@@ -78,10 +113,10 @@ const styles = StyleSheet.create({
 
   boxFav: {
     backgroundColor: globalColors.white,
+    borderWidth: 1,
     borderLeftWidth: 8,
     borderBottomWidth: 8,
     borderRadius: 10,
-    borderWidth: 1,
     borderColor: globalColors.primary,
     paddingVertical: 26,
     paddingHorizontal: 20,
@@ -95,6 +130,16 @@ const styles = StyleSheet.create({
     width: 20,
     height: 25,
     resizeMode: 'contain',
+  },
+
+  configBox: {
+    gap: 16,
+  },
+
+  bottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
 });

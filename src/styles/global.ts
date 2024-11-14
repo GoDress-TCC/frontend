@@ -15,7 +15,7 @@ export const globalStyles = StyleSheet.create({
     containerGlobal:{
         backgroundColor:globalColors.secundary,
         flex: 1,
-        paddingVertical: 40,
+        paddingVertical: 50,
         paddingHorizontal: 20,
 
     },

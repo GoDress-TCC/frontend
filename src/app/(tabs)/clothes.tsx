@@ -32,7 +32,7 @@ export default function Clothes() {
     ), [routes, filterClothes]);
 
     return (
-        <View style={{ flex: 1, paddingTop: 60 }}>
+        <View style={{ flex: 1, paddingTop: 50 }}>
 
             <Text style={[globalStyles.mainTitle, { textAlign: "center" }]}>Armário</Text>
 
