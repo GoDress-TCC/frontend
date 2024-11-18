@@ -6,18 +6,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Fonts from '@/src/services/utils/Fonts';
 import { router } from 'expo-router';
 
 export default function Profile() {
 
-  const { user } = useUser();
+  const { user, getUser } = useUser();
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('jwtToken');
-    router.replace('/');
+    router.replace("/");
+    getUser();
   };
 
   return (
@@ -79,11 +79,7 @@ export default function Profile() {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.bottom} onPress={handleLogout}>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <AntDesign name="logout" size={20} color="black" />
-                <Text style={styles.txt}>Sair da conta</Text>
-              </View>
-              <Ionicons name="chevron-forward-outline" size={24} color="black" />
+                <Text style={{ textDecorationLine: "underline", fontFamily: Fonts['montserrat-bold'], fontSize: 16, marginVertical: 5 }}>Sair da conta</Text>
             </TouchableOpacity>
 
           </View>
@@ -140,6 +136,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomWidth: 1,
+    paddingBottom: 10,
+    borderColor: globalColors.primary,
   },
 
 });

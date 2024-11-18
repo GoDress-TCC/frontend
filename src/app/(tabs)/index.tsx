@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList } from 'react-native';
 import { router } from 'expo-router';
@@ -11,12 +10,12 @@ import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
 import Modal from '../components/modals/modal';
 import ModalScreen from '../components/modals/modalScreen';
-import { ClothesList } from '../components/flatLists/clothesList';
+import ClothesList from '../components/flatLists/clothesList';
 import Api from '@/src/services/api';
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { MyButton } from '../components/button/button';
+import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';

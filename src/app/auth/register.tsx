@@ -11,7 +11,7 @@ import Fonts from '@/src/services/utils/Fonts';
 import Api from '@/src/services/api';
 import { router } from 'expo-router';
 import { globalColors } from '@/src/styles/global';
-import { MyButton } from '../components/button/button';
+import MyButton from '../components/button/button';
 import Toast from 'react-native-toast-message';
 
 type FormData = {

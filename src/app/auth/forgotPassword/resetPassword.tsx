@@ -11,7 +11,7 @@ import Feather from '@expo/vector-icons/Feather';
 import Api from '@/src/services/api';
 import { globalColors } from '@/src/styles/global';
 import Fonts from '@/src/services/utils/Fonts';
-import { MyButton } from '../../components/button/button';
+import MyButton from '../../components/button/button';
 
 type FormData = {
     token: string;

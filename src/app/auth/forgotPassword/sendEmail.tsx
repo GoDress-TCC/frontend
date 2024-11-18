@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import Api from '@/src/services/api';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import Fonts from '@/src/services/utils/Fonts';
-import { MyButton } from '../../components/button/button';
+import MyButton from '../../components/button/button';
 
 type FormData = {
     email: string;

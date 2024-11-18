@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
 
 import { Clothing } from '@/src/services/types/types';
-import { ClothesList } from '../components/flatLists/clothesList';
+import ClothesList from '../components/flatLists/clothesList';
 import Api from '@/src/services/api';
 
 export default function favClothes() {

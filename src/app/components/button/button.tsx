@@ -5,13 +5,13 @@ import Fonts from '@/src/services/utils/Fonts'
 
 interface ButtonProps {
     onPress?: () => void;
-    title: string;
+    title?: string;
     loading?: boolean;
     disabled?: boolean;
     type?: string;
 }
 
-export const MyButton: React.FC<ButtonProps> = ({ onPress, title, loading, disabled, type }) => {
+const MyButton: React.FC<ButtonProps> = ({ onPress, title, loading, disabled, type }) => {
 
     return (
 
@@ -34,3 +34,4 @@ export const MyButton: React.FC<ButtonProps> = ({ onPress, title, loading, disab
     )
 }
 
+export default MyButton;

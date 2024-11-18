@@ -24,7 +24,7 @@ import { useClothes } from '@/src/services/contexts/clothesContext';
 import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
-import { MyButton } from '../components/button/button';
+import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
 
 type FormData = {
@@ -67,7 +67,7 @@ export default function CameraScreen() {
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [devMode, setDevMode] = useState<boolean>(false);
+    const [devMode, setDevMode] = useState<boolean>(true);
 
     // contexts
     const { cats, getCats } = useCats();
@@ -209,7 +209,7 @@ export default function CameraScreen() {
                 console.log(response.data);
                 reset();
                 getClothes();
-                router.replace("clothes");
+                router.replace("/clothes");
             })
             .catch(error => {
                 console.log(error.response.data)

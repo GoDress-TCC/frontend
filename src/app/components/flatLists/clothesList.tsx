@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "react";
-import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Text, ImageBackground, ScrollView, Animated, Easing } from "react-native";
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import React, { useEffect, useRef, useState } from "react";
+import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Text, ImageBackground, ScrollView, Animated, Easing, ActivityIndicator, BackHandler } from "react-native";
+import { useForm, SubmitHandler } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 
 import { Clothing } from "@/src/services/types/types";
@@ -8,10 +8,11 @@ import { useClothes } from "@/src/services/contexts/clothesContext";
 import Modal from "../modals/modal";
 import Api from "@/src/services/api";
 
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { MaterialIcons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { globalColors } from "@/src/styles/global";
-import { MyButton } from "../button/button";
+import Toast from "react-native-toast-message";
+import { useFocusEffect } from "expo-router";
+import MyButton from "../button/button";
 
 const { width } = Dimensions.get('window');
 
@@ -25,15 +26,66 @@ type FormData = {
     gender?: string;
     tissue?: string;
     fav?: boolean;
-    dirty?: boolean
+    dirty?: boolean;
 }
 
-export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilter, canPick, pickParam }: { clothes: Clothing[], clothingBg: string, canOpen?: boolean, typeFilter?: string, canPick?: boolean, pickParam?: (string | undefined)[] }) => {
+const ClothesList = React.memo(({
+    clothes,
+    clothingBg,
+    canOpen,
+    typeFilter,
+    canPick,
+    canSelect,
+    pickParam,
+    operations,
+    showButton,
+    buttonTitle,
+    buttonOnPress,
+    buttonLoading, 
+}:
+    {
+        clothes: Clothing[],
+        clothingBg: string,
+        canOpen?: boolean,
+        typeFilter?: string,
+        canPick?: boolean,
+        canSelect?: boolean,
+        pickParam?: (string | undefined)[],
+        operations?: boolean | string[],
+        showButton?: boolean,
+        buttonTitle?: string,
+        buttonOnPress?: () => void,
+        buttonLoading?: boolean,
+    }) => {
+
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [openClothing, setOpenClothing] = useState<Clothing | null>(null);
     const [editClothing, setEditClothing] = useState<boolean>(false);
+    const [selectMode, setSelectMode] = useState<boolean>(false);
+    const [selectedClothes, setSelectedClothes] = useState<string[]>([]);
+    const [selectAll, setSelectAll] = useState<boolean>(false);
+    const [screenLoading, setScreenLoading] = useState<boolean>(false);
+    const [favIcon, setFavIcon] = useState<"favorite" | "heart-broken">("favorite");
+    const [dirtyIcon, setDirtyIcon] = useState<"washing-machine" | "washing-machine-off">("washing-machine");
 
-    const { getClothes, setSelectedClothingId, selectedClothingId } = useClothes();
+    const { getClothes, setSelectedClothingId, selectedClothingId, setSelectedClothesIds } = useClothes();
+
+    useFocusEffect(React.useCallback(() => {
+        const onBackAction = () => {
+            if (selectMode) {
+                setSelectMode(false);
+                setSelectedClothes([]);
+                return true;
+            }
+            return false;
+        }
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            onBackAction
+        );
+
+        return () => backHandler.remove();
+    }, [selectMode]))
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -43,10 +95,11 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
             temperature: openClothing?.temperature ?? '',
             tissue: openClothing?.tissue ?? '',
             fav: openClothing?.fav ?? false,
+            dirty: openClothing?.dirty ?? false,
         },
     });
 
-    const { watch, setValue, handleSubmit, reset, getValues } = form;
+    const { watch, setValue, handleSubmit, reset } = form;
 
     const favoriteValue = watch('fav');
 
@@ -54,7 +107,7 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
     const favAnimation = useRef(new Animated.Value(0)).current;
 
     const handleOpenClothing = (clothing: Clothing) => {
-        if (canOpen === true) {
+        if (canOpen === true && selectMode === false) {
             setOpenClothing(clothing);
             reset(clothing);
             setOpenModal(true);
@@ -65,30 +118,74 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
         return !_isEqual(initialData, currentData);
     };
 
-    const onSubmitUpdateClothing: SubmitHandler<FormData> = async (data) => {
-        if (openClothing && hasFormChanged(openClothing, data)) {
-            await Api.put(`/clothing/${openClothing._id}`, data)
-                .then(response => {
-                    console.log(response.data);
-                    setOpenClothing((prev) => prev ? { ...prev, ...data } : null);
-                    getClothes();
-                })
-                .catch(error => {
-                    console.log(error.response.data);
-                });
-        }
-    };
+    const onSubmitUpdateClothing = async (param: string | string[], data: FormData) => {
+        setScreenLoading(true);
 
-    const delClothing = async () => {
-        await Api.delete(`/clothing/${openClothing?._id}`)
+        await Api.put(`/clothing/${param}`, data)
             .then(response => {
                 console.log(response.data);
-                setOpenModal(false);
-                reset();
                 getClothes();
             })
             .catch(error => {
                 console.log(error.response.data);
+                Toast.show({
+                    type: "error",
+                    text1: error.response.data.msg,
+                    text2: "Tente novamente"
+                })
+            })
+            .finally(() => {
+                if (selectMode) {
+                    setSelectedClothes([]);
+                    setSelectMode(false);
+                }
+
+                setScreenLoading(false);
+
+                Toast.show({
+                    type: "success",
+                    text1: "Sucesso",
+                    text2: "Roupa atualizada"
+                });
+            });
+    };
+
+    const onSubmitDelClothing = async () => {
+        setScreenLoading(true);
+
+        await Api.delete(`/clothing/${selectedClothes}`)
+            .then(response => {
+                console.log(response.data);
+                getClothes();
+
+                if (selectMode === false) {
+                    setOpenModal(false);
+                    reset();
+                }
+            })
+            .catch(error => {
+                console.log(error.response.data);
+                Toast.show({
+                    type: "error",
+                    text1: error.response.data.msg,
+                    text2: "Tente novamente"
+                })
+
+                setSelectedClothes([]);
+            })
+            .finally(() => {
+                if (selectMode === true) {
+                    setSelectMode(false);
+                    setSelectedClothes([]);
+                }
+
+                setScreenLoading(false);
+
+                Toast.show({
+                    type: "success",
+                    text1: "Sucesso",
+                    text2: "Roupas excluídas"
+                });
             });
     };
 
@@ -143,8 +240,14 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
         ],
     }
 
+    const handleUpdateOpenClothing: SubmitHandler<FormData> = async (data) => {
+        if (openClothing && hasFormChanged(openClothing, data)) {
+            await onSubmitUpdateClothing(openClothing._id, data);
+        }
+    }
+
     const handleCloseModal = async () => {
-        await handleSubmit(onSubmitUpdateClothing)();
+        await handleSubmit(handleUpdateOpenClothing)();
         setOpenModal(false);
         setOpenClothing(null);
         setEditClothing(false);
@@ -154,7 +257,7 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
 
     const filteredClothes = clothes.filter(item => item.type === typeFilter);
 
-    const handleSelectClothing = (clothingId: string) => {
+    const handlePickClothing = (clothingId: string) => {
         if (canPick) {
             if (selectedClothingId === clothingId) {
                 setSelectedClothingId(undefined);
@@ -164,26 +267,117 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
         }
     };
 
+    const handleSelectClothing = (clothingId: string) => {
+        if (canSelect) {
+            if (selectedClothes.includes(clothingId)) {
+                setSelectedClothes(selectedClothes.filter(item => item !== clothingId));
+            } else {
+                setSelectedClothes([...selectedClothes, clothingId]);
+            }
+        }
+    }
+
+    const handleSelectAll = () => {
+        if (selectedClothes.length === clothes.length) {
+            setSelectedClothes([]);
+        } else {
+            setSelectedClothes(clothes.map(item => item._id));
+        }
+    }
+
+    const handleCloseSelectMode = () => {
+        setSelectMode(false);
+        setSelectedClothes([]);
+    }
+
+    const selectedClothesOperations = async () => {
+        const currentClothes = clothes.filter(item => selectedClothes.includes(item._id));
+
+        if (currentClothes.every(item => item.fav === true) && currentClothes.length > 0) {
+            setFavIcon("heart-broken");
+        } else {
+            setFavIcon("favorite");
+        }
+
+        if (currentClothes.every(item => item.dirty === true) && currentClothes.length > 0) {
+            setDirtyIcon("washing-machine-off");
+        } else {
+            setDirtyIcon("washing-machine");
+        }
+    }
+
+    useEffect(() => {
+        selectedClothesOperations();
+    }, [selectedClothes]);
+
+    useEffect(() => {
+        if (showButton && canSelect) {
+            setSelectedClothesIds(selectedClothes);
+        }
+    }, [selectedClothes]);
+
     return (
-        <View style={{ alignItems: "center" }}>
+        <View style={{ alignItems: "center", flex: 1 }}>
+            {selectMode &&
+                <View style={{ paddingBottom: 10, width: "100%", paddingHorizontal: 15 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                        <View style={{ flexDirection: "row", gap: 10 }}>
+                            <TouchableOpacity onPress={handleCloseSelectMode}>
+                                <MaterialIcons name="close" size={22} color={"#000"} />
+                            </TouchableOpacity>
+                            <Text>{`${selectedClothes.length} Roupas`}</Text>
+                        </View>
+
+                        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                            {(Array.isArray(operations) && operations.includes("fav")) || operations === true ? (
+                                <TouchableOpacity onPress={() => { onSubmitUpdateClothing(selectedClothes, { fav: favIcon === "favorite" }) }}>
+                                    <MaterialIcons name={favIcon} size={24} color={globalColors.primary} />
+                                </TouchableOpacity>
+                            ) : null}
+
+                            {(Array.isArray(operations) && operations.includes("dirty")) || operations === true ? (
+                                <TouchableOpacity onPress={() => { onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" }) }}>
+                                    <MaterialCommunityIcons name={dirtyIcon} size={26} color={globalColors.primary} />
+                                </TouchableOpacity>
+                            ) : null}
+
+                            {(Array.isArray(operations) && operations.includes("delete")) || operations === true ? (
+                                <TouchableOpacity onPress={onSubmitDelClothing}>
+                                    <FontAwesome5 name="trash" size={22} color={globalColors.primary} />
+                                </TouchableOpacity>
+                            ) : null}
+                        </View>
+
+                    </View>
+
+                    <TouchableOpacity onPress={() => { setSelectAll(!selectAll), handleSelectAll() }} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <MaterialIcons name={selectAll ? "check-circle" : "radio-button-unchecked"} color={selectAll ? globalColors.primary : "black"} size={24} />
+                        <Text>Selecionar tudo</Text>
+                    </TouchableOpacity>
+                </View>
+            }
+
             <FlatList
                 data={typeFilter ? filteredClothes.reverse() : [...clothes].reverse()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={[styles.itemContainer, { backgroundColor: item.dirty === true ? "green" : clothingBg }]} onPress={() => { handleOpenClothing(item), handleSelectClothing(item._id) }}>
+                    <TouchableOpacity style={[styles.itemContainer, { backgroundColor: item.dirty === true ? "rgba(11, 156, 49, 0.2)" : clothingBg }]} onPress={() => { handleOpenClothing(item), handlePickClothing(item._id), selectMode && handleSelectClothing(item._id) }} onLongPress={() => canSelect && (setSelectMode(!selectMode), handleSelectClothing(item._id))}>
                         <View style={styles.imageContainer}>
-                            <ImageBackground source={{ uri: item.image }} style={styles.image}>
+                            <ImageBackground source={{ uri: item.image }} style={[{ flex: 1, justifyContent: selectMode ? "flex-start" : "flex-end", alignItems: 'flex-end', padding: 5 }, selectedClothes.includes(item._id) && selectMode && { opacity: 0.5 }]}>
                                 {item.fav === true && <MaterialIcons name="favorite" color="red" size={16} />}
                                 {canPick === true && (
                                     pickParam?.includes(item._id) && <MaterialIcons name="check-circle" color={globalColors.primary} size={22} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
                                 )}
                             </ImageBackground>
+                            {selectMode &&
+                                <MaterialIcons name={selectedClothes.includes(item._id) ? "check-circle" : "radio-button-unchecked"} color={selectedClothes.includes(item._id) ? globalColors.primary : "black"} size={22} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
+                            }
                         </View>
                     </TouchableOpacity>
                 )}
                 keyExtractor={(item) => item._id}
                 numColumns={3}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingTop: 20 }}
+                contentContainerStyle={{ paddingBottom: selectMode ? 80 : 20 }}
             />
 
             {canOpen === true && openClothing && (
@@ -204,10 +398,6 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
                                         <Animated.View style={favClothingStyle}>
                                             <MaterialIcons name={favoriteValue === true ? "favorite" : "favorite-border"} color={favoriteValue === true ? "red" : styles.icon.color} size={26} />
                                         </Animated.View>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity onPress={delClothing} style={{ alignSelf: "flex-end", marginTop: 20 }}>
-                                        <FontAwesome5 name="trash" size={20} style={styles.icon} />
                                     </TouchableOpacity>
                                 </ImageBackground>
                             </Animated.View>
@@ -230,6 +420,18 @@ export const ClothesList = React.memo(({ clothes, clothingBg, canOpen, typeFilte
                     </Modal>
                 </View>
             )}
+
+            {showButton &&
+                <View style={{ paddingHorizontal: 20, width: "100%" }}>
+                    <MyButton title={buttonTitle} onPress={buttonOnPress} loading={buttonLoading} />
+                </View>
+            }
+
+            {screenLoading &&
+                <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: "rgba(0, 0, 0, 0.2)", justifyContent: "center", alignItems: "center" }}>
+                    <ActivityIndicator size={100} color={globalColors.primary} />
+                </View>
+            }
         </View>
     )
 });
@@ -248,12 +450,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         overflow: 'hidden'
     },
-    image: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'flex-end',
-        padding: 5
-    },
     modalContent: {
         backgroundColor: "#fff",
         height: "75%",
@@ -269,3 +465,5 @@ const styles = StyleSheet.create({
         fontWeight: "500"
     }
 });
+
+export default ClothesList;

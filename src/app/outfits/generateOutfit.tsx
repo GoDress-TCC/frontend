@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import Checkbox from 'expo-checkbox';
 
-import { MyButton } from '../components/button/button';
+import MyButton from '../components/button/button';
 import { Clothing } from '@/src/services/types/types';
 import { clothingStyle, clothingTemperature } from '@/src/services/local-data/dropDownData';
 import { useCats } from '@/src/services/contexts/catsContext';
@@ -16,7 +16,7 @@ import Api from '@/src/services/api';
 
 import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import ModalScreen from '../components/modals/modalScreen';
-import { ClothesList } from '../components/flatLists/clothesList';
+import ClothesList from '../components/flatLists/clothesList';
 
 const { width } = Dimensions.get('window');
 
@@ -236,13 +236,13 @@ export default function Outfits() {
 
       <View style={{ flexDirection: "row", width: "100%", justifyContent: "center" }}>
         <View style={globalStyles.styledContainer}>
-          <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>
+          <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }} style={{ backgroundColor: upperBody?.dirty ? "rgba(11, 156, 49, 0.2)" : "#fff" }}>
             {outfitClothing(upperBody, 0, false)}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>
+          <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }} style={{ backgroundColor: lowerBody?.dirty ? "rgba(11, 156, 49, 0.2)" : "#fff" }}>
             {outfitClothing(lowerBody, 1, false)}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>
+          <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }} style={{ backgroundColor: footwear?.dirty ? "rgba(11, 156, 49, 0.2)" : "#fff" }}>
             {outfitClothing(footwear, 2, false)}
           </TouchableOpacity>
         </View>
@@ -464,5 +464,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '90%',
   },
-
 });

@@ -12,7 +12,7 @@ import Api from '@/src/services/api';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
 import { globalColors } from '@/src/styles/global';
-import { MyButton } from '../components/button/button';
+import MyButton from '../components/button/button';
 
 type FormData = {
     email: string;
@@ -57,7 +57,7 @@ export default function Login() {
                 await AsyncStorage.setItem('jwtToken', token);
 
                 getClothes();
-                router.replace('(tabs)');
+                router.replace('/(tabs)');
             })
             .catch(function (error) {
                 console.log(error.response.data);

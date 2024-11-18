@@ -9,7 +9,7 @@ import { globalColors, globalStyles } from '../styles/global';
 export default function Index() {
     const hasToken = async () => {
         const token = await AsyncStorage.getItem('jwtToken')
-        if (token) { router.replace('(tabs)') }
+        if (token) { router.replace('/(tabs)') }
     };
 
     useEffect(() => {

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend-testes",
-    "slug": "frontend-testes",
+    "name": "frontend",
+    "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -44,7 +44,8 @@
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -57,6 +58,7 @@
         "projectId": "2a7862e3-1b0b-40a2-89af-a302a760f850"
       }
     },
-    "owner": "gttolla"
+    "owner": "gttolla",
+    "newArchEnabled": true
   }
 }

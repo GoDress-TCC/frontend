@@ -7,6 +7,8 @@ interface ClothesContextProps {
     getClothes: () => void;
     selectedClothingId: string | undefined;
     setSelectedClothingId: (id: string | undefined) => void;
+    selectedClothesIds: string[];
+    setSelectedClothesIds: (ids: string[]) => void;
 }
 
 const ClothesContext = createContext<ClothesContextProps | undefined>(undefined);
@@ -14,6 +16,7 @@ const ClothesContext = createContext<ClothesContextProps | undefined>(undefined)
 export function ClothesProvider({ children }: { children: ReactNode }) {
     const [clothes, setClothes] = useState<Clothing[]>([]);
     const [selectedClothingId, setSelectedClothingId] = useState<string | undefined>(undefined);
+    const [selectedClothesIds, setSelectedClothesIds] = useState<string[]>([]);
 
     const getClothes = async () => {
         await Api.get('/clothing')
@@ -31,7 +34,7 @@ export function ClothesProvider({ children }: { children: ReactNode }) {
     }, []);
 
     return (
-        <ClothesContext.Provider value={{ clothes, getClothes, selectedClothingId, setSelectedClothingId }}>
+        <ClothesContext.Provider value={{ clothes, getClothes, selectedClothingId, setSelectedClothingId, selectedClothesIds, setSelectedClothesIds }}>
             {children}
         </ClothesContext.Provider>
     );
