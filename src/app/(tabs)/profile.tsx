@@ -50,8 +50,7 @@ export default function Profile() {
         <View>
           <Text style={[styles.title, { marginBottom: 16 }]}>Configurações</Text>
           <View style={styles.configBox}>
-
-            <TouchableOpacity style={styles.bottom}>
+           <TouchableOpacity style={styles.bottom} >
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Ionicons name="information-circle-outline" size={24} color="black" />
                 <Text style={styles.txt}>Informações pessoais</Text>

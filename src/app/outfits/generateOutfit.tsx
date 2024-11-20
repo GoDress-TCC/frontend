@@ -15,8 +15,10 @@ import Modal from '../components/modals/modal';
 import Api from '@/src/services/api';
 
 import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import ModalScreen from '../components/modals/modalScreen';
 import ClothesList from '../components/flatLists/clothesList';
+import { router } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -230,19 +232,20 @@ export default function Outfits() {
 
   return (
     <View style={styles.container}>
-      <View style={{ width: "100%", flexDirection: "row", alignItems: "center" }}>
+      <View style={{ width: "100%", flexDirection: "row", }}>
+      <Ionicons name="chevron-back" size={30} color="#593C9D" onPress={() => router.back()} />
         <Text style={[styles.title, { flex: 1, textAlign: "center" }]}>Outfits</Text>
       </View>
 
       <View style={{ flexDirection: "row", width: "100%", justifyContent: "center" }}>
         <View style={globalStyles.styledContainer}>
-          <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }} style={{ backgroundColor: upperBody?.dirty ? "rgba(11, 156, 49, 0.2)" : "#fff" }}>
+          <TouchableOpacity onPress={() => { setSelectedType('upperBody'); setOpenSelectClothing(true); }}>
             {outfitClothing(upperBody, 0, false)}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }} style={{ backgroundColor: lowerBody?.dirty ? "rgba(11, 156, 49, 0.2)" : "#fff" }}>
+          <TouchableOpacity onPress={() => { setSelectedType('lowerBody'); setOpenSelectClothing(true); }}>
             {outfitClothing(lowerBody, 1, false)}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }} style={{ backgroundColor: footwear?.dirty ? "rgba(11, 156, 49, 0.2)" : "#fff" }}>
+          <TouchableOpacity onPress={() => { setSelectedType('footwear'); setOpenSelectClothing(true); }}>
             {outfitClothing(footwear, 2, false)}
           </TouchableOpacity>
         </View>
@@ -267,6 +270,12 @@ export default function Outfits() {
 
       <Modal isOpen={openFilter} onRequestClose={() => setOpenFilter(false)}>
         <View style={styles.modalContent}>
+
+          <View style={{ flexDirection: 'row', width: '100%', marginVertical: 10, }}>
+            <Ionicons name="chevron-back" size={30} color="#593C9D" onPress={() => setOpenFilter(false)} />
+
+            <Text style={styles.titleModal}>Filtros</Text>
+          </View>
 
           <Controller
             control={control}
@@ -341,7 +350,7 @@ export default function Outfits() {
                   onValueChange={(itemValue) => onChange(itemValue)}
                   color={value === true ? globalColors.primary : undefined}
                 />
-                <Text>Usar apenas roupas favoritas</Text>
+                <Text >Usar apenas roupas favoritas</Text>
               </View>
             )}
           />
@@ -385,7 +394,7 @@ export default function Outfits() {
               )}
             />
           </ScrollView>
-          
+
           <View style={{ paddingBottom: 20 }}>
             <MyButton title='Salvar' onPress={handleSubmit(onSubmitSaveOutfit)} loading={saveLoading} />
           </View>
@@ -398,7 +407,7 @@ export default function Outfits() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 40,
+    paddingVertical: 50,
     paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "space-between"
@@ -406,7 +415,7 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: "500",
     fontSize: 22,
-    textAlign: "center"
+    marginLeft: -30,
   },
   clothingContainer: {
     alignItems: "center",
@@ -426,7 +435,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 20,
     width: width * 0.8,
-    height: width * 0.8,
+    height: width * 0.9,
     justifyContent: "center"
   },
   pickerContainer: {
@@ -464,4 +473,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '90%',
   },
+
+  titleModal: {
+    marginLeft: 10,
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+
 });

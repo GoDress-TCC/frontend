@@ -290,7 +290,7 @@ export default function Home() {
 
                             <View style={{ marginTop: 10, gap: 10 }}>
                                 <MyButton title='Criar' onPress={handleSubmit(onSubmitCreateCat)} loading={loading} />
-                                <MyButton title='Cancelar' onPress={() => { setModalOpen(false) }} type='cancel' />
+                                <MyButton title='Cancelar' onPress={() => { setModalOpen(false) }} color='gray' />
                             </View>
                         </View>
                     </View>

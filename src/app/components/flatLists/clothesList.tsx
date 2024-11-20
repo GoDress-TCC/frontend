@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Text, ImageBackground, ScrollView, Animated, Easing, ActivityIndicator, BackHandler } from "react-native";
+import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Text, ImageBackground, ScrollView, Animated, Easing, ActivityIndicator, BackHandler, Pressable } from "react-native";
 import { useForm, SubmitHandler } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 
 import { Clothing } from "@/src/services/types/types";
 import { useClothes } from "@/src/services/contexts/clothesContext";
 import Modal from "../modals/modal";
+import ModalScreen from "../modals/modalScreen";
 import Api from "@/src/services/api";
 
-import { MaterialIcons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
-import { globalColors } from "@/src/styles/global";
+import { MaterialIcons, FontAwesome5, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
+import { globalColors, globalStyles } from "@/src/styles/global";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "expo-router";
 import MyButton from "../button/button";
@@ -41,7 +42,7 @@ const ClothesList = React.memo(({
     showButton,
     buttonTitle,
     buttonOnPress,
-    buttonLoading, 
+    buttonLoading,
 }:
     {
         clothes: Clothing[],
@@ -67,6 +68,8 @@ const ClothesList = React.memo(({
     const [screenLoading, setScreenLoading] = useState<boolean>(false);
     const [favIcon, setFavIcon] = useState<"favorite" | "heart-broken">("favorite");
     const [dirtyIcon, setDirtyIcon] = useState<"washing-machine" | "washing-machine-off">("washing-machine");
+    const [confirmationModal, setConfirmationModal] = useState<boolean>(false);
+    const [confirmationModalwash, setConfirmationModalwash] = useState<boolean>(false);
 
     const { getClothes, setSelectedClothingId, selectedClothingId, setSelectedClothesIds } = useClothes();
 
@@ -157,6 +160,7 @@ const ClothesList = React.memo(({
             .then(response => {
                 console.log(response.data);
                 getClothes();
+                setConfirmationModal(false);
 
                 if (selectMode === false) {
                     setOpenModal(false);
@@ -336,13 +340,13 @@ const ClothesList = React.memo(({
                             ) : null}
 
                             {(Array.isArray(operations) && operations.includes("dirty")) || operations === true ? (
-                                <TouchableOpacity onPress={() => { onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" }) }}>
+                                <TouchableOpacity onPress={() => setConfirmationModalwash(true)}>
                                     <MaterialCommunityIcons name={dirtyIcon} size={26} color={globalColors.primary} />
                                 </TouchableOpacity>
                             ) : null}
 
                             {(Array.isArray(operations) && operations.includes("delete")) || operations === true ? (
-                                <TouchableOpacity onPress={onSubmitDelClothing}>
+                                <TouchableOpacity onPress={() => setConfirmationModal(true)}>
                                     <FontAwesome5 name="trash" size={22} color={globalColors.primary} />
                                 </TouchableOpacity>
                             ) : null}
@@ -432,6 +436,50 @@ const ClothesList = React.memo(({
                     <ActivityIndicator size={100} color={globalColors.primary} />
                 </View>
             }
+
+            {confirmationModal &&
+                <ModalScreen isOpen={confirmationModal} onRequestClose={() => setConfirmationModal(false)}>
+                    <Pressable onPress={() => setConfirmationModal(false)} style={styles.backgroudwash} >
+                        <View style={styles.modalwash}>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30, marginTop: 20 }}>
+                                <Text style={globalStyles.mainTitle}>{`Deletar ${selectedClothes.length} roupas?`}</Text>
+                            </View>
+
+                            <View style={styles.btnContainer}>
+                                <MyButton color="#D12626" title="Deletar" onPress={onSubmitDelClothing} />
+                                <MyButton color="gray" title="Cancelar" onPress={() => setConfirmationModal(false)} />
+                            </View>
+
+                        </View>
+
+                    </Pressable>
+                </ModalScreen>
+            }
+
+            {confirmationModalwash &&
+
+                <ModalScreen isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)}>
+
+                    <Pressable onPress={() => setConfirmationModal(false)} style={styles.backgroudwash} >
+
+                        <View style={styles.modalwash}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}>
+
+                                <Text style={globalStyles.mainTitle}> {`colocar para lavar ${selectedClothes.length} roupas?`}</Text>
+                            </View>
+                            <View  style={styles.btnContainer}>
+                                <MyButton title="Lavar" onPress={() => onSubmitUpdateClothing(selectedClothes, { dirty: true })} />
+                                <MyButton color="gray" title="Cancelar" onPress={() => setConfirmationModalwash(false)} />
+                            </View>
+                        </View>
+
+                    </Pressable>
+
+
+                </ModalScreen>
+
+            }
         </View>
     )
 });
@@ -448,7 +496,7 @@ const styles = StyleSheet.create({
         height: width * 0.25,
         width: width * 0.25,
         borderRadius: 5,
-        overflow: 'hidden'
+        overflow: 'hidden',
     },
     modalContent: {
         backgroundColor: "#fff",
@@ -463,7 +511,32 @@ const styles = StyleSheet.create({
     clothingAtributes: {
         fontSize: 20,
         fontWeight: "500"
-    }
+    },
+    modalwash: {
+        backgroundColor: "#fff",
+        width: "100%",
+        height: "25%",
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        paddingVertical: 20,
+        paddingHorizontal: 16,
+        position: 'absolute',
+        bottom: 0,
+        alignItems: 'center'
+
+    },
+
+    backgroudwash: {
+        backgroundColor: 'rgba(0, 0, 0, 0.30)',
+        width: "100%",
+        height: "100%",
+    },
+    btnContainer: {
+        gap: 10,
+        flex: 1,
+        justifyContent: 'flex-end',
+        width: '100%',
+    },
 });
 
 export default ClothesList;

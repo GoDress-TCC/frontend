@@ -139,7 +139,7 @@ export default function Login() {
 
             <TouchableOpacity style={styles.containsenha}>
                 <Text style={styles.text}>Esqueci a</Text>
-                <Link href={"/auth/forgotPassword/sendEmail"} style={{ textDecorationLine: "underline", color: globalColors.primary, fontSize: 16, fontFamily: Fonts['montserrat-semibold'], }}> senha</Link>
+                <Link href={"/auth/forgotPassword/sendEmail"} style={{ textDecorationLine: "underline", color: globalColors.primary, fontSize: 16, fontFamily: Fonts['montserrat-semibold'], }}>senha</Link>
             </TouchableOpacity>
         </View>
     );
