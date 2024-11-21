@@ -42,8 +42,7 @@ export default function sendEmail() {
                 reset();
                 Toast.show({
                     type: 'success',
-                    text1: 'Sucesso',
-                    text2: 'Email enviado com sucesso'
+                    text1: 'Email enviado com sucesso'
                 });
                 await AsyncStorage.setItem('userEmail', data.email)
 

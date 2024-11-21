@@ -73,8 +73,7 @@ export default function resetPassword() {
             .then(async function (response) {
                 Toast.show({
                     type: 'success',
-                    text1: 'Sucesso',
-                    text2: 'Senha alterada com sucesso'
+                    text1: 'Senha alterada com sucesso!',
                 });
                 reset();
 

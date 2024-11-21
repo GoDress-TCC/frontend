@@ -11,16 +11,16 @@ import { globalColors } from "../styles/global";
 export default function Layout() {
 
     const toastConfig = {
-
         success: (props: any) => (
           <BaseToast
             {...props}
             style={{ borderLeftColor: globalColors.primary }}
             contentContainerStyle={{ paddingHorizontal: 15 }}
+            position='bottom'
             text1Style={{
-              fontSize: 16,
-              fontWeight: '400'
-            }}
+              fontSize: 14,
+              fontWeight: '400',
+            }}            
           />
         ),
 

@@ -39,8 +39,7 @@ export default function DirtyClothes() {
 
         Toast.show({
           type: 'success',
-          text1: 'Sucesso',
-          text2: 'Roupas lavadas'
+          text1: 'Roupas lavadas com sucesso!'
         });
       });
   }
@@ -50,7 +49,7 @@ export default function DirtyClothes() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name='chevron-back' size={30} color={globalColors.primary} />
         </TouchableOpacity>
-        <Text style={globalStyles.mainTitle}>Roupas sujas</Text>
+        <Text style={globalStyles.mainTitle}>Lavanderia</Text>
       </View>
 
       {filteredClothes.length === 0 ?

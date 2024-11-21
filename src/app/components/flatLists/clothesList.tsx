@@ -14,6 +14,7 @@ import { globalColors, globalStyles } from "@/src/styles/global";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "expo-router";
 import MyButton from "../button/button";
+import ConfirmationModal from "../modals/confirmationModal";
 
 const { width } = Dimensions.get('window');
 
@@ -127,6 +128,7 @@ const ClothesList = React.memo(({
         await Api.put(`/clothing/${param}`, data)
             .then(response => {
                 console.log(response.data);
+                if (confirmationModalwash) setConfirmationModalwash(false);
                 getClothes();
             })
             .catch(error => {
@@ -144,12 +146,6 @@ const ClothesList = React.memo(({
                 }
 
                 setScreenLoading(false);
-
-                Toast.show({
-                    type: "success",
-                    text1: "Sucesso",
-                    text2: "Roupa atualizada"
-                });
             });
     };
 
@@ -186,9 +182,8 @@ const ClothesList = React.memo(({
                 setScreenLoading(false);
 
                 Toast.show({
-                    type: "success",
-                    text1: "Sucesso",
-                    text2: "Roupas excluídas"
+                    type: "error",
+                    text1: "Roupas excluídas"
                 });
             });
     };
@@ -334,20 +329,20 @@ const ClothesList = React.memo(({
 
                         <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                             {(Array.isArray(operations) && operations.includes("fav")) || operations === true ? (
-                                <TouchableOpacity onPress={() => { onSubmitUpdateClothing(selectedClothes, { fav: favIcon === "favorite" }) }}>
-                                    <MaterialIcons name={favIcon} size={24} color={globalColors.primary} />
+                                <TouchableOpacity onPress={() => { selectedClothes.length > 0 && onSubmitUpdateClothing(selectedClothes, { fav: favIcon === "favorite" }) }}>
+                                    <MaterialIcons name={favIcon} size={24} color={selectedClothes.length > 0 ? globalColors.primary : "gray"} />
                                 </TouchableOpacity>
                             ) : null}
 
                             {(Array.isArray(operations) && operations.includes("dirty")) || operations === true ? (
-                                <TouchableOpacity onPress={() => setConfirmationModalwash(true)}>
-                                    <MaterialCommunityIcons name={dirtyIcon} size={26} color={globalColors.primary} />
+                                <TouchableOpacity onPress={() => { selectedClothes.length > 0 && setConfirmationModalwash(true) }}>
+                                    <MaterialCommunityIcons name={dirtyIcon} size={26} color={selectedClothes.length > 0 ? globalColors.primary : "gray"} />
                                 </TouchableOpacity>
                             ) : null}
 
                             {(Array.isArray(operations) && operations.includes("delete")) || operations === true ? (
-                                <TouchableOpacity onPress={() => setConfirmationModal(true)}>
-                                    <FontAwesome5 name="trash" size={22} color={globalColors.primary} />
+                                <TouchableOpacity onPress={() => { selectedClothes.length > 0 && setConfirmationModal(true) }}>
+                                    <FontAwesome5 name="trash" size={22} color={selectedClothes.length > 0 ? globalColors.primary : "gray"} />
                                 </TouchableOpacity>
                             ) : null}
                         </View>
@@ -437,49 +432,9 @@ const ClothesList = React.memo(({
                 </View>
             }
 
-            {confirmationModal &&
-                <ModalScreen isOpen={confirmationModal} onRequestClose={() => setConfirmationModal(false)}>
-                    <Pressable onPress={() => setConfirmationModal(false)} style={styles.backgroudwash} >
-                        <View style={styles.modalwash}>
+            <ConfirmationModal isOpen={confirmationModal} onRequestClose={() => setConfirmationModal(false)} onSubmit={onSubmitDelClothing} title="Excluir roupas" color="red" description="Essa ação não poderá ser desfeita" buttonTitle="Excluir" />
 
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30, marginTop: 20 }}>
-                                <Text style={globalStyles.mainTitle}>{`Deletar ${selectedClothes.length} roupas?`}</Text>
-                            </View>
-
-                            <View style={styles.btnContainer}>
-                                <MyButton color="#D12626" title="Deletar" onPress={onSubmitDelClothing} />
-                                <MyButton color="gray" title="Cancelar" onPress={() => setConfirmationModal(false)} />
-                            </View>
-
-                        </View>
-
-                    </Pressable>
-                </ModalScreen>
-            }
-
-            {confirmationModalwash &&
-
-                <ModalScreen isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)}>
-
-                    <Pressable onPress={() => setConfirmationModal(false)} style={styles.backgroudwash} >
-
-                        <View style={styles.modalwash}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30 }}>
-
-                                <Text style={globalStyles.mainTitle}> {`colocar para lavar ${selectedClothes.length} roupas?`}</Text>
-                            </View>
-                            <View  style={styles.btnContainer}>
-                                <MyButton title="Lavar" onPress={() => onSubmitUpdateClothing(selectedClothes, { dirty: true })} />
-                                <MyButton color="gray" title="Cancelar" onPress={() => setConfirmationModalwash(false)} />
-                            </View>
-                        </View>
-
-                    </Pressable>
-
-
-                </ModalScreen>
-
-            }
+            <ConfirmationModal isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)} onSubmit={() => onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" })} title="Mandar para lavanderia" description="Suas roupas ainda estarão disponíveis na aba lavanderia" color="green" buttonTitle="Confirmar" />
         </View>
     )
 });
@@ -511,31 +466,6 @@ const styles = StyleSheet.create({
     clothingAtributes: {
         fontSize: 20,
         fontWeight: "500"
-    },
-    modalwash: {
-        backgroundColor: "#fff",
-        width: "100%",
-        height: "25%",
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingVertical: 20,
-        paddingHorizontal: 16,
-        position: 'absolute',
-        bottom: 0,
-        alignItems: 'center'
-
-    },
-
-    backgroudwash: {
-        backgroundColor: 'rgba(0, 0, 0, 0.30)',
-        width: "100%",
-        height: "100%",
-    },
-    btnContainer: {
-        gap: 10,
-        flex: 1,
-        justifyContent: 'flex-end',
-        width: '100%',
     },
 });
 

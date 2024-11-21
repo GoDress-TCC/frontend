@@ -46,11 +46,6 @@ export default function Login() {
         })
             .then(async function (response) {
                 console.log(response.data);
-                Toast.show({
-                    type: 'success',
-                    text1: 'Sucesso',
-                    text2: 'Seja bem-vindo(a)'
-                }); 
                 reset();
                
                 const { token } = response.data;
