@@ -19,6 +19,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import ModalScreen from '../components/modals/modalScreen';
 import ClothesList from '../components/flatLists/clothesList';
 import { router } from 'expo-router';
+import MainHeader from '../components/headers/mainHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -31,13 +32,14 @@ type FormData = {
   fav: boolean
 };
 
-export default function Outfits() {
+export default function generateOutfits() {
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [openSelectClothing, setOpenSelectClothing] = useState<boolean>(false);
   const [openSaveClothing, setOpenSaveClothing] = useState<boolean>(false);
   const [selectedType, setSelectedType] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [useDirtyClothes, setUseDirtyClothes] = useState<boolean>(false);
 
   const [upperBody, setUpperBody] = useState<Clothing | undefined>(undefined);
   const [lowerBody, setLowerBody] = useState<Clothing | undefined>(undefined);
@@ -80,8 +82,8 @@ export default function Outfits() {
         console.log(error.response.data)
         Toast.show({
           type: 'error',
-          text1: error.response.data.msg,
-          text2: 'Tente novamente'
+          text1: error.response.data.msg === "Não foi possível completar o outfit, peças insuficientes" ? "Não foi possível completar o outfit" : error.response.data.msg,
+          text2: error.response.data.msg === "Não foi possível completar o outfit, peças insuficientes" ? "Peças insuficientes" : "Tente novamente"
         });
       })
       .finally(() => {
@@ -100,7 +102,7 @@ export default function Outfits() {
       Toast.show({
         type: 'error',
         text1: 'O outfit deve conter 3 peças de roupa',
-        text2: 'Tente novamente'
+        text2: 'Adicione mais roupas ao seu armário'
       });
     } else {
       setOpenSaveClothing(true)
@@ -186,7 +188,7 @@ export default function Outfits() {
     setFootwear(undefined);
     setSelectedClothingId(undefined);
     Toast.show({
-      type: "info",
+      type: "success",
       text1: "Outfit resetado",
       text2: "Todos os filtros e roupas foram resetados"
     })
@@ -231,11 +233,8 @@ export default function Outfits() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={{ width: "100%", flexDirection: "row", }}>
-      <Ionicons name="chevron-back" size={30} color="#593C9D" onPress={() => router.back()} />
-        <Text style={[styles.title, { flex: 1, textAlign: "center" }]}>Outfits</Text>
-      </View>
+    <View style={[globalStyles.globalContainer, { justifyContent: "space-between" }]}>
+      <MainHeader title='Gerar Outfit' backButton={true} />
 
       <View style={{ flexDirection: "row", width: "100%", justifyContent: "center" }}>
         <View style={globalStyles.styledContainer}>
@@ -350,10 +349,19 @@ export default function Outfits() {
                   onValueChange={(itemValue) => onChange(itemValue)}
                   color={value === true ? globalColors.primary : undefined}
                 />
-                <Text >Usar apenas roupas favoritas</Text>
+                <Text>Usar apenas roupas favoritas</Text>
               </View>
             )}
           />
+
+          <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
+            <Checkbox
+              value={!!useDirtyClothes}
+              onValueChange={(itemValue) => setUseDirtyClothes(itemValue)}
+              color={useDirtyClothes === true ? globalColors.primary : undefined}
+            />
+            <Text>Usar apenas roupas favoritas</Text>
+          </View>
 
         </View>
       </Modal>
@@ -405,13 +413,6 @@ export default function Outfits() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 50,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
   title: {
     fontWeight: "500",
     fontSize: 22,
@@ -435,7 +436,6 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 20,
     width: width * 0.8,
-    height: width * 0.9,
     justifyContent: "center"
   },
   pickerContainer: {

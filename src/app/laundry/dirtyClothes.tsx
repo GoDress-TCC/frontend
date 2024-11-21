@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons'
 import ClothesList from '../components/flatLists/clothesList'
 import Api from '@/src/services/api'
 import Toast from 'react-native-toast-message'
+import MainHeader from '../components/headers/mainHeader'
 
 export default function DirtyClothes() {
   const [loading, setLoading] = useState(false);
@@ -44,12 +45,9 @@ export default function DirtyClothes() {
       });
   }
   return (
-    <View style={{ flex: 1, paddingTop: 50, paddingBottom: 20 }}>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name='chevron-back' size={30} color={globalColors.primary} />
-        </TouchableOpacity>
-        <Text style={globalStyles.mainTitle}>Lavanderia</Text>
+    <View style={globalStyles.globalContainerForLists}>
+      <View style={{ marginHorizontal: 20 }}>
+        <MainHeader title='Lavanderia' backButton={true} />
       </View>
 
       {filteredClothes.length === 0 ?

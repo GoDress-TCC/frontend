@@ -36,11 +36,11 @@ export default function Clothes() {
     ), [routes, filterClothes]);
 
     return (
-        <View style={{ flex: 1, paddingTop: 50 }}>
+        <View style={globalStyles.globalContainerForLists}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", marginHorizontal: 20 }}>
                 <Text style={globalStyles.mainTitle}>Armário</Text>
                 <View style={{ flexDirection: "row", gap: 5 }}>
-                    <TouchableOpacity onPress={() => router.navigate('/')} style={styles.button}>
+                    <TouchableOpacity onPress={() => router.navigate('/outfits/outfits')} style={styles.button}>
                         <MaterialCommunityIcons name="hanger" size={24} color={globalColors.primary} />
                         <Text>Outfits</Text>
                     </TouchableOpacity>

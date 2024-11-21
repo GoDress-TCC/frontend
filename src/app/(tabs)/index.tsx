@@ -174,7 +174,7 @@ export default function Home() {
     }
 
     return (
-        <View style={globalStyles.containerGlobal}>
+        <View style={globalStyles.globalContainer}>
             <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <View style={{ flexDirection: "row" }}>
                     <Text style={styles.title}>Olá, </Text>

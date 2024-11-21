@@ -9,6 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Fonts from '@/src/services/utils/Fonts';
 import { router } from 'expo-router';
+import MainHeader from '../components/headers/mainHeader';
 
 export default function Profile() {
 
@@ -21,9 +22,9 @@ export default function Profile() {
   };
 
   return (
-    <View style={globalStyles.containerGlobal}>
+    <View style={globalStyles.globalContainer}>
       <View style={{ marginBottom: 30 }}>
-        <Text style={globalStyles.mainTitle}> Perfil </Text>
+        <MainHeader title='Perfil' />
       </View>
 
       <View >

@@ -421,7 +421,7 @@ const ClothesList = React.memo(({
             )}
 
             {showButton &&
-                <View style={{ paddingHorizontal: 20, width: "100%" }}>
+                <View style={{ paddingHorizontal: 20, width: "100%", paddingBottom: 20 }}>
                     <MyButton title={buttonTitle} onPress={buttonOnPress} loading={buttonLoading} />
                 </View>
             }

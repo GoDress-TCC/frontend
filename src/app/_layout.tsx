@@ -28,10 +28,8 @@ export default function Layout() {
           <ErrorToast
             {...props}
             text1Style={{
-              fontSize: 16
-            }}
-            text2Style={{
-              fontSize: 14
+              fontSize: 14,
+              fontWeight: '400',
             }}
           />
         ),
@@ -61,10 +59,9 @@ export default function Layout() {
                 <Stack.Screen name="clothes/addClothing" options={{ headerShown: false }} />
 
                 <Stack.Screen name="outfits/generateOutfit" options={{ headerShown: false }} />
+                <Stack.Screen name="outfits/outfits" options={{ headerShown: false}} />
 
                 <Stack.Screen name="laundry/dirtyClothes" options={{ headerShown: false }} />
-
-               
             </Stack>
         </CatsProvider>
         </ClothesProvider>
