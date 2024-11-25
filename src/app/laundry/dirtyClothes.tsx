@@ -51,11 +51,11 @@ export default function DirtyClothes() {
       </View>
 
       {filteredClothes.length === 0 ?
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text>Não há roupas sujas</Text>
+        <View style={globalStyles.message}>
+          <Text>Você não possui roupas sujas</Text>
         </View>
         :
-        <View style={{ flex: 1, marginTop: 20 }}>
+        <View style={globalStyles.flatListContainer}>
           <ClothesList clothes={filteredClothes} clothingBg='#fff' canSelect={true} canOpen={true} operations={["delete", "fav"]} showButton={true} buttonTitle={selectedClothesIds.length === 0 ? "Lavar todas as roupas" : "Lavar roupas selecionadas"} buttonOnPress={onSubmitWashClothes} buttonLoading={loading} />
         </View>
       }

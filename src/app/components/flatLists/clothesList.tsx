@@ -6,11 +6,10 @@ import _isEqual from 'lodash/isEqual';
 import { Clothing } from "@/src/services/types/types";
 import { useClothes } from "@/src/services/contexts/clothesContext";
 import Modal from "../modals/modal";
-import ModalScreen from "../modals/modalScreen";
 import Api from "@/src/services/api";
 
-import { MaterialIcons, FontAwesome5, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { globalColors, globalStyles } from "@/src/styles/global";
+import { MaterialIcons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { globalColors } from "@/src/styles/global";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "expo-router";
 import MyButton from "../button/button";
@@ -287,6 +286,7 @@ const ClothesList = React.memo(({
     const handleCloseSelectMode = () => {
         setSelectMode(false);
         setSelectedClothes([]);
+        setSelectAll(false);
     }
 
     const selectedClothesOperations = async () => {
@@ -307,11 +307,15 @@ const ClothesList = React.memo(({
 
     useEffect(() => {
         selectedClothesOperations();
-    }, [selectedClothes]);
 
-    useEffect(() => {
         if (showButton && canSelect) {
             setSelectedClothesIds(selectedClothes);
+        }
+
+        if (selectAll) {
+            if (selectedClothes.length < clothes.length) {
+                setSelectAll(false)
+            }
         }
     }, [selectedClothes]);
 
@@ -359,11 +363,14 @@ const ClothesList = React.memo(({
             <FlatList
                 data={typeFilter ? filteredClothes.reverse() : [...clothes].reverse()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={[styles.itemContainer, { backgroundColor: item.dirty === true ? "rgba(11, 156, 49, 0.2)" : clothingBg }]} onPress={() => { handleOpenClothing(item), handlePickClothing(item._id), selectMode && handleSelectClothing(item._id) }} onLongPress={() => canSelect && (setSelectMode(!selectMode), handleSelectClothing(item._id))}>
+                    <TouchableOpacity style={[styles.itemContainer, { backgroundColor: clothingBg }, item.dirty && { borderColor: globalColors.dirtyGreen, borderWidth: 1 }]} onPress={() => { handleOpenClothing(item), handlePickClothing(item._id), selectMode && handleSelectClothing(item._id) }} onLongPress={() => canSelect && (setSelectMode(!selectMode), handleSelectClothing(item._id))}>
                         <View style={styles.imageContainer}>
                             <ImageBackground source={{ uri: item.image }} style={[{ flex: 1, justifyContent: selectMode ? "flex-start" : "flex-end", alignItems: 'flex-end', padding: 5 }, selectedClothes.includes(item._id) && selectMode && { opacity: 0.5 }]}>
-                                {item.fav === true && <MaterialIcons name="favorite" color="red" size={16} />}
-                                {canPick === true && (
+                                <View>
+                                    {item.fav && <MaterialIcons name="favorite" color="red" size={16} />}
+                                    {item.dirty && <MaterialCommunityIcons name="washing-machine" size={16} style={{ backgroundColor: "#fff", borderRadius: 3 }} />}
+                                </View>
+                                {canPick && (
                                     pickParam?.includes(item._id) && <MaterialIcons name="check-circle" color={globalColors.primary} size={22} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
                                 )}
                             </ImageBackground>
@@ -434,7 +441,7 @@ const ClothesList = React.memo(({
 
             <ConfirmationModal isOpen={confirmationModal} onRequestClose={() => setConfirmationModal(false)} onSubmit={onSubmitDelClothing} title="Excluir roupas" color="red" description="Essa ação não poderá ser desfeita" buttonTitle="Excluir" />
 
-            <ConfirmationModal isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)} onSubmit={() => onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" })} title="Mandar para lavanderia" description="Suas roupas ainda estarão disponíveis na aba lavanderia" color="green" buttonTitle="Confirmar" />
+            <ConfirmationModal isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)} onSubmit={() => onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" })} title={dirtyIcon === "washing-machine" ? "Mandar para lavanderia" : "Lavar roupas"} description={dirtyIcon === "washing-machine" ? "Suas roupas serão realocadas para a aba lavanderia" : ""} color="green" buttonTitle="Confirmar" />
         </View>
     )
 });

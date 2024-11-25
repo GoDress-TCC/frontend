@@ -31,7 +31,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             setIsVisible(true);
             Animated.timing(backgroundOpacity, {
                 toValue: 0.4,
-                duration: 700,
+                duration: 1000,
                 useNativeDriver: true,
             }).start();
         } else {

@@ -38,12 +38,12 @@ export default function Profile() {
 
         <View style={{ gap: 10, marginVertical: 30 }}>
           <TouchableOpacity style={styles.boxFav} onPress={() => router.navigate("/clothes/favClothes")}>
-            <Text style={styles.txt}> Favoritos</Text>
+            <Text style={styles.txt}>Favoritos</Text>
             <Image style={styles.iconLav} source={require('../../../assets/icons/coracao.png')} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.boxFav} onPress={() => router.navigate("/clothes/favClothes")}>
-            <Text style={styles.txt}> Lavanderia</Text>
+          <TouchableOpacity style={styles.boxFav} onPress={() => router.navigate("/laundry/dirtyClothes")}>
+            <Text style={styles.txt}>Lavanderia</Text>
             <Image style={styles.iconLav} source={require('../../../assets/icons/lavanderia.png')} />
           </TouchableOpacity>
         </View>

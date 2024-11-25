@@ -14,12 +14,13 @@ import { globalColors, globalStyles } from '@/src/styles/global';
 import Modal from '../components/modals/modal';
 import Api from '@/src/services/api';
 
-import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons, FontAwesome5, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import ModalScreen from '../components/modals/modalScreen';
 import ClothesList from '../components/flatLists/clothesList';
 import { router } from 'expo-router';
 import MainHeader from '../components/headers/mainHeader';
+import { useOutfits } from '@/src/services/contexts/outfitsContext';
 
 const { width } = Dimensions.get('window');
 
@@ -47,6 +48,7 @@ export default function generateOutfits() {
 
   const { cats, getCats } = useCats();
   const { clothes, getClothes, selectedClothingId, setSelectedClothingId } = useClothes();
+  const { getOutfits } = useOutfits();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -121,17 +123,12 @@ export default function generateOutfits() {
     })
       .then(response => {
         console.log(response.data);
-        setOpenSaveClothing(false);
         reset();
         setUpperBody(undefined);
         setLowerBody(undefined);
         setFootwear(undefined);
         setSelectedClothingId(undefined);
-        Toast.show({
-          type: 'success',
-          text1: 'Outfit salvo com sucesso',
-          text2: 'Tenha um bom proveito!'
-        });
+        getOutfits();
       })
       .catch(error => {
         setOpenSaveClothing(false)
@@ -144,6 +141,8 @@ export default function generateOutfits() {
       })
       .finally(() => {
         setSaveLoading(false);
+        setOpenSaveClothing(false);
+        router.navigate('/outfits/outfits');
       });
   };
 
@@ -200,27 +199,35 @@ export default function generateOutfits() {
     return (
       <View style={styles.clothingContainer}>
         {clothing ? (
-          <ImageBackground source={{ uri: clothing.image }} style={styles.clothingImage}>
+          <ImageBackground source={{ uri: clothing.image }} style={[styles.clothingImage,  clothing.dirty && { borderWidth: 2, borderColor: globalColors.dirtyGreen }]}>
             {saving === false && (
-              <>
-                {clothing.fav === true && (
-                  <MaterialIcons
-                    name="favorite"
-                    color="red"
-                    size={16}
-                    style={{ position: "absolute", right: 1, bottom: 1 }}
-                  />
-                )}
+              <View style={{ flex: 1 }}>
+                <View style={{ position: "absolute", right: 5, bottom: 5 }}>
+                  {clothing.fav &&
+                    <MaterialIcons
+                      name="favorite"
+                      color="red"
+                      size={16}
+                    />
+                  }
+                  {clothing.dirty &&
+                    <MaterialCommunityIcons
+                      name="washing-machine"
+                      size={16}
+                      style={{ backgroundColor: "#fff", borderRadius: 4 }}
+                    />
+                  }
+                </View>
 
-                <View style={{ position: "absolute", right: 1, top: 1 }}>
+                <View style={{ position: "absolute", right: 3, top: 3 }}>
                   <FontAwesome5
                     name={clothingIds[clothingIndex] !== undefined ? "lock" : "unlock"}
-                    size={18}
+                    size={16}
                     color={globalColors.primary}
-                    style={{ backgroundColor: "#fff", borderRadius: 50, padding: 5 }}
+                    style={{ backgroundColor: "#fff", borderRadius: 4, padding: 2  }}
                   />
                 </View>
-              </>
+              </View>
             )}
 
           </ImageBackground>
@@ -416,7 +423,7 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: "500",
     fontSize: 22,
-    marginLeft: -30,
+    textAlign: "center"
   },
   clothingContainer: {
     alignItems: "center",
@@ -454,7 +461,7 @@ const styles = StyleSheet.create({
     height: "95%",
     paddingTop: 40,
     borderRadius: 10,
-    gap: 10
+    gap: 10,
   },
   inputarea: {
     flexDirection: 'row',

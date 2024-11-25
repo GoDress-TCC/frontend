@@ -1,29 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text } from 'react-native';
 
-import { Clothing } from '@/src/services/types/types';
+import { useClothes } from '@/src/services/contexts/clothesContext';
+import { globalStyles } from '@/src/styles/global';
 import ClothesList from '../components/flatLists/clothesList';
-import Api from '@/src/services/api';
+import MainHeader from '../components/headers/mainHeader';
 
 export default function favClothes() {
-    const [clothes, setClothes] = useState<Clothing[]>([])
+    const { clothes } = useClothes();
 
-    const getFavClothes = async () => {
-        await Api.get('/clothing/favs')
-            .then(response => {
-                setClothes(response.data)
-                console.log(clothes);
-            })
-            .catch(error => {
-                console.log(error.response.data)
-            })
-    }
+    const favClothes = clothes.filter(item => item.fav === true)
 
-    useEffect(() => {
-        getFavClothes();
-    }, []);
-    
     return (
-        <ClothesList clothes={clothes} canOpen={true} clothingBg='#fff'/>       
+        <View style={globalStyles.globalContainerForLists}>
+            <View style={{ marginHorizontal: 20 }}>
+                <MainHeader title="Roupas favoritas" backButton={true} />
+            </View>
+
+            {favClothes.length === 0 ?
+                <View style={globalStyles.message}>
+                    <Text>Você não possui roupas favoritas</Text>
+                </View>
+                :
+                <View style={globalStyles.flatListContainer}>
+                    <ClothesList clothes={favClothes} canOpen={true} clothingBg='#fff' canSelect={true} operations={true} />
+                </View>
+            }
+        </View>
     );
 }

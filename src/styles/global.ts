@@ -9,6 +9,7 @@ export const globalColors = {
     secundary: "#F8F7F4",
     black: "#000",
     white: "#fff",
+    dirtyGreen: "rgba(11, 156, 49, 0.5)"
 };
 
 export const globalStyles = StyleSheet.create({
@@ -45,7 +46,22 @@ export const globalStyles = StyleSheet.create({
         borderColor: globalColors.primary,
         borderLeftWidth: 8,
         borderBottomWidth: 8,
+        borderWidth: 1
     },
+
+    
+    tinyStyledContainer: {
+        backgroundColor: "#fff",
+        padding: 5,
+        borderRadius: 10,
+        flexDirection: "column",
+        gap: 5,
+        alignItems: "center",
+        borderColor: globalColors.primary,
+        borderBottomWidth: 5,
+        borderWidth: 1
+    },
+
     button: {
         backgroundColor: globalColors.primary,
         fontFamily: fonts['montserrat-black'],
@@ -53,5 +69,16 @@ export const globalStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+
+    message: {
+        flex: 1, 
+        alignItems: "center", 
+        justifyContent: "center" 
+    },
+
+    flatListContainer: {
+        flex: 1,
+        marginTop: 20
+    }
 
 });

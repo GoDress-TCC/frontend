@@ -19,9 +19,29 @@ export type Clothing = {
     type: string;
     color: string;
     style: string;
-    temperature: string; 
+    temperature: string;
     gender: string;
     tissue: string;
     fav: boolean;
     dirty: boolean
+};
+
+export type Outfit = {
+    _id: string;
+    clothingId: Clothing[];
+    name: string;
+    catId: string;
+    style: string;
+    temperature: string;
+    hour: string
+}
+
+export type Event = {
+    _id: string;
+    image: string;
+    name: string;
+    date: string;
+    local: string;
+    description: string;
+    outfitId: string;
 };

@@ -7,6 +7,7 @@ import { useFonts } from "expo-font"
 import fonts from "../services/fonts";
 import { UserProvider } from "../services/contexts/userContext";
 import { globalColors } from "../styles/global";
+import { OutfitsProvider } from "../services/contexts/outfitsContext";
 
 export default function Layout() {
 
@@ -43,6 +44,7 @@ export default function Layout() {
 
     return (
         <UserProvider>
+        <OutfitsProvider>
         <ClothesProvider>
         <CatsProvider>
             <Stack >
@@ -55,7 +57,7 @@ export default function Layout() {
 
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-                <Stack.Screen name="clothes/favClothes" options={{ title: "Roupas favoritas" }} />
+                <Stack.Screen name="clothes/favClothes" options={{ headerShown: false }} />
                 <Stack.Screen name="clothes/addClothing" options={{ headerShown: false }} />
 
                 <Stack.Screen name="outfits/generateOutfit" options={{ headerShown: false }} />
@@ -65,6 +67,7 @@ export default function Layout() {
             </Stack>
         </CatsProvider>
         </ClothesProvider>
+        </OutfitsProvider>
         <Toast config={toastConfig} />
         </UserProvider>
     );

@@ -8,6 +8,7 @@ import * as yup from 'yup';
 import { Clothing } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
+import { useOutfits } from '@/src/services/contexts/outfitsContext';
 import Modal from '../components/modals/modal';
 import ModalScreen from '../components/modals/modalScreen';
 import ClothesList from '../components/flatLists/clothesList';
@@ -51,6 +52,7 @@ export default function Home() {
     const { cats, getCats } = useCats();
     const { user, getUser } = useUser();
     const { clothes, getClothes } = useClothes();
+    const { getOutfits } = useOutfits();
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -109,14 +111,8 @@ export default function Home() {
     };
 
     const getCatClothes = async () => {
-        await Api.get(`/clothing/${openCatId}`)
-            .then(response => {
-                setCatClothes(response.data);
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.log(error.response.data);
-            })
+        const catClothes = clothes.filter(item => item.catId === openCatId)
+        setCatClothes(catClothes)
     };
 
     const handleOpenCat = (id: string) => {
@@ -153,12 +149,11 @@ export default function Home() {
         getCats();
         getUser();
         getClothes();
+        getOutfits();
     }, []);
 
     useEffect(() => {
-        if (openCatId) {
-            getCatClothes();
-        }
+        getCatClothes();
     }, [openCatId]);
 
     useEffect(() => {
@@ -177,9 +172,9 @@ export default function Home() {
         <View style={globalStyles.globalContainer}>
             <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <View style={{ flexDirection: "row" }}>
-                    <Text style={styles.title}>Olá, </Text>
-                    <Text style={styles.title}>{user?.name ? user.name : "..."} </Text>
-                    <Text style={styles.title}>{user?.surname ? user.surname : "..."}</Text>
+                    <Text style={globalStyles.mainTitle}>Olá, </Text>
+                    <Text style={globalStyles.mainTitle}>{user?.name ? user.name : "..."} </Text>
+                    <Text style={globalStyles.mainTitle}>{user?.surname ? user.surname : "..."}</Text>
                 </View>
             </View>
 
@@ -200,11 +195,11 @@ export default function Home() {
                                 {lowerBody.length > 0 && check()}
                             </View>
                         </View>
-                            <View style={styles.boxLower}>
-                                <FontAwesome5 name="tshirt" size={width * 0.3} />
-                                <Text>Calçados</Text>
-                                {footwear.length > 0 && check()}
-                            </View>
+                        <View style={styles.boxLower}>
+                            <FontAwesome5 name="tshirt" size={width * 0.3} />
+                            <Text>Calçados</Text>
+                            {footwear.length > 0 && check()}
+                        </View>
                     </View>
                     :
                     <View>
@@ -214,9 +209,9 @@ export default function Home() {
             </View>
 
             <View style={styles.functionContainer}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingBottom:8, borderBottomWidth:1, borderColor:globalColors.primary, }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingBottom: 8, borderBottomWidth: 1, borderColor: globalColors.primary, }}>
                     <Text style={{ fontSize: 16, fontWeight: "500" }}>Minhas Categorias:</Text>
-                    <TouchableOpacity style={styles.plusBnt}  onPress={() => { setModalOpen(true), reset() }}>
+                    <TouchableOpacity style={styles.plusBnt} onPress={() => { setModalOpen(true), reset() }}>
                         <FontAwesome5 name="plus" size={14} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
@@ -269,7 +264,7 @@ export default function Home() {
                 <Modal isOpen={modalOpen} withInput={true} onRequestClose={() => { setModalOpen(false) }}>
                     <View style={{ width: width * 0.9 }}>
                         <View style={styles.modalContent}>
-                            <Text style={{ fontSize: 16, fontFamily:Fonts['montserrat-bold'], }}>Adicionar Categoria</Text>
+                            <Text style={{ fontSize: 16, fontFamily: Fonts['montserrat-bold'], }}>Adicionar Categoria</Text>
 
                             <Controller
                                 control={control}
@@ -347,7 +342,10 @@ const styles = StyleSheet.create({
         padding: 10,
         marginTop: 20,
         borderRadius: 10,
-        gap: 5
+        gap: 5,
+        borderWidth: 1,
+        borderColor: globalColors.primary,
+        borderBottomWidth: 8
     },
     boxTop: {
         borderLeftWidth: 10,
