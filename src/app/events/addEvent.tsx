@@ -7,18 +7,23 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import DateTimePicker from 'react-native-ui-datepicker';
 import dayjs from 'dayjs';
 import localizedFormat from "dayjs/plugin/localizedFormat"
+import Toast from 'react-native-toast-message';
 
-import MainHeader from '../components/headers/mainHeader';
-import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
-import { globalColors, globalStyles } from '@/src/styles/global';
-import MyButton from '../components/button/button';
-import Modal from '../components/modals/modal';
-import { Picker } from '@react-native-picker/picker';
-import { brazilianStates } from '@/src/services/local-data/pickerData';
 import axios from 'axios';
 import Api from '@/src/services/api';
+import MyButton from '../components/button/button';
+import Modal from '../components/modals/modal';
+import MainHeader from '../components/headers/mainHeader';
+import { FontAwesome5, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { globalColors, globalStyles } from '@/src/styles/global';
+import { Picker } from '@react-native-picker/picker';
+import { brazilianStates } from '@/src/services/local-data/pickerData';
 import { Clothing } from '@/src/services/types/types';
-import Toast from 'react-native-toast-message';
+import { useOutfits } from '@/src/services/contexts/outfitsContext';
+import { STORAGE } from '@/src/services/firebase/firebaseConfig';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { router } from 'expo-router';
+import { useEvents } from '@/src/services/contexts/eventsContext';
 
 const { width } = Dimensions.get('window');
 
@@ -54,7 +59,12 @@ export default function AddEvent() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [outfitLoading, setOutfitLoading] = useState<boolean>(false);
-  const [outfits, setOutfits] = useState<Clothing[][]>([]);
+  const [outfitsRecomendations, setOutfitsRecomendations] = useState<Clothing[][]>([]);
+  const [eventOutfit, setEventOutfit] = useState<Clothing[]>([]);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+
+  const { outfits } = useOutfits();
+  const { getEvents } = useEvents();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -85,12 +95,6 @@ export default function AddEvent() {
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log('Dados enviados:', data);
-    reset();
-    setImage(null);
-  };
-
   const getLocations = async () => {
     if (!state) return;
     setSearchLoading(true);
@@ -119,7 +123,7 @@ export default function AddEvent() {
         generateMultiple: true,
       });
 
-      setOutfits(response.data.outfits);
+      setOutfitsRecomendations(response.data.outfits);
     } catch (error) {
       console.error(error);
       Toast.show({
@@ -132,6 +136,75 @@ export default function AddEvent() {
     }
   };
 
+  const handleSaveOutfit = async () => {
+    setSubmitLoading(true);
+    const hour = dayjs(watch("date")).hour();
+
+    await Api.post('/outfit', {
+      clothingId: eventOutfit,
+      name: `${watch("name")} - Outfit`,
+      temperature: watch("date"),
+      hour: hour,
+    })
+      .then(response => {
+        setValue("outfitId", response.data._id);
+      })
+      .catch(error => {
+        console.log(error.response.data)
+        Toast.show({
+          type: "error",
+          text1: error.response.data,
+          text2: "Tente novamente"
+        })
+      })
+  };
+
+  const uploadImage = async (uri: string): Promise<string | undefined> => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const storageRef = ref(STORAGE, `events/${Date.now()}`);
+      const snapshot = await uploadBytes(storageRef, blob);
+
+      return await getDownloadURL(snapshot.ref);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onSubmitCreateEvent: SubmitHandler<FormData> = async (data) => {
+    setSubmitLoading(true)
+
+    const outfitExists = outfits.filter(item => item.clothingId === eventOutfit);
+    if (outfitExists.length === 0) handleSaveOutfit();
+
+    if (image) {
+      const imageUrl = await uploadImage(image);
+      setValue("image", imageUrl);
+    }
+
+    await Api.post("/event", data)
+      .then((response) => {
+        console.log(response.data);
+        reset();
+        setImage(null);
+        setEventOutfit([]);
+        getEvents()
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+        Toast.show({
+          type: "error",
+          text1: error.response.data,
+          text2: "Tente novamente"
+        })
+      })
+      .finally(() => {
+        setSubmitLoading(false)
+        router.back();
+      })
+  };
 
   useEffect(() => {
     if (state) {
@@ -183,7 +256,7 @@ export default function AddEvent() {
             render={({ field: { value, onChange } }) => (
               <View style={{ gap: 5 }}>
                 <View style={globalStyles.inputArea}>
-                  <TextInput style={globalStyles.input} onChangeText={onChange} placeholder="Nome" value={value} autoCapitalize="none" />
+                  <TextInput style={globalStyles.input} onChangeText={onChange} placeholder="Nome" value={value} autoCapitalize="words" />
                 </View>
                 {errors.name && <Text style={globalStyles.error}>{errors.name.message}</Text>}
               </View>
@@ -212,20 +285,20 @@ export default function AddEvent() {
           </View>
         </View>
 
-        <View style={{ marginTop: 40, alignItems: "center" }}>
+        <View style={{ marginTop: 40 }}>
           <View style={{ marginBottom: 20, flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
             <Text style={globalStyles.subTitle}>Sugestões de outfits</Text>
-            {outfits.length > 0 && !outfitLoading &&
+            {outfitsRecomendations.length > 0 && !outfitLoading &&
               <TouchableOpacity onPress={handleGenerateOutfitsRecommendation}>
                 <FontAwesome name="refresh" size={20} color={globalColors.primary} />
               </TouchableOpacity>
             }
           </View>
 
-          <ScrollView horizontal>
-            {outfits.length === 0 && !outfitLoading &&
-              <View style={globalStyles.message}>
-                <Text style={{ textAlign: "center" }}>Nenhuma recomendação de outfit</Text>
+          <View style={{ flex: 1 }}>
+            {outfitsRecomendations.length === 0 && !outfitLoading &&
+              <View>
+                <Text>Preencha todos os campos para receber sujestões de outfits</Text>
               </View>
             }
             {outfitLoading &&
@@ -233,17 +306,18 @@ export default function AddEvent() {
                 <ActivityIndicator size={50} color={globalColors.primary} />
               </View>
             }
-            {outfits.length > 0 && !outfitLoading &&
+            {outfitsRecomendations.length > 0 && !outfitLoading &&
               <FlatList
-                data={outfits}
+                data={outfitsRecomendations}
                 keyExtractor={(item, index) => `outfit-${index}`}
                 renderItem={({ item: outfit, index }) => (
-                  <TouchableOpacity style={[globalStyles.tinyStyledContainer, { marginBottom: 20 }]}>
+                  <TouchableOpacity style={[globalStyles.tinyStyledContainer, { marginBottom: 20, width: "100%" }]} onPress={() => eventOutfit !== outfit ? setEventOutfit(outfit) : setEventOutfit([])}>
                     <Text style={{ fontWeight: "bold", fontSize: 16, marginVertical: 5 }}>Outfit {index + 1}</Text>
                     <FlatList
                       data={outfit}
                       keyExtractor={(clothing) => clothing._id}
                       horizontal
+                      showsHorizontalScrollIndicator={false}
                       renderItem={({ item: clothing }) => (
                         <View style={{ marginHorizontal: 8, alignItems: "center" }}>
                           <Image
@@ -254,15 +328,19 @@ export default function AddEvent() {
                         </View>
                       )}
                     />
+                    {eventOutfit === outfit &&
+                      <MaterialIcons name="check-circle" color={globalColors.primary} size={22} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
+                    }
                   </TouchableOpacity>
                 )}
+                scrollEnabled={false}
               />
             }
-          </ScrollView>
+          </View>
         </View>
       </ScrollView>
 
-      <MyButton title="Adicionar evento" onPress={handleSubmit(onSubmit)} />
+      <MyButton title="Adicionar evento" onPress={handleSubmit(onSubmitCreateEvent)} loading={submitLoading} />
 
       <Modal isOpen={openDatePicker} onRequestClose={() => setOpenDatePicker(false)}>
         <View style={[globalStyles.tinyStyledContainer, { width: "90%", paddingVertical: 10, paddingHorizontal: 10 }]}>
