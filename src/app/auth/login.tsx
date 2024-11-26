@@ -11,7 +11,7 @@ import Toast from 'react-native-toast-message';
 import Api from '@/src/services/api';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 import MyButton from '../components/button/button';
 
 type FormData = {
@@ -85,9 +85,9 @@ export default function Login() {
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 onChangeText={onChange}
                                 placeholder="Email"
                                 value={value}
@@ -106,9 +106,9 @@ export default function Login() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <View style={{ marginBottom: 20 }}>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Senha"
                                 onChangeText={onChange}
                                 value={value}
@@ -186,25 +186,6 @@ const styles = StyleSheet.create({
         width: "100%",
         alignItems: "center",
         marginTop: 20,
-    },
-    inputarea: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1,
-        borderRadius: 10,
-        borderColor: globalColors.primary,
-        justifyContent: 'space-between',
-
-    },
-
-    input: {
-        fontFamily: Fonts['montserrat-regular'],
-        fontSize: 16,
-        flexDirection: 'row',
-        width: '90%',
     },
 
     containsenha: {

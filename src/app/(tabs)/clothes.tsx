@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 
 import { Clothing } from '@/src/services/types/types';
 import { useClothes } from '@/src/services/contexts/clothesContext';
-import { clothingKind } from '@/src/services/local-data/dropDownData';
+import { clothingKind } from '@/src/services/local-data/pickerData';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ClothesList from '../components/flatLists/clothesList';
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
         fontSize: 22,
     },
     label: {
-        color: 'black',
+        color: "#red",
         fontSize: 14,
         textTransform: 'none',
     },

@@ -7,7 +7,7 @@ import Checkbox from 'expo-checkbox';
 
 import MyButton from '../components/button/button';
 import { Clothing } from '@/src/services/types/types';
-import { clothingStyle, clothingTemperature } from '@/src/services/local-data/dropDownData';
+import { clothingStyle, clothingTemperature } from '@/src/services/local-data/pickerData';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import { globalColors, globalStyles } from '@/src/styles/global';

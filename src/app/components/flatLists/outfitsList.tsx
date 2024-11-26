@@ -6,9 +6,11 @@ import { Outfit } from "@/src/services/types/types";
 
 const OutfitsList = React.memo(({
     outfits,
+    listOrientation = "vertical",
 }:
     {
         outfits: Outfit[],
+        listOrientation?: "vertical" | "horizontal",
     }) => {
 
     return (
@@ -27,9 +29,10 @@ const OutfitsList = React.memo(({
                     </TouchableOpacity>
                 )}
                 keyExtractor={(item) => item._id}
-                numColumns={2}
+                numColumns={listOrientation !== "horizontal" ? 2 : 0}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                horizontal={listOrientation === "horizontal"}
             />
         </View>
     )

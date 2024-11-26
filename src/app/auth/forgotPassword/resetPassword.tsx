@@ -9,7 +9,7 @@ import Toast from 'react-native-toast-message';
 import Feather from '@expo/vector-icons/Feather';
 
 import Api from '@/src/services/api';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 import Fonts from '@/src/services/utils/Fonts';
 import MyButton from '../../components/button/button';
 
@@ -110,9 +110,9 @@ export default function resetPassword() {
                 name="token"
                 render={({ field: { value, onChange } }) => (
                     <>
-                    <View style={styles.inputarea}>
+                    <View style={globalStyles.inputArea}>
                         <TextInput
-                            style={styles.input}
+                            style={globalStyles.input}
                             onChangeText={onChange}
                             placeholder="Código"
                             value={value}
@@ -128,9 +128,9 @@ export default function resetPassword() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={[styles.inputarea, { marginBottom: 0 }]}>
+                        <View style={[globalStyles.inputArea, { marginBottom: 0 }]}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 onChangeText={onChange}
                                 placeholder="Nova senha"
                                 value={value}
@@ -156,9 +156,9 @@ export default function resetPassword() {
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                    <View style={styles.inputarea}>
+                    <View style={globalStyles.inputArea}>
                         <TextInput
-                            style={styles.input}
+                            style={globalStyles.input}
                             onChangeText={onChange}
                             placeholder="Confirmar senha"
                             value={value}
@@ -205,27 +205,6 @@ const styles = StyleSheet.create({
         color: globalColors.primary,
         fontSize: 32,
         fontFamily: Fonts['montserrat-extrabold'],
-    },
-
-    inputarea: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1,
-        borderRadius: 10,
-        borderColor: globalColors.primary,
-        justifyContent: 'space-between',
-
-    },
-
-    input: {
-
-        fontFamily: Fonts['montserrat-regular'],
-        fontSize: 16,
-        flexDirection: 'row',
-        width: '90%',
     },
     error: {
         color: 'red',

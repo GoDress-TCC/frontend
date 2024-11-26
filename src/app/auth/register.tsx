@@ -10,7 +10,7 @@ import Fonts from '@/src/services/utils/Fonts';
 
 import Api from '@/src/services/api';
 import { router } from 'expo-router';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 import MyButton from '../components/button/button';
 import Toast from 'react-native-toast-message';
 
@@ -106,9 +106,9 @@ export default function Register() {
                 name="name"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Nome"
                                 onChangeText={onChange}
                                 value={value}
@@ -123,9 +123,9 @@ export default function Register() {
                 name="surname"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Sobrenome"
                                 onChangeText={onChange}
                                 value={value}
@@ -140,9 +140,9 @@ export default function Register() {
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 onChangeText={onChange}
                                 placeholder="Email"
                                 value={value}
@@ -158,9 +158,9 @@ export default function Register() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Senha"
                                 onChangeText={onChange}
                                 value={value}
@@ -185,9 +185,9 @@ export default function Register() {
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
                     <View style={{ marginBottom: 20 }}>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Confirmar senha"
                                 onChangeText={onChange}
                                 value={value}
@@ -244,29 +244,6 @@ const styles = StyleSheet.create({
         width: 55,
         resizeMode: 'contain',
     },
-
-
-    inputarea: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1,
-        borderRadius: 10,
-        borderColor: globalColors.primary,
-        justifyContent: 'space-between',
-
-    },
-
-    input: {
-
-        fontFamily: Fonts['montserrat-regular'],
-        fontSize: 16,
-        flexDirection: 'row',
-        width: '90%',
-    },
-
     button: {
         backgroundColor: globalColors.secundary,
         borderRadius: 5,

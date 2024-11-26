@@ -21,7 +21,7 @@ export default function TabLayout() {
                 name="clothes"
                 options={{
                     headerShown: false,
-                    title: 'Clothes',
+                    title: 'Armário',
                     tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="tshirt" color={color} />,
                 }}
             />
@@ -50,7 +50,7 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     headerShown: false,
-                    title: 'Profile',
+                    title: 'Perfil',
                     tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="user-alt" color={color} />,
                 }}
             />

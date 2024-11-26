@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,6 +20,7 @@ import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
+import { useEvents } from '@/src/services/contexts/eventsContext';
 
 type FormData = {
     name: string;
@@ -53,6 +54,7 @@ export default function Home() {
     const { user, getUser } = useUser();
     const { clothes, getClothes } = useClothes();
     const { getOutfits } = useOutfits();
+    const { getEvents } = useEvents(); 
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -150,6 +152,7 @@ export default function Home() {
         getUser();
         getClothes();
         getOutfits();
+        getEvents();
     }, []);
 
     useEffect(() => {
@@ -169,7 +172,7 @@ export default function Home() {
     }
 
     return (
-        <View style={globalStyles.globalContainer}>
+        <ScrollView style={globalStyles.globalContainer}>
             <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <View style={{ flexDirection: "row" }}>
                     <Text style={globalStyles.mainTitle}>Olá, </Text>
@@ -293,7 +296,7 @@ export default function Home() {
 
                 <View style={{ marginTop: 16, gap: 10 }} />
             </View>
-        </View>
+        </ScrollView>
     );
 }
 

@@ -42,6 +42,5 @@ export type Event = {
     name: string;
     date: string;
     local: string;
-    description: string;
     outfitId: string;
 };

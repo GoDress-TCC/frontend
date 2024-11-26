@@ -5,10 +5,8 @@ import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Picker } from '@react-native-picker/picker';
-import { Dropdown } from 'react-native-element-dropdown';
 import * as yup from 'yup';
 import * as ImagePicker from 'expo-image-picker';
-import ColorThief from 'color-thief-ts';
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';;
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -16,10 +14,9 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { STORAGE } from '@/src/services/firebase/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { Category } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
-import { clothingGender, clothingKind, clothingStyle, clothingTemperature, clothingTissue } from '@/src/services/local-data/dropDownData';
+import { clothingGender, clothingKind, clothingStyle, clothingTemperature, clothingTissue } from '@/src/services/local-data/pickerData';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Api from '@/src/services/api';
 
@@ -138,7 +135,7 @@ export default function CameraScreen() {
     const pickImage = async () => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: "images",
                 quality: 1,
             });
 
@@ -291,16 +288,14 @@ export default function CameraScreen() {
                         </View>
 
                         <View style={styles.informacoes}>
-
                             <Controller
                                 control={control}
                                 name="kind"
                                 render={({ field: { value, onChange } }) => (
-                                    
+
                                     <View style={[styles.controllerContainer, { width: "40%" }]}>
-                                        <View style={styles.pickerContainer}>
+                                        <View style={globalStyles.pickerContainer}>
                                             <Picker
-                                                style={styles.picker}
                                                 selectedValue={value}
                                                 onValueChange={(itemValue) => {
                                                     onChange(itemValue);
@@ -327,9 +322,8 @@ export default function CameraScreen() {
                                 name="style"
                                 render={({ field: { value, onChange } }) => (
                                     <View style={[styles.controllerContainer, { width: "40%" }]}>
-                                        <View style={styles.pickerContainer}>
+                                        <View style={globalStyles.pickerContainer}>
                                             <Picker
-                                                style={styles.picker}
                                                 selectedValue={value}
                                                 onValueChange={(itemValue) => onChange(itemValue)}
                                             >
@@ -343,8 +337,6 @@ export default function CameraScreen() {
                                     </View>
                                 )}
                             />
-
-                            {/* Comentário: Pegar cor automaticamente e mudar para um picker de cor com um quadrado representando a selecionada*/}
 
                             <Controller
                                 control={control}
@@ -364,100 +356,91 @@ export default function CameraScreen() {
                             />
                         </View>
 
-                        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", marginVertical: 10 }} onPress={() => { setMoreOptions(!moreOptions) }}>
-                            <MaterialIcons name={moreOptions ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={18} color={"grey"} />
-                            <Text style={styles.comment}>{moreOptions ? 'Menos' : 'Mais'} opções</Text>
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: "column", gap: 5, marginVertical: 20 }}>
+                            <Text style={styles.comment}>Opções avançadas</Text>
 
-                        {moreOptions === true &&
-                            <View style={{ flexDirection: "column", gap: 20 }}>
-                                <Controller
-                                    control={control}
-                                    name="temperature"
-                                    render={({ field: { value, onChange } }) => (
-                                        <View style={[styles.controllerContainer, { width: "100%" }]}>
-                                            <View style={styles.pickerContainer}>
-                                                <Picker
-                                                    style={styles.picker}
-                                                    selectedValue={value}
-                                                    onValueChange={(itemValue) => onChange(itemValue)}
-                                                >
-                                                    <Picker.Item label="Temperatura " value="" />
-                                                    {clothingTemperature.map(item => (
-                                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                                    ))}
-                                                </Picker>
-                                            </View>
-                                            {errors.temperature && <Text style={styles.error}>{errors.temperature.message}</Text>}
+                            <Controller
+                                control={control}
+                                name="temperature"
+                                render={({ field: { value, onChange } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Temperatura " value="" />
+                                                {clothingTemperature.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
                                         </View>
-                                    )}
-                                />
+                                        {errors.temperature && <Text style={styles.error}>{errors.temperature.message}</Text>}
+                                    </View>
+                                )}
+                            />
 
-                                <Controller
-                                    control={control}
-                                    name="gender"
-                                    render={({ field: { value, onChange } }) => (
-                                        <View style={[styles.controllerContainer, { width: "100%" }]}>
-                                            <View style={styles.pickerContainer}>
-                                                <Picker
-                                                    style={styles.picker}
-                                                    selectedValue={value}
-                                                    onValueChange={(itemValue) => onChange(itemValue)}
-                                                >
-                                                    <Picker.Item label="Gênero" value="" />
-                                                    {clothingGender.map(item => (
-                                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                                    ))}
-                                                </Picker>
-                                            </View>
-                                            {errors.gender && <Text style={styles.error}>{errors.gender.message}</Text>}
+                            <Controller
+                                control={control}
+                                name="gender"
+                                render={({ field: { value, onChange } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Gênero" value="" />
+                                                {clothingGender.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
                                         </View>
-                                    )}
-                                />
-                                <Controller
-                                    control={control}
-                                    name="tissue"
-                                    render={({ field: { value, onChange } }) => (
-                                        <View style={[styles.controllerContainer, { width: "100%" }]}>
-                                            <View style={styles.pickerContainer}>
-                                                <Picker
-                                                    style={styles.picker}
-                                                    selectedValue={value}
-                                                    onValueChange={(itemValue) => onChange(itemValue)}
-                                                >
-                                                    <Picker.Item label="Tecido" value="" />
-                                                    {clothingTissue.map(item => (
-                                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                                    ))}
-                                                </Picker>
-                                            </View>
-                                            {errors.tissue && <Text style={styles.error}>{errors.tissue.message}</Text>}
+                                        {errors.gender && <Text style={styles.error}>{errors.gender.message}</Text>}
+                                    </View>
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="tissue"
+                                render={({ field: { value, onChange } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Tecido" value="" />
+                                                {clothingTissue.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
                                         </View>
-                                    )}
-                                />
-                                <Controller
-                                    control={control}
-                                    name="catId"
-                                    render={({ field: { onChange, value } }) => (
-                                        <>
-                                            <Dropdown
-                                                style={styles.inputCategoria}
-                                                data={cats}
-                                                labelField="name"
-                                                valueField="_id"
-                                                placeholder="Selecione uma categoria"
-                                                search
-                                                searchPlaceholder='Pesquisar'
-                                                value={value}
-                                                onChange={(item: Category) => {
-                                                    onChange(item._id);
-                                                }}
-                                            />
-                                        </>
-                                    )}
-                                />
-                            </View>
-                        }
+                                        {errors.tissue && <Text style={styles.error}>{errors.tissue.message}</Text>}
+                                    </View>
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="catId"
+                                render={({ field: { onChange, value } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Categoria" value="" />
+                                                {cats.map(item => (
+                                                    <Picker.Item key={item._id} label={item.name} value={item._id} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                        {errors.tissue && <Text style={styles.error}>{errors.tissue.message}</Text>}
+                                    </View>
+                                )}
+                            />
+                        </View>
 
                     </ScrollView>
 
@@ -478,7 +461,8 @@ const styles = StyleSheet.create({
 
     informacoes: {
         flexDirection: 'row',
-        gap:4,
+        gap: 4,
+        justifyContent: "space-between"
     },
 
     cameraContainer: {
@@ -532,24 +516,24 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     input: {
-        alignItems:'center',
-        textAlign:'center',
+        alignItems: 'center',
+        textAlign: 'center',
         justifyContent: "center",
         borderWidth: 1,
         borderColor: globalColors.primary,
         borderRadius: 10,
-        paddingVertical:8,
-        
+        paddingVertical: 8,
+        flex: 1
     },
 
-    inputCategoria:{
-        marginTop:10,
-        borderRadius:10,
-        borderColor:globalColors.primary,
-        borderWidth:1,
-        height:45,
-        paddingHorizontal:20,
-        marginBottom:20,
+    inputCategoria: {
+        marginTop: 10,
+        borderRadius: 10,
+        borderColor: globalColors.primary,
+        borderWidth: 1,
+        height: 45,
+        paddingHorizontal: 20,
+        marginBottom: 20,
     },
 
     error: {
@@ -561,22 +545,9 @@ const styles = StyleSheet.create({
     comment: {
         color: "grey",
         fontWeight: "500",
-        marginVertical: 10
     },
     controllerContainer: {
         flexDirection: "column",
-
-        marginTop:10,
+        marginTop: 10,
     },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: globalColors.primary,
-        borderRadius: 10,
-        height: 45,
-        justifyContent: "center",
-    },
-    picker: {
-        width: "100%",
-        height: "100%"
-    }
 });

@@ -8,6 +8,7 @@ import fonts from "../services/fonts";
 import { UserProvider } from "../services/contexts/userContext";
 import { globalColors } from "../styles/global";
 import { OutfitsProvider } from "../services/contexts/outfitsContext";
+import { EventsProvider } from "../services/contexts/eventsContext";
 
 export default function Layout() {
 
@@ -44,6 +45,7 @@ export default function Layout() {
 
     return (
         <UserProvider>
+        <EventsProvider>
         <OutfitsProvider>
         <ClothesProvider>
         <CatsProvider>
@@ -64,10 +66,13 @@ export default function Layout() {
                 <Stack.Screen name="outfits/outfits" options={{ headerShown: false}} />
 
                 <Stack.Screen name="laundry/dirtyClothes" options={{ headerShown: false }} />
+
+                <Stack.Screen name="events/addEvent" options={{ headerShown: false }} />
             </Stack>
         </CatsProvider>
         </ClothesProvider>
         </OutfitsProvider>
+        </EventsProvider>
         <Toast config={toastConfig} />
         </UserProvider>
     );
