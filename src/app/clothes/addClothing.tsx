@@ -23,6 +23,7 @@ import Api from '@/src/services/api';
 import ModalScreen from '../components/modals/modalScreen';
 import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
+import Fonts from '@/src/services/utils/Fonts';
 
 const { width } = Dimensions.get('window');
 
@@ -231,7 +232,8 @@ export default function CameraScreen() {
                         </View>
 
                         <View style={{ flex: 1, justifyContent: "center" }}>
-                            <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 1, height: width * 1, alignSelf: "center" }} />
+                            <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 0.9, height: width * 1.5, alignSelf: "center", resizeMode:'contain', }} />
+                            <Text style={{textAlign:'center', fontFamily:Fonts['montserrat-bold'], color:globalColors.white, fontSize:16 }}> Centralize sua roupa aqui</Text>
                         </View>
 
                         <View style={{ justifyContent: 'flex-end' }}>

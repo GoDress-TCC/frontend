@@ -25,10 +25,10 @@ export default function Index() {
 
             <View style={styles.miniContainer}>
                 <Text style={styles.titulo}>Bem vindo a GoDress</Text>
-                <Link href={"/auth/register"} style={styles.button}>cadastre-se</Link>
+                <Link href={"/auth/register"} style={styles.button}>Cadastre-se</Link>
                 <View style={styles.containtext}>
-                    <Link href={"/auth/login"} style={styles.txtlogin}>ja possui cadastro?</Link>
-                    <Link href={"/auth/login"} style={styles.txtentrar}>entrar</Link>
+                    <Link href={"/auth/login"} style={styles.txtlogin}>Já possui cadastro?</Link>
+                    <Link href={"/auth/login"} style={styles.txtentrar}>Entrar</Link>
                 </View>
             </View>
 
