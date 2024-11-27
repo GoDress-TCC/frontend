@@ -31,6 +31,11 @@ export const clothingGender = [
     { label: 'Unisex', value: 'unisex' }
 ];
 
+export const clothingHour = [
+    { label: "Dia", value: 12 },
+    { label: "Noite", value: 20 },
+];
+
 export const clothingTissue = [
     { label: 'Algodão', value: 'cotton' },
     { label: 'Poliéster', value: 'polyester' },

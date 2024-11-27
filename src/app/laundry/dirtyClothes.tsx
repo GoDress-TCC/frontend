@@ -9,9 +9,11 @@ import ClothesList from '../components/flatLists/clothesList'
 import Api from '@/src/services/api'
 import Toast from 'react-native-toast-message'
 import MainHeader from '../components/headers/mainHeader'
+import ConfirmationModal from '../components/modals/confirmationModal'
 
 export default function DirtyClothes() {
   const [loading, setLoading] = useState(false);
+  const [confirmationModalwash, setConfirmationModalwash] = useState(false);
 
   const { clothes, getClothes, selectedClothesIds } = useClothes();
 
@@ -26,6 +28,7 @@ export default function DirtyClothes() {
       .then((response) => {
         console.log(response.data.msg);
         getClothes();
+        setConfirmationModalwash(false);
       })
       .catch(error => {
         console.log(error.response.data);
@@ -56,9 +59,11 @@ export default function DirtyClothes() {
         </View>
         :
         <View style={globalStyles.flatListContainer}>
-          <ClothesList clothes={filteredClothes} clothingBg='#fff' canSelect={true} canOpen={true} operations={["delete", "fav"]} showButton={true} buttonTitle={selectedClothesIds.length === 0 ? "Lavar todas as roupas" : "Lavar roupas selecionadas"} buttonOnPress={onSubmitWashClothes} buttonLoading={loading} />
+          <ClothesList clothes={filteredClothes} clothingBg='#fff' canSelect={true} canOpen={true} operations={["delete", "fav"]} showButton={true} buttonTitle={selectedClothesIds.length === 0 ? "Lavar todas as roupas" : "Lavar roupas selecionadas"} buttonOnPress={() => selectedClothesIds.length > 0 ? onSubmitWashClothes() : setConfirmationModalwash(true)} buttonLoading={loading} />
         </View>
       }
+
+      <ConfirmationModal isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)} onSubmit={onSubmitWashClothes} title="Lavar roupas" description="Todas suas roupas retornarão ao seu armário" buttonTitle="Confirmar" />
     </View>
   )
 }

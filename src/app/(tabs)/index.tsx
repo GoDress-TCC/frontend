@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList, ScrollView } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList, ScrollView, FlatList, Image } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import dayjs from 'dayjs';
+import Toast from 'react-native-toast-message';
 
-import { Clothing } from '@/src/services/types/types';
+import { Clothing, Outfit } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
 import { useOutfits } from '@/src/services/contexts/outfitsContext';
@@ -21,6 +23,7 @@ import { globalColors, globalStyles } from '@/src/styles/global';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
 import { useEvents } from '@/src/services/contexts/eventsContext';
+import { Ionicons } from '@expo/vector-icons';
 
 type FormData = {
     name: string;
@@ -49,12 +52,13 @@ export default function Home() {
     const [lowerBody, setLowerBody] = useState<Clothing[]>([]);
     const [footwear, setFootwear] = useState<Clothing[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [outfitRecomendation, setOutfitRecomendation] = useState<Clothing[]>([]);
 
     const { cats, getCats } = useCats();
     const { user, getUser } = useUser();
     const { clothes, getClothes } = useClothes();
     const { getOutfits } = useOutfits();
-    const { getEvents } = useEvents(); 
+    const { getEvents } = useEvents();
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -129,21 +133,23 @@ export default function Home() {
     };
 
     const outfitClothes = () => {
-        const filteredUpperBody = clothes.filter(item => item.type === "upperBody");
-        const filteredLowerBody = clothes.filter(item => item.type === "lowerBody");
-        const filteredFootwear = clothes.filter(item => item.type === "footwear");
+        if (clothes.length > 0) {
+            const filteredUpperBody = clothes.filter(item => item.type === "upperBody");
+            const filteredLowerBody = clothes.filter(item => item.type === "lowerBody");
+            const filteredFootwear = clothes.filter(item => item.type === "footwear");
 
-        setUpperBody(filteredUpperBody);
-        setLowerBody(filteredLowerBody);
-        setFootwear(filteredFootwear);
+            setUpperBody(filteredUpperBody);
+            setLowerBody(filteredLowerBody);
+            setFootwear(filteredFootwear);
 
-        const remainingClothes = 3 - (filteredUpperBody.length > 0 ? 1 : 0) - (filteredLowerBody.length > 0 ? 1 : 0) - (filteredFootwear.length > 0 ? 1 : 0);
-        setNeededClothes(remainingClothes);
+            const remainingClothes = 3 - (filteredUpperBody.length > 0 ? 1 : 0) - (filteredLowerBody.length > 0 ? 1 : 0) - (filteredFootwear.length > 0 ? 1 : 0);
+            setNeededClothes(remainingClothes);
 
-        if (upperBody.length > 0 && lowerBody.length > 0 && footwear.length > 0) {
-            setShowGenerateOutfitButton(true);
-        } else {
-            setShowGenerateOutfitButton(false)
+            if (filteredUpperBody.length > 0 && filteredLowerBody.length > 0 && filteredFootwear.length > 0) {
+                setShowGenerateOutfitButton(true);
+            } else {
+                setShowGenerateOutfitButton(false)
+            }
         }
     };
 
@@ -162,6 +168,10 @@ export default function Home() {
     useEffect(() => {
         outfitClothes();
     }, [clothes]);
+
+    useEffect(() => {
+        console.log(outfitRecomendation);
+    }, [outfitRecomendation]);
 
     const check = () => {
         return (
@@ -221,8 +231,9 @@ export default function Home() {
                 <View style={{ marginTop: 10, gap: 10 }}>
                     {cats.map((category) => (
                         <View key={category._id}>
-                            <TouchableOpacity onPress={() => { handleOpenCat(category._id) }}>
+                            <TouchableOpacity onPress={() => { handleOpenCat(category._id) }} style={{ justifyContent: "space-between", flexDirection: "row" }}>
                                 <Text style={{ fontSize: 16, fontWeight: "400" }}>{category.name}</Text>
+                                <Ionicons name="chevron-forward" size={18} />
                             </TouchableOpacity>
 
                             {openCatId === category._id && (
@@ -230,7 +241,7 @@ export default function Home() {
                                     <View style={styles.modalScreenContent}>
                                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", paddingHorizontal: 20 }}>
                                             <TouchableOpacity onPress={handleCloseCat}>
-                                                <FontAwesome5 name="arrow-left" size={18} />
+                                                <Ionicons name="chevron-back" size={18} />
                                             </TouchableOpacity>
                                             <Controller
                                                 control={control}

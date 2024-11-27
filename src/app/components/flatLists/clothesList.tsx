@@ -8,7 +8,7 @@ import { useClothes } from "@/src/services/contexts/clothesContext";
 import Modal from "../modals/modal";
 import Api from "@/src/services/api";
 
-import { MaterialIcons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome5, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { globalColors } from "@/src/styles/global";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "expo-router";
@@ -43,6 +43,7 @@ const ClothesList = React.memo(({
     buttonTitle,
     buttonOnPress,
     buttonLoading,
+    buttonIcon,
 }:
     {
         clothes: Clothing[],
@@ -57,6 +58,7 @@ const ClothesList = React.memo(({
         buttonTitle?: string,
         buttonOnPress?: () => void,
         buttonLoading?: boolean,
+        buttonIcon?: string,
     }) => {
 
     const [openModal, setOpenModal] = useState<boolean>(false);
@@ -392,14 +394,9 @@ const ClothesList = React.memo(({
                         <View style={styles.modalContent}>
                             <Animated.View style={[{ borderRadius: 5, overflow: 'hidden', paddingBottom: 10 }, editClothingStyle]}>
                                 <ImageBackground source={{ uri: openClothing.image }} style={{ flex: 1, padding: 5 }} resizeMode="contain">
-                                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                        <TouchableOpacity onPress={handleCloseModal}>
-                                            <FontAwesome5 name="arrow-left" style={styles.icon} size={22} />
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={handleEditClothing}>
-                                            <MaterialIcons name={editClothing === true ? "close" : "edit"} size={22} style={styles.icon} />
-                                        </TouchableOpacity>
-                                    </View>
+                                    <TouchableOpacity onPress={handleCloseModal}>
+                                        <Ionicons name="chevron-back" style={styles.icon} size={26} color={globalColors.primary} />
+                                    </TouchableOpacity>
                                     <TouchableOpacity style={{ position: 'absolute', right: 10, bottom: 10 }} onPress={handleFavClothing}>
                                         <Animated.View style={favClothingStyle}>
                                             <MaterialIcons name={favoriteValue === true ? "favorite" : "favorite-border"} color={favoriteValue === true ? "red" : styles.icon.color} size={26} />
@@ -429,7 +426,7 @@ const ClothesList = React.memo(({
 
             {showButton &&
                 <View style={{ paddingHorizontal: 20, width: "100%", paddingBottom: 20 }}>
-                    <MyButton title={buttonTitle} onPress={buttonOnPress} loading={buttonLoading} />
+                    <MyButton title={buttonTitle} onPress={buttonOnPress} loading={buttonLoading} icon={buttonIcon} />
                 </View>
             }
 

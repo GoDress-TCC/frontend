@@ -123,25 +123,27 @@ export default function AddEvent() {
     const hour = dayjs(watch("date")).hour();
     setOutfitLoading(true);
 
-    try {
-      const response = await Api.post("/outfit/generate_outfit", {
-        temperature: watch("date"),
-        location: watch("location"),
-        hour: hour,
-        generateMultiple: true,
+    await Api.post("/outfit/generate_outfit", {
+      temperature: watch("date"),
+      location: watch("location"),
+      hour: hour,
+      generateMultiple: true,
+    })
+      .then(response => {
+        setOutfitsRecomendations(response.data.outfits);
+      })
+      .catch(error => {
+        console.log(error.response.data.msg);
+        Toast.show({
+          type: "error",
+          text1: "Erro ao gerar recomendação de outfits",
+          text2: "Tente novamente mais tarde",
+        })
+        return
+      })
+      .finally(() => {
+        setOutfitLoading(false);
       });
-
-      setOutfitsRecomendations(response.data.outfits);
-    } catch (error) {
-      console.error(error);
-      Toast.show({
-        type: "error",
-        text1: "Erro ao gerar recomendação de outfits",
-        text2: "Tente novamente mais tarde",
-      });
-    } finally {
-      setOutfitLoading(false);
-    }
   };
 
   const handleSaveOutfit = async () => {
@@ -159,10 +161,10 @@ export default function AddEvent() {
         console.log(response.data._id);
       })
       .catch(error => {
-        console.log(error.response.data)
+        console.log(error.response.data.msg)
         Toast.show({
           type: "error",
-          text1: error.response.data,
+          text1: error.response.data.msg,
           text2: "Tente novamente"
         })
       })
@@ -195,7 +197,7 @@ export default function AddEvent() {
     else {
       setValue("outfitId", outfitExists._id);
       console.log(outfitExists._id);
-    } 
+    }
 
     if (image) {
       const imageUrl = await uploadImage(image);
@@ -214,18 +216,21 @@ export default function AddEvent() {
         router.back();
       })
       .catch((error) => {
-        console.log(error.response.data);
-        reset();
-        setImage(null);
-        setEventOutfit([]);
-        setOutfitsRecomendations([]);
-        setState("");
-        setLocations([]);
+        console.log(error.response.data.msg);
         Toast.show({
           type: "error",
           text1: error.response.data.msg,
           text2: "Tente novamente"
         })
+
+        if (error.response.data.msg !== "Adicione um outfit") {
+          reset();
+          setImage(null);
+          setEventOutfit([]);
+          setOutfitsRecomendations([]);
+          setState("");
+          setLocations([]);
+        }
       })
       .finally(() => {
         setSubmitLoading(false)

@@ -4,10 +4,11 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import Checkbox from 'expo-checkbox';
+import * as yup from "yup"
 
 import MyButton from '../components/button/button';
 import { Clothing } from '@/src/services/types/types';
-import { clothingStyle, clothingTemperature } from '@/src/services/local-data/pickerData';
+import { clothingHour, clothingStyle, clothingTemperature } from '@/src/services/local-data/pickerData';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import { globalColors, globalStyles } from '@/src/styles/global';
@@ -30,7 +31,9 @@ type FormData = {
   name?: string,
   style?: string,
   temperature?: string,
-  fav: boolean
+  fav?: boolean,
+  useDirtyClothes?: boolean,
+  hour?: string
 };
 
 export default function generateOutfits() {
@@ -40,7 +43,6 @@ export default function generateOutfits() {
   const [selectedType, setSelectedType] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
-  const [useDirtyClothes, setUseDirtyClothes] = useState<boolean>(false);
 
   const [upperBody, setUpperBody] = useState<Clothing | undefined>(undefined);
   const [lowerBody, setLowerBody] = useState<Clothing | undefined>(undefined);
@@ -57,11 +59,13 @@ export default function generateOutfits() {
       name: "",
       style: "",
       temperature: "",
-      fav: false
+      fav: false,
+      useDirtyClothes: false,
+      hour: ""
     },
   });
 
-  const { handleSubmit, control, reset, setValue, getValues } = form;
+  const { handleSubmit, control, reset, setValue, getValues, watch } = form;
 
   const generateOutfit: SubmitHandler<FormData> = async (data) => {
     setLoading(true);
@@ -199,7 +203,7 @@ export default function generateOutfits() {
     return (
       <View style={styles.clothingContainer}>
         {clothing ? (
-          <ImageBackground source={{ uri: clothing.image }} style={[styles.clothingImage,  clothing.dirty && { borderWidth: 2, borderColor: globalColors.dirtyGreen }]}>
+          <ImageBackground source={{ uri: clothing.image }} style={[styles.clothingImage, clothing.dirty && { borderWidth: 2, borderColor: globalColors.dirtyGreen }]}>
             {saving === false && (
               <View style={{ flex: 1 }}>
                 <View style={{ position: "absolute", right: 5, bottom: 5 }}>
@@ -224,7 +228,7 @@ export default function generateOutfits() {
                     name={clothingIds[clothingIndex] !== undefined ? "lock" : "unlock"}
                     size={16}
                     color={globalColors.primary}
-                    style={{ backgroundColor: "#fff", borderRadius: 4, padding: 2  }}
+                    style={{ backgroundColor: "#fff", borderRadius: 4, padding: 2 }}
                   />
                 </View>
               </View>
@@ -257,26 +261,25 @@ export default function generateOutfits() {
         </View>
 
         <View style={{ position: "absolute", right: 0, alignItems: "center" }}>
-          <TouchableOpacity onPress={() => { setOpenFilter(true) }} style={{ marginBottom: 10 }}>
+          <TouchableOpacity onPress={() => setOpenFilter(true)} style={{ marginBottom: 10 }}>
             <Ionicons name="options" size={28} color={"#000"} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { console.log('maneiro') }} style={{ marginBottom: 30 }}>
+          <TouchableOpacity onPress={() => router.navigate("/outfits/outfits")} style={{ marginBottom: 30 }}>
             <FontAwesome name='bookmark' size={28} color={"#000"} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => { resetOutfit() }}>
+          <TouchableOpacity onPress={() => resetOutfit()}>
             <FontAwesome5 name='trash' size={24} color={"#000"} />
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={{ width: "100%", gap: 10 }}>
-        <MyButton title={"Gerar outfit"} onPress={handleSubmit(generateOutfit)} loading={loading} />
+        <MyButton title={"Gerar outfit"} icon="dice" borderButton onPress={handleSubmit(generateOutfit)} loading={loading} />
         <MyButton title={"Salvar outfit"} onPress={handleOpenSaveOutfit} />
       </View>
 
       <Modal isOpen={openFilter} onRequestClose={() => setOpenFilter(false)}>
         <View style={styles.modalContent}>
-
           <View style={{ flexDirection: 'row', width: '100%', marginVertical: 10, }}>
             <Ionicons name="chevron-back" size={30} color="#593C9D" onPress={() => setOpenFilter(false)} />
 
@@ -348,6 +351,27 @@ export default function generateOutfits() {
 
           <Controller
             control={control}
+            name="hour"
+            render={({ field: { onChange, value } }) => (
+              <View>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    style={styles.picker}
+                    selectedValue={value}
+                    onValueChange={(itemValue) => onChange(itemValue)}
+                  >
+                    <Picker.Item label="Horário" value="" />
+                    {clothingHour.map(item => (
+                      <Picker.Item key={item.value} label={item.label} value={item.value} />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+            )}
+          />
+
+          <Controller
+            control={control}
             name="fav"
             render={({ field: { onChange, value } }) => (
               <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
@@ -361,28 +385,40 @@ export default function generateOutfits() {
             )}
           />
 
-          <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
-            <Checkbox
-              value={!!useDirtyClothes}
-              onValueChange={(itemValue) => setUseDirtyClothes(itemValue)}
-              color={useDirtyClothes === true ? globalColors.primary : undefined}
-            />
-            <Text>Usar apenas roupas favoritas</Text>
-          </View>
+          <Controller
+            control={control}
+            name="useDirtyClothes"
+            render={({ field: { onChange, value } }) => (
+              <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
+                <Checkbox
+                  value={!!value}
+                  onValueChange={(itemValue) => onChange(itemValue)}
+                  color={value === true ? globalColors.primary : undefined}
+                />
+                <Text>Usar roupas sujas</Text>
+              </View>
+            )}
+          />
 
         </View>
       </Modal>
 
       <ModalScreen isOpen={openSelectClothing} onRequestClose={() => setOpenSelectClothing(false)}>
         <View style={styles.modalScreenContent}>
-          <Text style={styles.title}>{selectedType}</Text>
+          <Text style={[globalStyles.subTitle, { textAlign: "center" }]}>{
+            selectedType === "upperBody" && "Parte superior"
+            ||
+            selectedType === "lowerBody" && "Parte inferior"
+            ||
+            selectedType === "footwear" && "Calçado"
+          }</Text>
           <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} clothingBg={globalColors.secundary} pickParam={getValues('clothingId')} />
         </View>
       </ModalScreen>
 
       <ModalScreen isOpen={openSaveClothing} onRequestClose={() => setOpenSaveClothing(false)} withInput={true}>
         <View style={[styles.modalScreenContent, { paddingHorizontal: 20 }]}>
-          <Text style={styles.title}>Salvar Outfit</Text>
+          <Text style={[globalStyles.subTitle, { textAlign: "center" }]}>Salvar Outfit</Text>
           <ScrollView>
             <View style={[globalStyles.styledContainer, { marginTop: 20 }]}>
               {outfitClothing(upperBody, 0, true)}
@@ -403,7 +439,6 @@ export default function generateOutfits() {
                       value={value}
                       autoCapitalize="none"
                     />
-
                   </View >
                 </>
               )}
@@ -411,7 +446,7 @@ export default function generateOutfits() {
           </ScrollView>
 
           <View style={{ paddingBottom: 20 }}>
-            <MyButton title='Salvar' onPress={handleSubmit(onSubmitSaveOutfit)} loading={saveLoading} />
+            <MyButton title='Salvar' onPress={handleSubmit(onSubmitSaveOutfit)} disabled={watch("name") === "" ? true : false} loading={saveLoading} />
           </View>
         </View>
       </ModalScreen>

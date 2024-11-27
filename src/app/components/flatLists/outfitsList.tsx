@@ -3,6 +3,7 @@ import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Image, Text }
 const { width } = Dimensions.get('window');
 
 import { Outfit } from "@/src/services/types/types";
+import { globalStyles } from "@/src/styles/global";
 
 const OutfitsList = React.memo(({
     outfits,
@@ -18,14 +19,14 @@ const OutfitsList = React.memo(({
             <FlatList
                 data={[...outfits].reverse()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.itemContainer}>
+                    <TouchableOpacity style={[globalStyles.styledContainer, { margin: 5 }]}>
+                        <Text style={[globalStyles.subTitle, { marginBottom: 20 }]}>{item.name}</Text>
+
                         <View style={styles.imageContainer}>
                             <Image source={{ uri: item.clothingId[0].image }} style={{ width: width / 2.5, height: width / 2.5 }} />
                             <Image source={{ uri: item.clothingId[1].image }} style={{ width: width / 2.5, height: width / 2.5 }} />
                             <Image source={{ uri: item.clothingId[2].image }} style={{ width: width / 2.5, height: width / 2.5 }} />
                         </View>
-
-                        <Text>{item.name}</Text>
                     </TouchableOpacity>
                 )}
                 keyExtractor={(item) => item._id}

@@ -24,6 +24,7 @@ import ModalScreen from '../components/modals/modalScreen';
 import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import Fonts from '@/src/services/utils/Fonts';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -227,13 +228,13 @@ export default function CameraScreen() {
                     <View style={styles.cameraContainer}>
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.cameraButton} onPress={router.back}>
-                                <FontAwesome5 name="arrow-left" size={20} color="white" />
+                                <Ionicons name="chevron-back" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
 
                         <View style={{ flex: 1, justifyContent: "center" }}>
-                            <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 0.9, height: width * 1.5, alignSelf: "center", resizeMode:'contain', }} />
-                            
+                            <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 0.9, height: width * 1.5, alignSelf: "center", resizeMode: 'contain', }} />
+
                         </View>
 
                         <View style={{ justifyContent: 'flex-end' }}>
@@ -278,7 +279,7 @@ export default function CameraScreen() {
                 <View style={styles.modalScreenContent}>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", width: "100%", marginHorizontal: 20 }}>
                         <TouchableOpacity onPress={() => { setSaveClothingScreenOpen(false) }} style={{ position: "absolute", left: 20 }}>
-                            <FontAwesome5 name="arrow-left" size={18} />
+                            <Ionicons name="chevron-back" size={26} />
                         </TouchableOpacity>
 
                         <Text style={globalStyles.subTitle}>Salvar peça de roupa</Text>
