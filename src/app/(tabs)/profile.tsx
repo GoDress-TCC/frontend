@@ -17,7 +17,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('jwtToken');
-    router.replace("/");
+    router.replace("../");
     getUser();
   };
 

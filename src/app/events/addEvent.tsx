@@ -50,6 +50,14 @@ const registerSchema = yup.object({
   location: yup.string().required('Local é obrigatório'),
 }).required();
 
+export const autoCapitalizer = (str: string) => {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export default function AddEvent() {
   const [image, setImage] = useState<string | null>(null);
   const [openDatePicker, setOpenDatePicker] = useState<boolean>(false);
@@ -63,7 +71,7 @@ export default function AddEvent() {
   const [eventOutfit, setEventOutfit] = useState<Clothing[]>([]);
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
 
-  const { outfits } = useOutfits();
+  const { outfits, getOutfits } = useOutfits();
   const { getEvents } = useEvents();
 
   const form = useForm<FormData>({
@@ -148,6 +156,7 @@ export default function AddEvent() {
     })
       .then(response => {
         setValue("outfitId", response.data._id);
+        console.log(response.data._id);
       })
       .catch(error => {
         console.log(error.response.data)
@@ -176,8 +185,17 @@ export default function AddEvent() {
   const onSubmitCreateEvent: SubmitHandler<FormData> = async (data) => {
     setSubmitLoading(true)
 
-    const outfitExists = outfits.filter(item => item.clothingId === eventOutfit);
-    if (outfitExists.length === 0) handleSaveOutfit();
+    const outfitExists = outfits.find((item) =>
+      JSON.stringify(item.clothingId) === JSON.stringify(eventOutfit)
+    );
+
+    if (!outfitExists) {
+      await handleSaveOutfit()
+    }
+    else {
+      setValue("outfitId", outfitExists._id);
+      console.log(outfitExists._id);
+    } 
 
     if (image) {
       const imageUrl = await uploadImage(image);
@@ -190,19 +208,27 @@ export default function AddEvent() {
         reset();
         setImage(null);
         setEventOutfit([]);
-        getEvents()
+        setOutfitsRecomendations([]);
+        getEvents();
+        getOutfits();
+        router.back();
       })
       .catch((error) => {
         console.log(error.response.data);
+        reset();
+        setImage(null);
+        setEventOutfit([]);
+        setOutfitsRecomendations([]);
+        setState("");
+        setLocations([]);
         Toast.show({
           type: "error",
-          text1: error.response.data,
+          text1: error.response.data.msg,
           text2: "Tente novamente"
         })
       })
       .finally(() => {
         setSubmitLoading(false)
-        router.back();
       })
   };
 
@@ -311,7 +337,7 @@ export default function AddEvent() {
                 data={outfitsRecomendations}
                 keyExtractor={(item, index) => `outfit-${index}`}
                 renderItem={({ item: outfit, index }) => (
-                  <TouchableOpacity style={[globalStyles.tinyStyledContainer, { marginBottom: 20, width: "100%" }]} onPress={() => eventOutfit !== outfit ? setEventOutfit(outfit) : setEventOutfit([])}>
+                  <TouchableOpacity style={[globalStyles.tinyStyledContainer, { marginBottom: 20, width: "100%", paddingVertical: 10 }]} onPress={() => eventOutfit !== outfit ? setEventOutfit(outfit) : setEventOutfit([])}>
                     <Text style={{ fontWeight: "bold", fontSize: 16, marginVertical: 5 }}>Outfit {index + 1}</Text>
                     <FlatList
                       data={outfit}
@@ -324,12 +350,11 @@ export default function AddEvent() {
                             source={{ uri: clothing.image }}
                             style={{ width: width * 0.25, height: width * 0.25, borderRadius: 8 }}
                           />
-                          <Text style={{ marginTop: 5 }}>{clothing.type}</Text>
                         </View>
                       )}
                     />
                     {eventOutfit === outfit &&
-                      <MaterialIcons name="check-circle" color={globalColors.primary} size={22} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
+                      <MaterialIcons name="check-circle" color={globalColors.primary} size={26} style={{ position: "absolute", right: 1, bottom: 1, backgroundColor: "#fff", borderRadius: 100 }} />
                     }
                   </TouchableOpacity>
                 )}
@@ -400,10 +425,10 @@ export default function AddEvent() {
                   keyExtractor={item => item.codigo_ibge}
                   renderItem={({ item }) => (
                     <TouchableOpacity style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: globalColors.primary }} onPress={() => {
-                      setValue("location", item.nome, { shouldValidate: true });
+                      setValue("location", autoCapitalizer(item.nome), { shouldValidate: true });
                       setOpenLocationPicker(false);
                     }}>
-                      <Text>{item.nome}</Text>
+                      <Text>{autoCapitalizer(item.nome)}</Text>
                     </TouchableOpacity>
                   )}
                 />

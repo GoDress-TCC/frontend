@@ -13,6 +13,7 @@ import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import MyButton from '../components/button/button';
+import MainHeader from '../components/headers/mainHeader';
 
 type FormData = {
     email: string;
@@ -70,10 +71,7 @@ export default function Login() {
 
     return (
         <View style={styles.container}>
-
-            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
-                <Image style={styles.imgVoltar} source={require('../../../assets/icons/voltar.png')} />
-            </TouchableOpacity >
+            <MainHeader backButton />
 
             <View style={styles.containlogotxt}>
                 <Text style={styles.titulo} >Faça Login</Text>
@@ -145,7 +143,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 20,
         gap: 10,
-
+        paddingVertical: 40,
     },
 
     containVoltar: {

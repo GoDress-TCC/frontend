@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Image, Text } from "react-native";
-const { width } = Dimensions.get('window');
+import dayjs from "dayjs";
 
-import { Event } from "@/src/services/types/types";
+import { Event, Outfit } from "@/src/services/types/types";
 import { globalColors, globalStyles } from "@/src/styles/global";
 import { useOutfits } from "@/src/services/contexts/outfitsContext";
+import { autoCapitalizer } from "../../events/addEvent";
+
+const { width } = Dimensions.get('window');
 
 const EventsList = React.memo(({
     events,
@@ -20,14 +23,28 @@ const EventsList = React.memo(({
             <FlatList
                 data={[...events].reverse()}
                 renderItem={({ item }) => {
-                    const eventOutfit = outfits.filter(outfit => outfit._id === item._id)
+                    const outfit = outfits.find(outfit => outfit._id === item.outfitId);
 
                     return (
-                        <TouchableOpacity style={[styles.tinyStyledContainer, { width: "100%" }]}>
-                            <View>
-                               
+                        <TouchableOpacity style={[styles.tinyStyledContainer, { width: "100%", marginBottom: 20, paddingVertical: 20, paddingHorizontal: 20 }]}>
+                            <View style={{ flexDirection: "row", gap: 20 }}>
+                                {item.image &&
+                                    <Image source={{ uri: item.image }} style={{ width: 60, height: 60, borderRadius: 100 }} />
+                                }
+                                <View style={{ flexDirection: "column" }}>
+                                    <Text style={[globalStyles.subTitle, { color: globalColors.primary }]}>{item.name}</Text>
+                                    <Text>{`Dia: ${dayjs(item.date).format("MMM D, YYYY HH:mm")}`}</Text>
+                                    <Text>{`Local: ${autoCapitalizer(item.location)}`}</Text>
+                                </View>
                             </View>
-                            <Text>{item.name}</Text>
+
+                            {outfit && outfit.clothingId.length > 0 &&
+                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                    <Image source={{ uri: outfit.clothingId[0].image }} style={styles.image} />
+                                    <Image source={{ uri: outfit.clothingId[1].image }} style={styles.image} />
+                                    <Image source={{ uri: outfit.clothingId[2].image }} style={styles.image} />
+                                </View>
+                            }
                         </TouchableOpacity>
                     )
                 }}
@@ -45,12 +62,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         padding: 5,
         borderRadius: 10,
-        flexDirection: "row",
         gap: 5,
         borderColor: globalColors.primary,
         borderBottomWidth: 5,
-        borderWidth: 1
+        borderWidth: 1,
     },
+    imageContainer: {
+        borderRadius: 5,
+        overflow: 'hidden',
+    },
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 5,
+        margin: 5,
+    }
 })
 
 export default EventsList;

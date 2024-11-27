@@ -40,13 +40,15 @@ export default function Clothes() {
             );
         }
         return (
-            <ClothesList
-                clothes={filtered}
-                canOpen={true}
-                clothingBg="#fff"
-                canSelect={true}
-                operations={true}
-            />
+            <View style={{ flex: 1, paddingTop: 10 }}>
+                <ClothesList
+                    clothes={filtered}
+                    canOpen={true}
+                    clothingBg="#fff"
+                    canSelect={true}
+                    operations={true}
+                />
+            </View>
         );
     }, [filterClothes]);
 
@@ -94,8 +96,7 @@ export default function Clothes() {
                             borderBottomWidth: 1,
                             borderBottomColor: 'rgba(0, 0, 0, 0.1)',
                             elevation: 0,
-                            marginHorizontal: 20,
-                            marginBottom: 20,
+                            marginHorizontal: 19,
                             marginTop: 8
                         }}
                         labelStyle={{

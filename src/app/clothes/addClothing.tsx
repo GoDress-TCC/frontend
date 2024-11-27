@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, CameraView, FlashMode } from 'expo-camera';
-import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, TextInput, Image, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -23,6 +23,8 @@ import Api from '@/src/services/api';
 import ModalScreen from '../components/modals/modalScreen';
 import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
+
+const { width } = Dimensions.get('window');
 
 type FormData = {
     catId?: string;
@@ -228,7 +230,11 @@ export default function CameraScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+                        <View style={{ flex: 1, justifyContent: "center" }}>
+                            <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 1, height: width * 1, alignSelf: "center" }} />
+                        </View>
+
+                        <View style={{ justifyContent: 'flex-end' }}>
                             <View style={[styles.buttonContainer, { justifyContent: "center" }]}>
                                 <TouchableOpacity style={[styles.cameraButton, { position: "absolute", left: 1 }]} onPress={pickImage}>
                                     <MaterialIcons name='add-photo-alternate' size={20} color="white" />
