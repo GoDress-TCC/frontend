@@ -233,7 +233,7 @@ export default function CameraScreen() {
 
                         <View style={{ flex: 1, justifyContent: "center" }}>
                             <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 0.9, height: width * 1.5, alignSelf: "center", resizeMode:'contain', }} />
-                            <Text style={{textAlign:'center', fontFamily:Fonts['montserrat-bold'], color:globalColors.white, fontSize:16 }}> Centralize sua roupa aqui</Text>
+                            
                         </View>
 
                         <View style={{ justifyContent: 'flex-end' }}>
