@@ -63,22 +63,22 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     style={{ 
                         backgroundColor: "#fff", 
                         width: "100%", 
-                        height: "25%", 
                         borderTopLeftRadius: 30, 
                         borderTopRightRadius: 30, 
                         paddingVertical: 20, 
                         paddingHorizontal: 16, 
                         position: 'absolute', 
                         bottom: 0, 
-                        alignItems: 'center' 
+                        alignItems: 'center',
+                        gap: 20
                     }}
                 >
-                    <View style={{ alignItems: "center", marginBottom: 30, gap: 5 }}>
+                    <View style={{ alignItems: "center", gap: 5 }}>
                         <Text style={globalStyles.mainTitle}>{title}</Text>
                         <Text>{description}</Text>
                     </View>
 
-                    <View style={{ gap: 10, flex: 1, justifyContent: 'flex-end', width: '100%' }}>
+                    <View style={{ gap: 10, justifyContent: 'flex-end', width: '100%' }}>
                         <MyButton color={color} title={buttonTitle} onPress={onSubmit} />
                         <MyButton color="gray" title="Cancelar" onPress={onRequestClose} />
                     </View>

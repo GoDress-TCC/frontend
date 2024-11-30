@@ -6,6 +6,10 @@ import { Event, Outfit } from "@/src/services/types/types";
 import { globalColors, globalStyles } from "@/src/styles/global";
 import { useOutfits } from "@/src/services/contexts/outfitsContext";
 import { autoCapitalizer } from "../../events/addEvent";
+import Api from "@/src/services/api";
+import Toast from "react-native-toast-message";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import { useEvents } from "@/src/services/contexts/eventsContext";
 
 const { width } = Dimensions.get('window');
 
@@ -18,6 +22,8 @@ const EventsList = React.memo(({
 
     const { outfits } = useOutfits();
 
+    const { getEvents } = useEvents();
+
     return (
         <View style={{ alignItems: "center", flex: 1 }}>
             <FlatList
@@ -27,24 +33,40 @@ const EventsList = React.memo(({
 
                     return (
                         <TouchableOpacity style={[styles.tinyStyledContainer, { width: "100%", marginBottom: 20, paddingVertical: 20, paddingHorizontal: 20 }]}>
-                            <View style={{ flexDirection: "row", gap: 20 }}>
-                                {item.image &&
-                                    <Image source={{ uri: item.image }} style={{ width: 60, height: 60, borderRadius: 100 }} />
-                                }
-                                <View style={{ flexDirection: "column" }}>
-                                    <Text style={[globalStyles.subTitle, { color: globalColors.primary }]}>{item.name}</Text>
-                                    <Text>{`Dia: ${dayjs(item.date).format("MMM D, YYYY HH:mm")}`}</Text>
-                                    <Text>{`Local: ${autoCapitalizer(item.location)}`}</Text>
-                                </View>
-                            </View>
+                            <View style={{ flex: 1 }}>
+                                <View style={{ flexDirection: "row", gap: 20, justifyContent: "space-between" }}>
+                                    <View style={{ flexDirection: "row", gap: 10 }}>
+                                        {item.image &&
+                                            <Image source={{ uri: item.image }} style={{ width: 60, height: 60, borderRadius: 100 }} />
+                                        }
+                                        <View style={{ flexDirection: "column", width: "65%" }}>
+                                            <Text style={[globalStyles.subTitle, { color: globalColors.primary }]} ellipsizeMode="tail" numberOfLines={1}>{item.name}</Text>
+                                            <Text>{`Dia: ${dayjs(item.date).format("MMM D, YYYY HH:mm")}`}</Text>
+                                            <Text>{`Local: ${autoCapitalizer(item.location)}`}</Text>
+                                        </View>
+                                    </View>
 
-                            {outfit && outfit.clothingId.length > 0 &&
-                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                    <Image source={{ uri: outfit.clothingId[0].image }} style={styles.image} />
-                                    <Image source={{ uri: outfit.clothingId[1].image }} style={styles.image} />
-                                    <Image source={{ uri: outfit.clothingId[2].image }} style={styles.image} />
+                                    <TouchableOpacity onPress={async () => await Api.delete(`/event/${item._id}`)
+                                        .then(response => {
+                                            Toast.show({
+                                                type: "success",
+                                                text1: "Evento excluído com sucesso!",
+                                            })
+                                            getEvents()
+                                        })
+                                    }>
+                                        <FontAwesome5 name="trash" size={20} color={globalColors.primary} />
+                                    </TouchableOpacity>
                                 </View>
-                            }
+
+                                {outfit && outfit.clothingId.length > 0 &&
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                        <Image source={{ uri: outfit.clothingId[0].image }} style={styles.image} />
+                                        <Image source={{ uri: outfit.clothingId[1].image }} style={styles.image} />
+                                        <Image source={{ uri: outfit.clothingId[2].image }} style={styles.image} />
+                                    </View>
+                                }
+                            </View>
                         </TouchableOpacity>
                     )
                 }}
@@ -72,8 +94,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     image: {
-        width: 100,
-        height: 100,
+        width: width * 0.20,
+        height: width * 0.20,
         borderRadius: 5,
         margin: 5,
     }

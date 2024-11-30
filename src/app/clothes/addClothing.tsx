@@ -68,7 +68,7 @@ export default function CameraScreen() {
     const [moreOptions, setMoreOptions] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [devMode, setDevMode] = useState<boolean>(true);
+    const [devMode, setDevMode] = useState<boolean>(false);
 
     // contexts
     const { cats, getCats } = useCats();
