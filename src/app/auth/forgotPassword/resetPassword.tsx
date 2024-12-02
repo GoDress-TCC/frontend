@@ -12,6 +12,7 @@ import Api from '@/src/services/api';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import Fonts from '@/src/services/utils/Fonts';
 import MyButton from '../../components/button/button';
+import MainHeader from '../../components/headers/mainHeader';
 
 type FormData = {
     token: string;
@@ -96,10 +97,8 @@ export default function resetPassword() {
 
     return (
         <View style={styles.container}>
-
-            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
-                <Image style={styles.imgVoltar} source={require('../../../../assets/icons/voltar.png')} />
-            </TouchableOpacity >
+                 <MainHeader backButton />
+            
 
             <View>
                 <Text style={styles.title}>Codigo enviado para seu email</Text>

@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Fonts from '@/src/services/utils/Fonts';
 import { router } from 'expo-router';
 import MainHeader from '../components/headers/mainHeader';
+import { AntDesign } from '@expo/vector-icons';
 
 export default function Profile() {
 
@@ -80,7 +81,13 @@ export default function Profile() {
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.bottom} onPress={handleLogout}>
-                <Text style={{ textDecorationLine: "underline", fontFamily: Fonts['montserrat-bold'], fontSize: 16, marginVertical: 5 }}>Sair da conta</Text>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems:'center' }}>
+              <AntDesign name="logout" size={24} color="black" />v
+                  <Text style={{ textDecorationLine: "underline", fontFamily: Fonts['montserrat-bold'], fontSize: 16, marginVertical: 5 }}>Sair da conta</Text>
+                </View>
+
+                <Ionicons name="chevron-forward-outline" size={24} color="black" />
+               
               </TouchableOpacity>
 
             </View>

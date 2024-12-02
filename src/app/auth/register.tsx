@@ -13,6 +13,7 @@ import { router } from 'expo-router';
 import { globalColors, globalStyles } from '@/src/styles/global';
 import MyButton from '../components/button/button';
 import Toast from 'react-native-toast-message';
+import MainHeader from '../components/headers/mainHeader';
 
 type FormData = {
     name: string;
@@ -91,10 +92,7 @@ export default function Register() {
     return (
         <View style={styles.container}>
 
-
-            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
-                <Image style={styles.imgVoltar} source={require('../../../assets/icons/voltar.png')} />
-            </TouchableOpacity >
+            <MainHeader backButton />
 
             <View style={styles.containlogotxt}>
                 <Text style={styles.titulo} >Cadastre-se</Text>
