@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { View, FlatList, TouchableOpacity, StyleSheet, Dimensions, Image, Text } from "react-native";
+import React from "react";
+import { View, FlatList, StyleSheet, Dimensions, Image, Text } from "react-native";
 const { width } = Dimensions.get('window');
 
 import { Outfit } from "@/src/services/types/types";
@@ -19,23 +19,25 @@ const OutfitsList = React.memo(({
             <FlatList
                 data={[...outfits].reverse()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={[globalStyles.styledContainer, { margin: 5 }]}>
-                        <Text style={[globalStyles.subTitle, { marginBottom: 20 }]}>{item.name}</Text>
+                    <View style={[globalStyles.styledContainer, { margin: 5, maxWidth: width / 2 - 15 }]}>
+                        <View>
+                            <Text style={[globalStyles.subTitle, { marginBottom: 20, textAlign: "center" }]} ellipsizeMode="tail" numberOfLines={2}>{item.name}</Text>
+                        </View>
 
                         <View style={styles.imageContainer}>
                             <Image source={{ uri: item.clothingId[0].image }} style={{ width: width / 2.5, height: width / 2.5 }} />
                             <Image source={{ uri: item.clothingId[1].image }} style={{ width: width / 2.5, height: width / 2.5 }} />
                             <Image source={{ uri: item.clothingId[2].image }} style={{ width: width / 2.5, height: width / 2.5 }} />
                         </View>
-                    </TouchableOpacity>
+                    </View >
                 )}
-                keyExtractor={(item) => item._id}
-                numColumns={listOrientation !== "horizontal" ? 2 : 0}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                horizontal={listOrientation === "horizontal"}
+keyExtractor = {(item) => item._id}
+numColumns = { listOrientation !== "horizontal" ? 2 : 0}
+showsVerticalScrollIndicator = { false}
+contentContainerStyle = {{ paddingBottom: 20 }}
+horizontal = { listOrientation === "horizontal"}
             />
-        </View>
+        </View >
     )
 });
 

@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, VirtualizedList, ScrollView, FlatList, Image } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import dayjs from 'dayjs';
-import Toast from 'react-native-toast-message';
 
-import { Clothing, Outfit } from '@/src/services/types/types';
+import { Clothing } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
 import { useOutfits } from '@/src/services/contexts/outfitsContext';
 import Modal from '../components/modals/modal';
-import ModalScreen from '../components/modals/modalScreen';
-import ClothesList from '../components/flatLists/clothesList';
 import Api from '@/src/services/api';
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -36,16 +32,10 @@ const addCatSchema = yup.object({
 const { width } = Dimensions.get('window');
 
 export default function Home() {
-    // getCatClothes
-    const [catClothes, setCatClothes] = useState<Clothing[]>([]);
-
     // modals
     const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const [catScreenOpen, setCatScreenOpen] = useState<boolean>(false);
-    const [openCatId, setOpenCatId] = useState<string | null>(null);
 
     // buttons
-    const [showUpdateCatButton, setShowUpdateCatButton] = useState<string>("");
     const [showGenerateOutfitButton, setShowGenerateOutfitButton] = useState<boolean>(false);
     const [neededClothes, setNeededClothes] = useState<number>(3);
     const [upperBody, setUpperBody] = useState<Clothing[]>([]);
@@ -87,51 +77,6 @@ export default function Home() {
             });
     };
 
-    const onSubmitUpdateCat: SubmitHandler<FormData> = async (data) => {
-        setLoading(true);
-
-        await Api.put(`/cat/${openCatId}`, data)
-            .then(response => {
-                console.log(response.data);
-                setCatScreenOpen(false);
-                getCats();
-            })
-            .catch(error => {
-                console.log(error.response.data);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    };
-
-    const delCat = async () => {
-        await Api.delete(`/cat/${openCatId}`)
-            .then(response => {
-                console.log(response.data);
-                setCatScreenOpen(false);
-                getCats();
-            })
-            .catch(error => {
-                console.log(error.response.data);
-            });
-    };
-
-    const getCatClothes = async () => {
-        const catClothes = clothes.filter(item => item.catId === openCatId)
-        setCatClothes(catClothes)
-    };
-
-    const handleOpenCat = (id: string) => {
-        setOpenCatId(id);
-        setCatScreenOpen(true);
-        setShowUpdateCatButton("");
-    };
-
-    const handleCloseCat = () => {
-        setCatScreenOpen(false),
-            setOpenCatId(null)
-    };
-
     const outfitClothes = () => {
         if (clothes.length > 0) {
             const filteredUpperBody = clothes.filter(item => item.type === "upperBody");
@@ -153,6 +98,11 @@ export default function Home() {
         }
     };
 
+    const catClothesLength = (cat: string) => {
+        const catClothes = clothes.filter(item => item.catId === cat);
+        return catClothes.length;
+    };
+
     useEffect(() => {
         getCats();
         getUser();
@@ -162,16 +112,8 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        getCatClothes();
-    }, [openCatId]);
-
-    useEffect(() => {
         outfitClothes();
     }, [clothes]);
-
-    useEffect(() => {
-        console.log(outfitRecomendation);
-    }, [outfitRecomendation]);
 
     const check = () => {
         return (
@@ -228,49 +170,16 @@ export default function Home() {
                         <FontAwesome5 name="plus" size={14} color={'#fff'} />
                     </TouchableOpacity>
                 </View>
-                <View style={{ marginTop: 10, gap: 10 }}>
+                <View style={{ marginTop: 10, gap: 15 }}>
                     {cats.map((category) => (
                         <View key={category._id}>
-                            <TouchableOpacity onPress={() => { handleOpenCat(category._id) }} style={{ justifyContent: "space-between", flexDirection: "row" }}>
-                                <Text style={{ fontSize: 16, fontWeight: "400" }}>{category.name}</Text>
+                            <TouchableOpacity onPress={() => { router.navigate(`/categories/${category._id}`) }} style={{ justifyContent: "space-between", flexDirection: "row" }}>
+                                <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                    <Text style={{ fontSize: 16, fontWeight: "400" }}>{category.name}</Text>
+                                    {catClothesLength(category._id) > 0 && <Text style={{ fontWeight: "600", color: globalColors.primary }}>( {catClothesLength(category._id)} )</Text>}
+                                </View>
                                 <Ionicons name="chevron-forward" size={18} />
                             </TouchableOpacity>
-
-                            {openCatId === category._id && (
-                                <ModalScreen isOpen={catScreenOpen} onRequestClose={handleCloseCat}>
-                                    <View style={styles.modalScreenContent}>
-                                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", paddingHorizontal: 20 }}>
-                                            <TouchableOpacity onPress={handleCloseCat}>
-                                                <Ionicons name="chevron-back" size={18} />
-                                            </TouchableOpacity>
-                                            <Controller
-                                                control={control}
-                                                name="name"
-                                                render={({ field: { onChange } }) => (
-                                                    <>
-                                                        <TextInput
-                                                            style={{ textAlign: "center", fontSize: 18, fontWeight: "500" }}
-                                                            onChangeText={(text) => { onChange(text), setShowUpdateCatButton(text) }}
-                                                            defaultValue={category.name}
-                                                            autoCapitalize="none"
-                                                        />
-                                                    </>
-                                                )}
-                                            />
-                                            <TouchableOpacity onPress={delCat}>
-                                                <FontAwesome5 name="trash" size={18} color="red" />
-                                            </TouchableOpacity>
-                                        </View>
-
-                                        {showUpdateCatButton !== category.name && showUpdateCatButton !== "" && (
-                                            <View style={{ marginHorizontal: 20, marginTop: 10 }}>
-                                                <MyButton title='Atualizar' onPress={handleSubmit(onSubmitUpdateCat)} loading={loading} />
-                                            </View>
-                                        )}
-                                        <ClothesList clothes={catClothes} canOpen={true} clothingBg={globalColors.secundary} />
-                                    </View>
-                                </ModalScreen>
-                            )}
                         </View>
                     ))}
                 </View>
@@ -290,7 +199,7 @@ export default function Home() {
                                             onChangeText={(text) => { onChange(text) }}
                                             placeholder="Nome"
                                             value={value}
-                                            autoCapitalize="none"
+                                            autoCapitalize="words"
                                         />
                                         {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
                                     </>

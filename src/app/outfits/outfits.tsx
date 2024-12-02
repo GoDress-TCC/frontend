@@ -32,7 +32,7 @@ export default function Outfits() {
             </View>
 
             {outfits.length > 0 ?
-                <View style={globalStyles.flatListContainer}>
+                <View style={[globalStyles.flatListContainer, { alignItems: "center" }]}>
                     <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
                         <View style={styles.searchInputArea}>
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>

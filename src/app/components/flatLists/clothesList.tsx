@@ -9,11 +9,13 @@ import Modal from "../modals/modal";
 import Api from "@/src/services/api";
 
 import { MaterialIcons, FontAwesome5, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { globalColors } from "@/src/styles/global";
+import { globalColors, globalStyles } from "@/src/styles/global";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "expo-router";
 import MyButton from "../button/button";
 import ConfirmationModal from "../modals/confirmationModal";
+import { Picker } from "@react-native-picker/picker";
+import { clothingKind } from "@/src/services/local-data/pickerData";
 
 const { width } = Dimensions.get('window');
 
@@ -39,11 +41,12 @@ const ClothesList = React.memo(({
     canSelect,
     pickParam,
     operations,
-    showButton,
     buttonTitle,
     buttonOnPress,
     buttonLoading,
     buttonIcon,
+    pickerFilter,
+    fixedSelectMode
 }:
     {
         clothes: Clothing[],
@@ -54,11 +57,12 @@ const ClothesList = React.memo(({
         canSelect?: boolean,
         pickParam?: (string | undefined)[],
         operations?: boolean | string[],
-        showButton?: boolean,
         buttonTitle?: string,
         buttonOnPress?: () => void,
         buttonLoading?: boolean,
         buttonIcon?: string,
+        pickerFilter?: boolean
+        fixedSelectMode?: boolean
     }) => {
 
     const [openModal, setOpenModal] = useState<boolean>(false);
@@ -72,6 +76,7 @@ const ClothesList = React.memo(({
     const [dirtyIcon, setDirtyIcon] = useState<"washing-machine" | "washing-machine-off">("washing-machine");
     const [confirmationModal, setConfirmationModal] = useState<boolean>(false);
     const [confirmationModalwash, setConfirmationModalwash] = useState<boolean>(false);
+    const [pickerFilterValue, setPickerFilterValue] = useState<string>("");
 
     const { getClothes, setSelectedClothingId, selectedClothingId, setSelectedClothesIds } = useClothes();
 
@@ -307,10 +312,27 @@ const ClothesList = React.memo(({
         }
     }
 
+    const SelectAllButton = () => {
+        return (
+            <TouchableOpacity onPress={() => { setSelectAll(!selectAll), handleSelectAll() }} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <MaterialIcons name={selectAll ? "check-circle" : "radio-button-unchecked"} color={selectAll ? globalColors.primary : "black"} size={24} />
+                <Text>Selecionar tudo</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    const filteredClothesByPicker = () => {
+        if (pickerFilterValue === "all" || pickerFilterValue === "") {
+            return [...clothes].reverse();
+        } else {
+            return clothes.filter(item => item.kind === pickerFilterValue).reverse();
+        }
+    };
+
     useEffect(() => {
         selectedClothesOperations();
 
-        if (showButton && canSelect) {
+        if (buttonTitle && canSelect) {
             setSelectedClothesIds(selectedClothes);
         }
 
@@ -321,15 +343,41 @@ const ClothesList = React.memo(({
         }
     }, [selectedClothes]);
 
+    useEffect(() => {
+        if (fixedSelectMode) {
+            setSelectMode(true);
+        }
+    }, []);
+
     return (
         <View style={{ alignItems: "center", flex: 1 }}>
+            {pickerFilter &&
+                <View style={[globalStyles.pickerContainer, { width: "90%", marginTop: 10, marginBottom: 20 }]}>
+                    <Picker
+                        selectedValue={pickerFilterValue}
+                        onValueChange={(itemValue) => setPickerFilterValue(itemValue)}
+                    >
+                        <Picker.Item label="Tipo" value="all" />
+                        {clothingKind.map(item => (
+                            <Picker.Item key={item.value} label={item.label} value={item.value} />
+                        ))}
+                    </Picker>
+                </View>
+            }
+
             {selectMode &&
-                <View style={{ paddingBottom: 10, width: "100%", paddingHorizontal: 15 }}>
+                <View style={[{ paddingBottom: 10, width: "100%", paddingHorizontal: 15 }, fixedSelectMode && { flexDirection: "row", justifyContent: "space-between" }]}>
+                    {fixedSelectMode &&
+                        <SelectAllButton />
+                    }
+
                     <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ flexDirection: "row", gap: 10 }}>
-                            <TouchableOpacity onPress={handleCloseSelectMode}>
-                                <MaterialIcons name="close" size={22} color={"#000"} />
-                            </TouchableOpacity>
+                            {!fixedSelectMode &&
+                                <TouchableOpacity onPress={handleCloseSelectMode}>
+                                    <MaterialIcons name="close" size={22} color={"#000"} />
+                                </TouchableOpacity>
+                            }
                             <Text>{`${selectedClothes.length} Roupas`}</Text>
                         </View>
 
@@ -355,17 +403,22 @@ const ClothesList = React.memo(({
 
                     </View>
 
-                    <TouchableOpacity onPress={() => { setSelectAll(!selectAll), handleSelectAll() }} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                        <MaterialIcons name={selectAll ? "check-circle" : "radio-button-unchecked"} color={selectAll ? globalColors.primary : "black"} size={24} />
-                        <Text>Selecionar tudo</Text>
-                    </TouchableOpacity>
+                    {!fixedSelectMode &&
+                        <SelectAllButton />
+                    }
+                </View>
+            }
+
+            {pickerFilter && filteredClothesByPicker().length === 0 &&
+                <View style={globalStyles.message}>
+                    <Text>Nenhuma roupa encontrada para esse tipo</Text>
                 </View>
             }
 
             <FlatList
-                data={typeFilter ? filteredClothes.reverse() : [...clothes].reverse()}
+                data={typeFilter ? [...filteredClothes].reverse() : pickerFilter ? filteredClothesByPicker() : [...clothes].reverse()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={[styles.itemContainer, { backgroundColor: clothingBg }, item.dirty && { borderColor: globalColors.dirtyGreen, borderWidth: 1 }]} onPress={() => { handleOpenClothing(item), handlePickClothing(item._id), selectMode && handleSelectClothing(item._id) }} onLongPress={() => canSelect && (setSelectMode(!selectMode), handleSelectClothing(item._id))}>
+                    <TouchableOpacity style={[styles.itemContainer, { backgroundColor: clothingBg }, item.dirty && { borderColor: globalColors.dirtyGreen, borderWidth: 1 }]} onPress={() => { handleOpenClothing(item), handlePickClothing(item._id), selectMode && handleSelectClothing(item._id) }} onLongPress={() => canSelect && (setSelectMode(true), handleSelectClothing(item._id))}>
                         <View style={styles.imageContainer}>
                             <ImageBackground source={{ uri: item.image }} style={[{ flex: 1, justifyContent: selectMode ? "flex-start" : "flex-end", alignItems: 'flex-end', padding: 5 }, selectedClothes.includes(item._id) && selectMode && { opacity: 0.5 }]}>
                                 <View>
@@ -424,7 +477,7 @@ const ClothesList = React.memo(({
                 </View>
             )}
 
-            {showButton &&
+            {buttonTitle &&
                 <View style={{ paddingHorizontal: 20, width: "100%", paddingBottom: 20 }}>
                     <MyButton title={buttonTitle} onPress={buttonOnPress} loading={buttonLoading} icon={buttonIcon} />
                 </View>

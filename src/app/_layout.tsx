@@ -68,6 +68,8 @@ export default function Layout() {
                 <Stack.Screen name="laundry/dirtyClothes" options={{ headerShown: false }} />
 
                 <Stack.Screen name="events/addEvent" options={{ headerShown: false }} />
+
+                <Stack.Screen name="categories/[id]" options={{ headerShown: false }} />
             </Stack>
         </CatsProvider>
         </ClothesProvider>

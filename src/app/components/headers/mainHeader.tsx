@@ -44,7 +44,7 @@ const MainHeader: React.FC<mainHeaderProps> = ({ title, backButton, functionButt
                     {functionButtonIcon &&
                         <FontAwesome5 name={functionButtonIcon} size={16} color={globalColors.white} />
                     }
-                    <Text style={{ color: globalColors.white, fontFamily: Fonts['montserrat-black'], }}>{functionButtonTitle}</Text>
+                    <Text style={{ color: globalColors.white, fontFamily: Fonts['montserrat-black'], }} ellipsizeMode="tail" numberOfLines={1}>{functionButtonTitle}</Text>
                 </TouchableOpacity>
             }
         </View>

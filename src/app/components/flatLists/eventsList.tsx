@@ -60,7 +60,7 @@ const EventsList = React.memo(({
                                 </View>
 
                                 {outfit && outfit.clothingId.length > 0 &&
-                                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 15 }}>
                                         <Image source={{ uri: outfit.clothingId[0].image }} style={styles.image} />
                                         <Image source={{ uri: outfit.clothingId[1].image }} style={styles.image} />
                                         <Image source={{ uri: outfit.clothingId[2].image }} style={styles.image} />

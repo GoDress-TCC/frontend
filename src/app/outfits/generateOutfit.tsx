@@ -437,7 +437,7 @@ export default function generateOutfits() {
                       onChangeText={onChange}
                       placeholder="Nome"
                       value={value}
-                      autoCapitalize="none"
+                      autoCapitalize="words"
                     />
                   </View >
                 </>
