@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, ScrollView, BackHandler, Image } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -20,6 +20,8 @@ import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
 import { useEvents } from '@/src/services/contexts/eventsContext';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
+import ConfirmationModal from '../components/modals/confirmationModal';
 
 type FormData = {
     name: string;
@@ -42,6 +44,9 @@ export default function Home() {
     const [lowerBody, setLowerBody] = useState<Clothing[]>([]);
     const [footwear, setFootwear] = useState<Clothing[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [editCatMode, setEditCatMode] = useState<boolean>(false);
+    const [delCatConfirmationModal, setDelCatConfirmationModal] = useState<boolean>(false);
+    const [delCat, setDelCat] = useState<string>("");
     const [outfitRecomendation, setOutfitRecomendation] = useState<Clothing[]>([]);
 
     const { cats, getCats } = useCats();
@@ -59,6 +64,22 @@ export default function Home() {
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
+    useFocusEffect(React.useCallback(() => {
+        const onBackAction = () => {
+            if (editCatMode) {
+                setEditCatMode(false);
+                return true;
+            }
+            return false;
+        }
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            onBackAction
+        );
+
+        return () => backHandler.remove();
+    }, [editCatMode]));
+
     const onSubmitCreateCat: SubmitHandler<FormData> = async (data) => {
         setLoading(true);
 
@@ -71,6 +92,13 @@ export default function Home() {
             })
             .catch(error => {
                 console.log(error.response.data);
+                Toast.show({
+                    type: "error",
+                    text1: error.response.data.msg,
+                    text2: "Tente novamente"
+                })
+                setModalOpen(false);
+                reset();
             })
             .finally(() => {
                 setLoading(false);
@@ -99,8 +127,52 @@ export default function Home() {
     };
 
     const catClothesLength = (cat: string) => {
-        const catClothes = clothes.filter(item => item.catId === cat);
+        const catClothes = clothes.filter(item => item.catId.includes(cat));
         return catClothes.length;
+    };
+
+    const onSubmitDelCat = async (catId: string) => {
+        setLoading(true);
+
+        await Api.delete(`/cat/${catId}`)
+            .then(response => {
+                console.log(response.data);
+                getCats();
+                Toast.show({
+                    type: "success",
+                    text1: response.data.msg
+                })
+            })
+            .catch(error => {
+                console.log(error.response.data);
+                Toast.show({
+                    type: "error",
+                    text1: error.response.data.msg,
+                    text2: "Tente novamente"
+                })
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
+    const handleGenerateOutfitsRecommendation = async () => {
+        await Api.post("/outfit/generate_outfit", {
+            temperature: "current",
+            location: "Itu",
+        })
+            .then(response => {
+                setOutfitRecomendation(response.data.outfit);
+            })
+            .catch(error => {
+                console.log(error.response.data.msg);
+                Toast.show({
+                    type: "error",
+                    text1: "Erro ao gerar recomendação de outfit",
+                    text2: "Tente novamente mais tarde",
+                })
+                return
+            })
     };
 
     useEffect(() => {
@@ -109,11 +181,18 @@ export default function Home() {
         getClothes();
         getOutfits();
         getEvents();
+        handleGenerateOutfitsRecommendation();
     }, []);
 
     useEffect(() => {
         outfitClothes();
     }, [clothes]);
+
+    useEffect(() => {
+        if (cats.length === 0) {
+            setEditCatMode(false);
+        }
+    }, [cats]);
 
     const check = () => {
         return (
@@ -163,22 +242,54 @@ export default function Home() {
                 }
             </View>
 
-            <View style={styles.functionContainer}>
+            {outfitRecomendation?.length > 0 &&
+                <View style={{ gap: 10, marginVertical: 10 }}>
+                    <Text style={globalStyles.subTitle}>Que tal esse outfit para hoje?</Text>
+
+                    <View style={[globalStyles.styledContainer, { padding: 20, alignItems: "center", gap: 10 }]}>
+                        <View style={{ flexDirection: "row", gap: 10 }}>
+                            <Image source={{ uri: outfitRecomendation[0].image }} style={{ width: width * 0.4, height: width * 0.4 }} />
+                            <Image source={{ uri: outfitRecomendation[1].image }} style={{ width: width * 0.4, height: width * 0.4 }} />
+                        </View>
+                        <Image source={{ uri: outfitRecomendation[2].image }} style={{ width: width * 0.4, height: width * 0.4 }} />
+                    </View>
+                </View>
+            }
+
+            <View style={[styles.functionContainer, { marginBottom: 100 }]}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingBottom: 8, borderBottomWidth: 1, borderColor: globalColors.primary, }}>
                     <Text style={{ fontSize: 16, fontWeight: "500" }}>Minhas Categorias:</Text>
-                    <TouchableOpacity style={styles.plusBnt} onPress={() => { setModalOpen(true), reset() }}>
-                        <FontAwesome5 name="plus" size={14} color={'#fff'} />
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: "row", gap: 10 }}>
+                        <TouchableOpacity style={[styles.plusBnt, { backgroundColor: "gray" }]} onPress={() => { cats.length > 0 && setEditCatMode(!editCatMode) }}>
+                            <FontAwesome5 name={editCatMode ? "times" : "pen"} size={14} color={'#fff'} />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.plusBnt, { backgroundColor: globalColors.primary }]} onPress={() => { setModalOpen(true), reset() }}>
+                            <FontAwesome5 name="plus" size={14} color={'#fff'} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <View style={{ marginTop: 10, gap: 15 }}>
+                <View style={{ marginTop: 10, gap: editCatMode ? 25 : 15 }}>
+                    {cats.length === 0 && <Text style={{ textAlign: "center" }}>Você não possui nenhuma categoria cadastrada</Text>}
                     {cats.map((category) => (
                         <View key={category._id}>
-                            <TouchableOpacity onPress={() => { router.navigate(`/categories/${category._id}`) }} style={{ justifyContent: "space-between", flexDirection: "row" }}>
+                            <TouchableOpacity onPress={() => { editCatMode ? {} : router.navigate(`/categories/${category._id}`) }} onLongPress={() => setEditCatMode(!editCatMode)} style={{ justifyContent: "space-between", flexDirection: "row", alignItems: "center" }}>
                                 <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                    {editCatMode &&
+                                        <View style={{ marginRight: 5 }}>
+                                            <FontAwesome5 name="pen" size={16} color="gray" />
+                                        </View>
+                                    }
                                     <Text style={{ fontSize: 16, fontWeight: "400" }}>{category.name}</Text>
                                     {catClothesLength(category._id) > 0 && <Text style={{ fontWeight: "600", color: globalColors.primary }}>( {catClothesLength(category._id)} )</Text>}
                                 </View>
-                                <Ionicons name="chevron-forward" size={18} />
+
+                                {editCatMode ?
+                                    <TouchableOpacity onPress={() => { catClothesLength(category._id) === 0 ? onSubmitDelCat(category._id) : setDelCatConfirmationModal(true), setDelCat(category._id) }}>
+                                        <FontAwesome5 name="trash" size={16} color="red" />
+                                    </TouchableOpacity>
+                                    :
+                                    <Ionicons name="chevron-forward" size={18} />
+                                }
                             </TouchableOpacity>
                         </View>
                     ))}
@@ -216,6 +327,9 @@ export default function Home() {
 
                 <View style={{ marginTop: 16, gap: 10 }} />
             </View>
+
+            <ConfirmationModal isOpen={delCatConfirmationModal} onRequestClose={() => setDelCatConfirmationModal(false)} onSubmit={() => { onSubmitDelCat(delCat), setDelCatConfirmationModal(false) }} title="Excluir categoria" color="red" description="Essa categoria já possui roupas cadastradas" buttonTitle="Excluir" />
+
         </ScrollView>
     );
 }
@@ -290,7 +404,6 @@ const styles = StyleSheet.create({
     },
 
     plusBnt: {
-        backgroundColor: globalColors.primary,
         height: 30,
         width: 30,
         padding: 5,

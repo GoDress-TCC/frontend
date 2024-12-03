@@ -18,7 +18,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('jwtToken');
-    router.replace("../");
+    router.replace("/");
     getUser();
   };
 
@@ -82,7 +82,7 @@ export default function Profile() {
 
               <TouchableOpacity style={styles.bottom} onPress={handleLogout}>
               <View style={{ flexDirection: 'row', gap: 8, alignItems:'center' }}>
-              <AntDesign name="logout" size={24} color="black" />v
+              <AntDesign name="logout" size={24} color="black" />
                   <Text style={{ textDecorationLine: "underline", fontFamily: Fonts['montserrat-bold'], fontSize: 16, marginVertical: 5 }}>Sair da conta</Text>
                 </View>
 

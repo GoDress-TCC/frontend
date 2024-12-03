@@ -14,7 +14,7 @@ export default function favClothes() {
     return (
         <View style={globalStyles.globalContainerForLists}>
             <View style={{ marginHorizontal: 20 }}>
-                <MainHeader title="Roupas favoritas" backButton />
+                <MainHeader title="Roupas Favoritas" backButton />
             </View>
 
             {favClothes.length === 0 ?

@@ -14,13 +14,16 @@ import { globalColors, globalStyles } from '@/src/styles/global';
 import MyButton from '../components/button/button';
 import Toast from 'react-native-toast-message';
 import MainHeader from '../components/headers/mainHeader';
+import { Picker } from '@react-native-picker/picker';
+import { clothingGender } from '@/src/services/local-data/pickerData';
 
 type FormData = {
     name: string;
     surname: string;
     email: string;
     password: string;
-    confirm_password: string
+    confirm_password: string;
+    gender: string;
 }
 
 const registerSchema = yup.object({
@@ -34,7 +37,8 @@ const registerSchema = yup.object({
         .matches(/[0-9]/, 'Senha deve conter pelo menos um número')
         .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Senha deve conter pelo menos um caractere especial')
         .required('Senha é obrigatória'),
-    confirm_password: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'As senhas devem ser iguais!')
+    confirm_password: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'As senhas devem ser iguais!'),
+    gender: yup.string().required('Gênero é obrigatório')
 }).required();
 
 
@@ -48,7 +52,8 @@ export default function Register() {
             surname: "",
             email: "",
             password: "",
-            confirm_password: ""
+            confirm_password: "",
+            gender: ""
         },
         resolver: yupResolver(registerSchema),
     });
@@ -62,7 +67,8 @@ export default function Register() {
             name: data.name,
             surname: data.surname,
             email: data.email,
-            password: data.password
+            password: data.password,
+            gender: data.gender
         })
             .then(function (response) {
                 console.log(response.data);
@@ -93,7 +99,7 @@ export default function Register() {
         <View style={styles.container}>
 
             <MainHeader backButton />
-
+        
             <View style={styles.containlogotxt}>
                 <Text style={styles.titulo} >Cadastre-se</Text>
                 <Image style={styles.logoimg} source={require('../../../assets/images/gPurple.png')} />
@@ -182,7 +188,7 @@ export default function Register() {
                 control={control}
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
-                    <View style={{ marginBottom: 20 }}>
+                    <View>
                         <View style={globalStyles.inputArea}>
                             <TextInput
                                 style={globalStyles.input}
@@ -198,8 +204,27 @@ export default function Register() {
                     </View>
                 )}
             />
+            <Controller
+                control={control}
+                name="gender"
+                render={({ field: { value, onChange } }) => (
+                    <View style={[globalStyles.pickerContainer, { backgroundColor: "#fff" }]}>
+                        <Picker
+                            selectedValue={value}
+                            onValueChange={(itemValue) => onChange(itemValue)}
+                        >
+                            <Picker.Item label="Gênero" value="" />
+                            {clothingGender.map(item => (
+                                <Picker.Item key={item.value} label={item.label} value={item.value} />
+                            ))}
+                        </Picker>
+                    </View>
+                )}
+            />
 
-            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' loading={loading} />
+            <View style={{ marginTop: 40 }}>
+                <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' loading={loading} />
+            </View>
 
         </View>
     );
@@ -209,20 +234,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        gap: 10
-    },
-
-    containVoltar: {
-        paddingTop: '15%',
-    },
-
-    imgVoltar: {
-        height: 30,
-        width: 30,
+        gap: 10,
+        paddingTop: 40,
     },
 
     containlogotxt: {
-        marginTop: 70,
+        marginTop: 20,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',

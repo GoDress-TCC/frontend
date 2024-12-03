@@ -32,7 +32,7 @@ const EventsList = React.memo(({
                     const outfit = outfits.find(outfit => outfit._id === item.outfitId);
 
                     return (
-                        <TouchableOpacity style={[styles.tinyStyledContainer, { width: "100%", marginBottom: 20, paddingVertical: 20, paddingHorizontal: 20 }]}>
+                        <View style={[styles.tinyStyledContainer, { width: "100%", marginBottom: 20, paddingVertical: 20, paddingHorizontal: 20 }]}>
                             <View style={{ flex: 1 }}>
                                 <View style={{ flexDirection: "row", gap: 20, justifyContent: "space-between" }}>
                                     <View style={{ flexDirection: "row", gap: 10 }}>
@@ -67,7 +67,7 @@ const EventsList = React.memo(({
                                     </View>
                                 }
                             </View>
-                        </TouchableOpacity>
+                        </View>
                     )
                 }}
                 keyExtractor={(item) => item._id}

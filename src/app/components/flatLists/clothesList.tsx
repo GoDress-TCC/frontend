@@ -20,14 +20,6 @@ import { clothingKind } from "@/src/services/local-data/pickerData";
 const { width } = Dimensions.get('window');
 
 type FormData = {
-    catId?: string;
-    image?: string;
-    kind?: string;
-    color?: string;
-    style?: string;
-    temperature?: string;
-    gender?: string;
-    tissue?: string;
     fav?: boolean;
     dirty?: boolean;
 }
@@ -41,6 +33,8 @@ const ClothesList = React.memo(({
     canSelect,
     pickParam,
     operations,
+    additionalOperation,
+    additionalOperationOnPress,
     buttonTitle,
     buttonOnPress,
     buttonLoading,
@@ -57,6 +51,8 @@ const ClothesList = React.memo(({
         canSelect?: boolean,
         pickParam?: (string | undefined)[],
         operations?: boolean | string[],
+        additionalOperation?: keyof typeof MaterialIcons.glyphMap,
+        additionalOperationOnPress?: () => void,
         buttonTitle?: string,
         buttonOnPress?: () => void,
         buttonLoading?: boolean,
@@ -99,11 +95,6 @@ const ClothesList = React.memo(({
 
     const form = useForm<FormData>({
         defaultValues: {
-            catId: openClothing?.catId ?? '',
-            color: openClothing?.color ?? '',
-            gender: openClothing?.gender ?? '',
-            temperature: openClothing?.temperature ?? '',
-            tissue: openClothing?.tissue ?? '',
             fav: openClothing?.fav ?? false,
             dirty: openClothing?.dirty ?? false,
         },
@@ -189,21 +180,9 @@ const ClothesList = React.memo(({
 
                 Toast.show({
                     type: "error",
-                    text1: "Roupas excluídas"
+                    text1: `Roupa${selectedClothes.length > 1 ? "s" : ""} excluída${selectedClothes.length > 1 ? "s" : ""}`
                 });
             });
-    };
-
-
-    const handleEditClothing = () => {
-        Animated.timing(editAnimation, {
-            toValue: editClothing ? 0 : 1,
-            duration: 300,
-            easing: Easing.ease,
-            useNativeDriver: false,
-        }).start(() => {
-            setEditClothing(!editClothing);
-        });
     };
 
     const editClothingStyle = {
@@ -329,10 +308,12 @@ const ClothesList = React.memo(({
         }
     };
 
+    const activeOperations = selectedClothes.length > 0 ? globalColors.primary : "gray";
+
     useEffect(() => {
         selectedClothesOperations();
 
-        if (buttonTitle && canSelect) {
+        if ((buttonTitle || additionalOperation) && (canSelect || fixedSelectMode)) {
             setSelectedClothesIds(selectedClothes);
         }
 
@@ -357,7 +338,7 @@ const ClothesList = React.memo(({
                         selectedValue={pickerFilterValue}
                         onValueChange={(itemValue) => setPickerFilterValue(itemValue)}
                     >
-                        <Picker.Item label="Tipo" value="all" />
+                        <Picker.Item label="Todas" value="all" />
                         {clothingKind.map(item => (
                             <Picker.Item key={item.value} label={item.label} value={item.value} />
                         ))}
@@ -381,26 +362,32 @@ const ClothesList = React.memo(({
                             <Text>{`${selectedClothes.length} Roupas`}</Text>
                         </View>
 
-                        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-                            {(Array.isArray(operations) && operations.includes("fav")) || operations === true ? (
-                                <TouchableOpacity onPress={() => { selectedClothes.length > 0 && onSubmitUpdateClothing(selectedClothes, { fav: favIcon === "favorite" }) }}>
-                                    <MaterialIcons name={favIcon} size={24} color={selectedClothes.length > 0 ? globalColors.primary : "gray"} />
-                                </TouchableOpacity>
-                            ) : null}
+                        {!fixedSelectMode &&
+                            <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                                {additionalOperation &&
+                                    <TouchableOpacity onPress={additionalOperationOnPress}>
+                                        <MaterialIcons name={additionalOperation} size={24} color={activeOperations} />
+                                    </TouchableOpacity>
+                                }
+                                {(Array.isArray(operations) && operations.includes("fav")) || operations === true ? (
+                                    <TouchableOpacity onPress={() => { selectedClothes.length > 0 && onSubmitUpdateClothing(selectedClothes, { fav: favIcon === "favorite" }) }}>
+                                        <MaterialIcons name={favIcon} size={24} color={activeOperations} />
+                                    </TouchableOpacity>
+                                ) : null}
 
-                            {(Array.isArray(operations) && operations.includes("dirty")) || operations === true ? (
-                                <TouchableOpacity onPress={() => { selectedClothes.length > 0 && setConfirmationModalwash(true) }}>
-                                    <MaterialCommunityIcons name={dirtyIcon} size={26} color={selectedClothes.length > 0 ? globalColors.primary : "gray"} />
-                                </TouchableOpacity>
-                            ) : null}
+                                {(Array.isArray(operations) && operations.includes("dirty")) || operations === true ? (
+                                    <TouchableOpacity onPress={() => { selectedClothes.length > 0 && setConfirmationModalwash(true) }}>
+                                        <MaterialCommunityIcons name={dirtyIcon} size={26} color={activeOperations} />
+                                    </TouchableOpacity>
+                                ) : null}
 
-                            {(Array.isArray(operations) && operations.includes("delete")) || operations === true ? (
-                                <TouchableOpacity onPress={() => { selectedClothes.length > 0 && setConfirmationModal(true) }}>
-                                    <FontAwesome5 name="trash" size={22} color={selectedClothes.length > 0 ? globalColors.primary : "gray"} />
-                                </TouchableOpacity>
-                            ) : null}
-                        </View>
-
+                                {(Array.isArray(operations) && operations.includes("delete")) || operations === true ? (
+                                    <TouchableOpacity onPress={() => { selectedClothes.length > 0 && setConfirmationModal(true) }}>
+                                        <FontAwesome5 name="trash" size={22} color={activeOperations} />
+                                    </TouchableOpacity>
+                                ) : null}
+                            </View>
+                        }
                     </View>
 
                     {!fixedSelectMode &&
@@ -411,7 +398,7 @@ const ClothesList = React.memo(({
 
             {pickerFilter && filteredClothesByPicker().length === 0 &&
                 <View style={globalStyles.message}>
-                    <Text>Nenhuma roupa encontrada para esse tipo</Text>
+                    <Text>Nenhuma roupa desse tipo encontrada</Text>
                 </View>
             }
 
@@ -438,61 +425,65 @@ const ClothesList = React.memo(({
                 keyExtractor={(item) => item._id}
                 numColumns={3}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: selectMode ? 80 : 20 }}
+                contentContainerStyle={{ paddingBottom: selectMode ? 40 : 20 }}
             />
 
-            {canOpen === true && openClothing && (
-                <View key={openClothing._id}>
-                    <Modal isOpen={openModal} onRequestClose={handleCloseModal}>
-                        <View style={styles.modalContent}>
-                            <Animated.View style={[{ borderRadius: 5, overflow: 'hidden', paddingBottom: 10 }, editClothingStyle]}>
-                                <ImageBackground source={{ uri: openClothing.image }} style={{ flex: 1, padding: 5 }} resizeMode="contain">
-                                    <TouchableOpacity onPress={handleCloseModal}>
-                                        <Ionicons name="chevron-back" style={styles.icon} size={26} color={globalColors.primary} />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={{ position: 'absolute', right: 10, bottom: 10 }} onPress={handleFavClothing}>
-                                        <Animated.View style={favClothingStyle}>
-                                            <MaterialIcons name={favoriteValue === true ? "favorite" : "favorite-border"} color={favoriteValue === true ? "red" : styles.icon.color} size={26} />
-                                        </Animated.View>
-                                    </TouchableOpacity>
-                                </ImageBackground>
-                            </Animated.View>
+            {
+                canOpen === true && openClothing && (
+                    <View key={openClothing._id}>
+                        <Modal isOpen={openModal} onRequestClose={handleCloseModal}>
+                            <View style={styles.modalContent}>
+                                <Animated.View style={[{ borderRadius: 5, overflow: 'hidden', paddingBottom: 10 }, editClothingStyle]}>
+                                    <ImageBackground source={{ uri: openClothing.image }} style={{ flex: 1, padding: 5 }} resizeMode="contain">
+                                        <TouchableOpacity onPress={handleCloseModal}>
+                                            <Ionicons name="chevron-back" style={styles.icon} size={26} color={globalColors.primary} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={{ position: 'absolute', right: 10, bottom: 10 }} onPress={handleFavClothing}>
+                                            <Animated.View style={favClothingStyle}>
+                                                <MaterialIcons name={favoriteValue === true ? "favorite" : "favorite-border"} color={favoriteValue === true ? "red" : styles.icon.color} size={26} />
+                                            </Animated.View>
+                                        </TouchableOpacity>
+                                    </ImageBackground>
+                                </Animated.View>
 
-                            {editClothing === true &&
-                                <View>
-                                    <ScrollView>
-                                        <View style={{ marginTop: 20, gap: 20, alignItems: "center" }}>
-                                            <Text style={styles.clothingAtributes}>{openClothing.color}</Text>
-                                            <Text style={styles.clothingAtributes}>{openClothing.gender}</Text>
-                                            <Text style={styles.clothingAtributes}>{openClothing.kind}</Text>
-                                            <Text style={styles.clothingAtributes}>{openClothing.style}</Text>
-                                            <Text style={styles.clothingAtributes}>{openClothing.temperature}</Text>
-                                            <Text style={styles.clothingAtributes}>{openClothing.tissue}</Text>
-                                        </View>
-                                    </ScrollView>
-                                </View>
-                            }
-                        </View>
-                    </Modal>
-                </View>
-            )}
+                                {editClothing === true &&
+                                    <View>
+                                        <ScrollView>
+                                            <View style={{ marginTop: 20, gap: 20, alignItems: "center" }}>
+                                                <Text style={styles.clothingAtributes}>{openClothing.color}</Text>
+                                                <Text style={styles.clothingAtributes}>{openClothing.gender}</Text>
+                                                <Text style={styles.clothingAtributes}>{openClothing.kind}</Text>
+                                                <Text style={styles.clothingAtributes}>{openClothing.style}</Text>
+                                                <Text style={styles.clothingAtributes}>{openClothing.temperature}</Text>
+                                                <Text style={styles.clothingAtributes}>{openClothing.tissue}</Text>
+                                            </View>
+                                        </ScrollView>
+                                    </View>
+                                }
+                            </View>
+                        </Modal>
+                    </View>
+                )
+            }
 
-            {buttonTitle &&
+            {
+                buttonTitle &&
                 <View style={{ paddingHorizontal: 20, width: "100%", paddingBottom: 20 }}>
                     <MyButton title={buttonTitle} onPress={buttonOnPress} loading={buttonLoading} icon={buttonIcon} />
                 </View>
             }
 
-            {screenLoading &&
+            {
+                screenLoading &&
                 <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: "rgba(0, 0, 0, 0.2)", justifyContent: "center", alignItems: "center" }}>
                     <ActivityIndicator size={100} color={globalColors.primary} />
                 </View>
             }
 
-            <ConfirmationModal isOpen={confirmationModal} onRequestClose={() => setConfirmationModal(false)} onSubmit={onSubmitDelClothing} title="Excluir roupas" color="red" description="Essa ação não poderá ser desfeita" buttonTitle="Excluir" />
+            <ConfirmationModal isOpen={confirmationModal} onRequestClose={() => setConfirmationModal(false)} onSubmit={onSubmitDelClothing} title={`Excluir roupa${selectedClothes.length > 1 ? "s" : ""}`} color="red" description="Essa ação não poderá ser desfeita" buttonTitle="Excluir" />
 
-            <ConfirmationModal isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)} onSubmit={() => onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" })} title={dirtyIcon === "washing-machine" ? "Mandar para lavanderia" : "Lavar roupas"} description={dirtyIcon === "washing-machine" ? "Suas roupas serão realocadas para a aba lavanderia" : ""} color="green" buttonTitle="Confirmar" />
-        </View>
+            <ConfirmationModal isOpen={confirmationModalwash} onRequestClose={() => setConfirmationModalwash(false)} onSubmit={() => onSubmitUpdateClothing(selectedClothes, { dirty: dirtyIcon === "washing-machine" })} title={dirtyIcon === "washing-machine" ? "Mandar para lavanderia" : "Lavar roupas"} description={dirtyIcon === "washing-machine" ? "Suas roupas serão realocadas para a aba lavanderia" : "Suas roupas retornarão ao seu armário"} color="green" buttonTitle="Confirmar" />
+        </View >
     )
 });
 

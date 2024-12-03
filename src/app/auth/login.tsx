@@ -53,7 +53,7 @@ export default function Login() {
                 await AsyncStorage.setItem('jwtToken', token);
 
                 getClothes();
-                router.replace('/(tabs)');
+                router.replace('/(tabs)/home');
             })
             .catch(function (error) {
                 console.log(error.response.data);

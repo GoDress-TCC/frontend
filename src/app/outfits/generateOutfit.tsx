@@ -405,20 +405,34 @@ export default function generateOutfits() {
 
       <ModalScreen isOpen={openSelectClothing} onRequestClose={() => setOpenSelectClothing(false)}>
         <View style={styles.modalScreenContent}>
-          <Text style={[globalStyles.subTitle, { textAlign: "center" }]}>{
-            selectedType === "upperBody" && "Parte superior"
-            ||
-            selectedType === "lowerBody" && "Parte inferior"
-            ||
-            selectedType === "footwear" && "Calçado"
-          }</Text>
+          <View style={{ flexDirection: "row", marginHorizontal: 20, justifyContent: "center" }}>
+            <TouchableOpacity onPress={() => { setOpenSelectClothing(false) }} style={{ position: "absolute", left: 0 }}>
+              <Ionicons name="chevron-back" size={26} />
+            </TouchableOpacity>
+
+            <Text style={[globalStyles.subTitle, { textAlign: "center" }]}>{
+              selectedType === "upperBody" && "Parte superior"
+              ||
+              selectedType === "lowerBody" && "Parte inferior"
+              ||
+              selectedType === "footwear" && "Calçado"
+            }</Text>
+          </View>
+
           <ClothesList clothes={clothes} typeFilter={selectedType} canPick={true} clothingBg={globalColors.secundary} pickParam={getValues('clothingId')} />
         </View>
       </ModalScreen>
 
       <ModalScreen isOpen={openSaveClothing} onRequestClose={() => setOpenSaveClothing(false)} withInput={true}>
         <View style={[styles.modalScreenContent, { paddingHorizontal: 20 }]}>
-          <Text style={[globalStyles.subTitle, { textAlign: "center" }]}>Salvar Outfit</Text>
+          <View style={{ flexDirection: "row", marginHorizontal: 20, justifyContent: "center" }}>
+            <TouchableOpacity onPress={() => { setOpenSaveClothing(false) }} style={{ position: "absolute", left: 0 }}>
+              <Ionicons name="chevron-back" size={26} />
+            </TouchableOpacity>
+
+            <Text style={globalStyles.subTitle}>Salvar outfit</Text>
+          </View>
+
           <ScrollView>
             <View style={[globalStyles.styledContainer, { marginTop: 20 }]}>
               {outfitClothing(upperBody, 0, true)}

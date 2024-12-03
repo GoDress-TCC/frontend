@@ -59,7 +59,7 @@ export default function DirtyClothes() {
         </View>
         :
         <View style={globalStyles.flatListContainer}>
-          <ClothesList clothes={filteredClothes} clothingBg='#fff' canSelect={true} canOpen={true} operations={["delete", "fav"]} buttonTitle={selectedClothesIds.length === 0 ? "Lavar todas as roupas" : "Lavar roupas selecionadas"} buttonOnPress={() => selectedClothesIds.length > 0 ? onSubmitWashClothes() : setConfirmationModalwash(true)} buttonLoading={loading} />
+          <ClothesList clothes={filteredClothes} clothingBg='#fff' canSelect={true} canOpen={true} operations={["delete", "fav"]} buttonTitle={selectedClothesIds.length === 0 ? "Lavar todas as roupas" : "Lavar roupas selecionadas"} buttonOnPress={() => selectedClothesIds.length > 0 && selectedClothesIds.length !== filteredClothes.length ? onSubmitWashClothes() : setConfirmationModalwash(true)} buttonLoading={loading} />
         </View>
       }
 

@@ -13,7 +13,7 @@ export type Category = {
 
 export type Clothing = {
     _id: string;
-    catId: string;
+    catId: Array<string>;
     image: string;
     kind: string;
     type: string;

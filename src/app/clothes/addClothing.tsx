@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, CameraView, FlashMode } from 'expo-camera';
-import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, TextInput, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, TextInput, Image, Dimensions, FlatList } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -16,15 +16,15 @@ import { STORAGE } from '@/src/services/firebase/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
-import { clothingGender, clothingKind, clothingStyle, clothingTemperature, clothingTissue } from '@/src/services/local-data/pickerData';
+import { clothingColors, clothingGender, clothingKind, clothingStyle, clothingTemperature, clothingTissue } from '@/src/services/local-data/pickerData';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
 import MyButton from '../components/button/button';
 import { globalColors, globalStyles } from '@/src/styles/global';
-import Fonts from '@/src/services/utils/Fonts';
 import { Ionicons } from '@expo/vector-icons';
+import Modal from '../components/modals/modal';
 
 const { width } = Dimensions.get('window');
 
@@ -65,10 +65,10 @@ export default function CameraScreen() {
 
     // saveClothingScreen
     const [saveClothingScreenOpen, setSaveClothingScreenOpen] = useState<boolean>(false);
-    const [moreOptions, setMoreOptions] = useState<boolean>(false);
+    const [colorPicker, setColorPicker] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [devMode, setDevMode] = useState<boolean>(false);
+    const [devMode, setDevMode] = useState<boolean>(true);
 
     // contexts
     const { cats, getCats } = useCats();
@@ -220,7 +220,6 @@ export default function CameraScreen() {
             })
     };
 
-
     return (
         <View style={styles.container}>
             {!image ?
@@ -347,22 +346,16 @@ export default function CameraScreen() {
                                 )}
                             />
 
-                            <Controller
-                                control={control}
-                                name="color"
-                                render={({ field: { value, onChange } }) => (
-                                    <View style={[styles.controllerContainer, { width: "16%" }]}>
-                                        <TextInput
-                                            style={[styles.input, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: globalColors.primary, borderWidth: 1 }]}
-                                            onChangeText={(text) => { onChange(text), setColor(text) }}
-                                            placeholder="Cor"
-                                            value={value}
-                                            autoCapitalize="none"
-                                        />
-                                        {errors.color && <Text style={styles.error}>{errors.color.message}</Text>}
-                                    </View>
-                                )}
-                            />
+                            <TouchableOpacity style={[styles.controllerContainer, { width: "16%" }]} onPress={() => setColorPicker(true)}>
+                                <View style={styles.input}>
+                                    {watch('color') ?
+                                        <View style={[{ width: 30, height: 30, borderRadius: 100, backgroundColor: `${watch('color')}` }, watch('color') === "#FFFFFF" && { borderWidth: 1 }]}></View>
+                                        :
+                                        <Text>Cor</Text>
+                                    }
+                                </View>
+                                {errors.color && <Text style={styles.error}>{errors.color.message}</Text>}
+                            </TouchableOpacity>
                         </View>
 
                         <View style={{ flexDirection: "column", gap: 5, marginVertical: 20 }}>
@@ -457,6 +450,22 @@ export default function CameraScreen() {
                         <MyButton title='Salvar' onPress={handleSubmit(onSubmitCreateClothing)} loading={loading} />
                     </View>
                 </View>
+
+                <Modal isOpen={colorPicker} onRequestClose={() => setColorPicker(false)}>
+                    <View style={{ backgroundColor: "#fff", width: "90%", height: "70%" }}>
+                        <FlatList
+                            data={clothingColors}
+                            keyExtractor={item => item.value}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity style={{ padding: 10, flexDirection: "row", alignItems: "center", gap: 15 }} onPress={() => { setValue("color", item.value), setColorPicker(false) }}>
+                                    <View style={[{ width: 30, height: 30, borderRadius: 100, backgroundColor: `${item.value}` }, item.value === "#FFFFFF" && { borderWidth: 1 }]}></View>
+                                    <Text style={{ fontSize: 16 }}>{item.label}</Text>
+                                </TouchableOpacity>
+                            )}
+                            contentContainerStyle={{ gap: 10 }}
+                        />
+                    </View>
+                </Modal>
             </ModalScreen >
         </View >
     );

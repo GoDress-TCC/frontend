@@ -171,7 +171,7 @@ export default function resetPassword() {
             />
             <View style={{ marginTop: 50, gap: 10 }}>
 
-                <MyButton onPress={resendToken} title='Reenviar código' loading={false} />
+                <MyButton onPress={resendToken} title='Reenviar código' loading={false} borderButton />
 
                 <MyButton onPress={handleSubmit(onSubmit)} title='Alterar senha' loading={false} />
 

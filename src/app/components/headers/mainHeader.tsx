@@ -26,7 +26,11 @@ const MainHeader: React.FC<mainHeaderProps> = ({ title, backButton, functionButt
                         <Ionicons name='chevron-back' size={30} color={globalColors.primary} />
                     </TouchableOpacity>
                 }
-                <Text style={globalStyles.mainTitle}>{title}</Text>
+                {functionButtonIcon ?
+                    <Text style={[globalStyles.mainTitle, { width: width * 0.40 }]} ellipsizeMode="tail" numberOfLines={1}>{title}</Text>
+                    :
+                    <Text style={globalStyles.mainTitle}>{title}</Text>
+                }
             </View>
 
             {functionButtonTitle &&
