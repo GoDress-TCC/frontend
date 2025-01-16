@@ -6,12 +6,14 @@ import { router, Link } from 'expo-router';
 import * as yup from 'yup';
 import Feather from '@expo/vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 import Api from '@/src/services/api';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Fonts from '@/src/services/utils/Fonts';
-import { globalColors } from '@/src/styles/global';
-import { MyButton } from '../components/button/button';
+import { globalColors, globalStyles } from '@/src/styles/global';
+import MyButton from '../components/button/button';
+import MainHeader from '../components/headers/mainHeader';
 
 type FormData = {
     email: string;
@@ -24,7 +26,8 @@ const registerSchema = yup.object({
 }).required();
 
 export default function Login() {
-    const [resultData, setResultData] = useState(null);
+    const [hidepass, setHidepass] = useState(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const { getClothes } = useClothes()
 
     const form = useForm<FormData>({
@@ -35,39 +38,40 @@ export default function Login() {
         resolver: yupResolver(registerSchema),
     });
 
-    const [hidepass, setHidepass] = useState(true);
-
-
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
+        setLoading(true); 
         await Api.post('/auth/login', {
             ...data
         })
             .then(async function (response) {
                 console.log(response.data);
-                setResultData(response.data.msg);
                 reset();
-
+               
                 const { token } = response.data;
                 await AsyncStorage.setItem('jwtToken', token);
 
                 getClothes();
-                router.replace('(tabs)');
+                router.replace('/(tabs)/home');
             })
             .catch(function (error) {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
+                Toast.show({
+                    type: 'error',
+                    text1: error.response.data.msg,
+                    text2: 'Tente novamente'
+                });
+            })
+            .finally(() => {
+                setLoading(false);
             });
 
     };
 
     return (
         <View style={styles.container}>
-
-            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
-                <Image style={styles.imgVoltar} source={require('../../../assets/icons/voltar.png')} />
-            </TouchableOpacity >
+            <MainHeader backButton />
 
             <View style={styles.containlogotxt}>
                 <Text style={styles.titulo} >Faça Login</Text>
@@ -79,9 +83,9 @@ export default function Login() {
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 onChangeText={onChange}
                                 placeholder="Email"
                                 value={value}
@@ -99,10 +103,10 @@ export default function Login() {
                 control={control}
                 name="password"
                 render={({ field: { value, onChange } }) => (
-                    <>
-                        <View style={styles.inputarea}>
+                    <View style={{ marginBottom: 20 }}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Senha"
                                 onChangeText={onChange}
                                 value={value}
@@ -110,33 +114,26 @@ export default function Login() {
                                 autoCapitalize="none"
                             />
                             <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
-                                { hidepass ?
+                                {hidepass ?
                                     <Feather name="eye-off" size={24} color="#593C9D" />
                                     :
-                                    <Feather name="eye" size={24} color="#593C9D" />    
-                            }
+                                    <Feather name="eye" size={24} color="#593C9D" />
+                                }
 
                             </TouchableOpacity>
                         </View>
 
                         {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
-                    </>
+                    </View>
                 )}
             />
 
-            <MyButton onPress={handleSubmit(onSubmit)} title="Entrar" />
+            <MyButton onPress={handleSubmit(onSubmit)} title="Entrar" loading={loading}/>
 
             <TouchableOpacity style={styles.containsenha}>
                 <Text style={styles.text}>Esqueci a</Text>
-                <Link href={"/auth/forgotPassword/sendEmail"} style={{ textDecorationLine: "underline", color: globalColors.primary, fontSize: 16, fontFamily: Fonts['montserrat-semibold'], }}> senha</Link>
+                <Link href={"/auth/forgotPassword/sendEmail"} style={{ textDecorationLine: "underline", color: globalColors.primary, fontSize: 16, fontFamily: Fonts['montserrat-semibold'], }}>senha</Link>
             </TouchableOpacity>
-
-            {resultData && (
-                <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
-                    <Text style={styles.resultText}>{resultData}</Text>
-                </View>
-            )}
         </View>
     );
 }
@@ -146,7 +143,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 20,
         gap: 10,
-
+        paddingVertical: 40,
     },
 
     containVoltar: {
@@ -187,26 +184,6 @@ const styles = StyleSheet.create({
         width: "100%",
         alignItems: "center",
         marginTop: 20,
-    },
-    inputarea: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1,
-        borderRadius: 10,
-        borderColor: globalColors.primary,
-        justifyContent: 'space-between',
-
-    },
-
-    input: {
-
-        fontFamily: Fonts['montserrat-regular'],
-        fontSize: 16,
-        flexDirection: 'row',
-        width: '90%',
     },
 
     containsenha: {

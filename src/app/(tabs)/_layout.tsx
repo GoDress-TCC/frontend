@@ -1,11 +1,16 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Fontisto from '@expo/vector-icons/Fontisto';
+
+import ButtonNew from '../components/button/buttonNew';
 
 export default function TabLayout() {
     return (
-        <Tabs screenOptions={{ tabBarActiveTintColor: '#593C9D' }}>
+        <Tabs screenOptions={{ tabBarActiveTintColor: '#593C9D',}}>
+
             <Tabs.Screen
-                name="index"
+                name="home"
                 options={{
                     headerShown: false,
                     title: 'Home',
@@ -16,16 +21,37 @@ export default function TabLayout() {
                 name="clothes"
                 options={{
                     headerShown: false,
-                    title: 'Clothes',
+                    title: 'Armário',
                     tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="tshirt" color={color} />,
                 }}
             />
-             <Tabs.Screen
-                name="outfits"
+            <Tabs.Screen
+              name="whiteScreen" 
+              options={{
+                  tabBarLabel: '',
+                  headerShown: false,
+                  tabBarIcon: ({ color }) => <ButtonNew />, 
+              }}
+              listeners={{
+                  tabPress: (e) => {
+                      e.preventDefault();
+                      router.navigate('/clothes/addClothing'); 
+                  },
+              }}
+            />
+            <Tabs.Screen
+                name="events"
                 options={{
                     headerShown: false,
-                    title: 'Outfits',
-                    tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="plus" color={color} />,
+                    title: 'Eventos',
+                    tabBarIcon: ({ color }) =>  <Fontisto name="calendar" size={22} color={color} />, }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    headerShown: false,
+                    title: 'Perfil',
+                    tabBarIcon: ({ color }) => <FontAwesome5 size={22} name="user-alt" color={color} />,
                 }}
             />
         </Tabs>

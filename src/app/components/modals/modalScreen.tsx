@@ -1,5 +1,5 @@
-import { globalColors } from "@/src/styles/global";
-import { KeyboardAvoidingView, Modal as RNModal, ModalProps, View, StyleSheet } from "react-native"
+import React, { useRef } from "react";
+import { KeyboardAvoidingView, Modal as RNModal, ModalProps, View, StyleSheet, Pressable } from "react-native"
 
 type PROPS = ModalProps & {
     isOpen: boolean;
@@ -31,6 +31,5 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "flex-end",
         alignItems: "flex-end",
-
     },
 })

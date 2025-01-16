@@ -5,11 +5,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { router, Link } from 'expo-router';
 import * as yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+import Feather from '@expo/vector-icons/Feather';
 
 import Api from '@/src/services/api';
-import { globalColors } from '@/src/styles/global';
+import { globalColors, globalStyles } from '@/src/styles/global';
 import Fonts from '@/src/services/utils/Fonts';
-import { MyButton } from '../../components/button/button';
+import MyButton from '../../components/button/button';
+import MainHeader from '../../components/headers/mainHeader';
 
 type FormData = {
     token: string;
@@ -30,8 +33,6 @@ const registerSchema = yup.object({
 }).required();
 
 export default function resetPassword() {
-    const [resultData, setResultData] = useState(null);
-
     const form = useForm<FormData>({
         defaultValues: {
             token: "",
@@ -42,6 +43,8 @@ export default function resetPassword() {
     });
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hidepass, setHidepass] = useState(true);
 
     const resendToken = async () => {
         const email = await AsyncStorage.getItem('userEmail');
@@ -51,17 +54,16 @@ export default function resetPassword() {
         })
             .then(async function (response) {
                 console.log(response.data);
-                setResultData(response.data.msg);
                 reset();
             })
             .catch(function (error) {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
             });
     }
 
 
     const onSubmit: SubmitHandler<FormData> = async (data) => {
+        setLoading(true);
         const email = await AsyncStorage.getItem('userEmail')
 
         await Api.post('/auth/reset_password', {
@@ -70,8 +72,10 @@ export default function resetPassword() {
             password: data.password
         })
             .then(async function (response) {
-                console.log(response.data);
-                setResultData(response.data.msg);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Senha alterada com sucesso!',
+                });
                 reset();
 
                 await AsyncStorage.removeItem('userEmail');
@@ -79,18 +83,22 @@ export default function resetPassword() {
                 router.replace('/');
             })
             .catch(function (error) {
-                console.log(error.response.data);
-                setResultData(error.response.data.msg);
+                Toast.show({
+                    type: 'error',
+                    text1: error.response.data.msg,
+                    text2: 'Tente novamente'
+                });
+            })
+            .finally(() => {
+                setLoading(false);
             });
 
     };
 
     return (
         <View style={styles.container}>
-
-            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
-                <Image style={styles.imgVoltar} source={require('../../../../assets/icons/voltar.png')} />
-            </TouchableOpacity >
+                 <MainHeader backButton />
+            
 
             <View>
                 <Text style={styles.title}>Codigo enviado para seu email</Text>
@@ -101,13 +109,15 @@ export default function resetPassword() {
                 name="token"
                 render={({ field: { value, onChange } }) => (
                     <>
+                    <View style={globalStyles.inputArea}>
                         <TextInput
-                            style={styles.input}
+                            style={globalStyles.input}
                             onChangeText={onChange}
                             placeholder="Código"
                             value={value}
                             autoCapitalize="none"
                         />
+                        </View>
                         {errors.token && <Text style={styles.error}>{errors.token.message}</Text>}
                     </>
                 )}
@@ -117,14 +127,25 @@ export default function resetPassword() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={onChange}
-                            placeholder="Nova senha"
-                            value={value}
-                            autoCapitalize="none"
-                            secureTextEntry={true}
-                        />
+                        <View style={[globalStyles.inputArea, { marginBottom: 0 }]}>
+                            <TextInput
+                                style={globalStyles.input}
+                                onChangeText={onChange}
+                                placeholder="Nova senha"
+                                value={value}
+                                autoCapitalize="none"
+                                secureTextEntry={hidepass}
+                            />
+
+                            <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
+                                {hidepass ?
+                                    <Feather name="eye-off" size={24} color="#593C9D" />
+                                    :
+                                    <Feather name="eye" size={24} color="#593C9D" />
+                                }
+
+                            </TouchableOpacity>
+                        </View>
                         {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
                     </>
                 )}
@@ -134,32 +155,27 @@ export default function resetPassword() {
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
                     <>
+                    <View style={globalStyles.inputArea}>
                         <TextInput
-                            style={styles.input}
+                            style={globalStyles.input}
                             onChangeText={onChange}
                             placeholder="Confirmar senha"
                             value={value}
                             autoCapitalize="none"
-                            secureTextEntry={true}
+                            secureTextEntry={hidepass}
                         />
+                        </View>
                         {errors.confirm_password && <Text style={styles.error}>{errors.confirm_password.message}</Text>}
                     </>
                 )}
             />
             <View style={{ marginTop: 50, gap: 10 }}>
 
-                <MyButton onPress={resendToken} title='Reenviar código' />
+                <MyButton onPress={resendToken} title='Reenviar código' loading={false} borderButton />
 
-                <MyButton onPress={handleSubmit(onSubmit)} title='Alterar senha'/>
+                <MyButton onPress={handleSubmit(onSubmit)} title='Alterar senha' loading={false} />
 
             </View>
-
-            {resultData && (
-                <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
-                    <Text style={styles.resultText}>{resultData}</Text>
-                </View>
-            )}
         </View>
     );
 }
@@ -182,23 +198,12 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        marginTop:"30%",
-        marginBottom:20,
+        marginTop: "30%",
+        marginBottom: 20,
 
         color: globalColors.primary,
         fontSize: 32,
         fontFamily: Fonts['montserrat-extrabold'],
-    },
-
-    input: {
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1.5,
-        borderRadius: 10,
-        borderColor: globalColors.primary,
-        fontFamily: Fonts['montserrat-regular'],
-        fontSize: 16,
     },
     error: {
         color: 'red',

@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, CameraView, FlashMode } from 'expo-camera';
-import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, ScrollView, TextInput, Image, Dimensions, FlatList } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Picker } from '@react-native-picker/picker';
-import { Dropdown } from 'react-native-element-dropdown';
 import * as yup from 'yup';
 import * as ImagePicker from 'expo-image-picker';
-import ColorThief from 'color-thief-ts';
 
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';;
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -16,14 +14,19 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { STORAGE } from '@/src/services/firebase/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { Category } from '@/src/services/types/types';
 import { useCats } from '@/src/services/contexts/catsContext';
 import { useUser } from '@/src/services/contexts/userContext';
-import { clothingGender, clothingKind, clothingStyle, clothingTemperature, clothingTissue } from '@/src/services/local-data/dropDownData';
+import { clothingColors, clothingGender, clothingKind, clothingStyle, clothingTemperature, clothingTissue } from '@/src/services/local-data/pickerData';
 import { useClothes } from '@/src/services/contexts/clothesContext';
 import Api from '@/src/services/api';
 
 import ModalScreen from '../components/modals/modalScreen';
+import MyButton from '../components/button/button';
+import { globalColors, globalStyles } from '@/src/styles/global';
+import { Ionicons } from '@expo/vector-icons';
+import Modal from '../components/modals/modal';
+
+const { width } = Dimensions.get('window');
 
 type FormData = {
     catId?: string;
@@ -62,8 +65,10 @@ export default function CameraScreen() {
 
     // saveClothingScreen
     const [saveClothingScreenOpen, setSaveClothingScreenOpen] = useState<boolean>(false);
-    const [moreOptions, setMoreOptions] = useState<boolean>(false);
+    const [colorPicker, setColorPicker] = useState<boolean>(false);
     const [color, setColor] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
+    const [devMode, setDevMode] = useState<boolean>(true);
 
     // contexts
     const { cats, getCats } = useCats();
@@ -103,7 +108,6 @@ export default function CameraScreen() {
 
             getCats();
             getUser();
-            setValue('gender', user?.gender);
         })();
     }, []);
 
@@ -120,10 +124,9 @@ export default function CameraScreen() {
 
     const takePicture = async () => {
         if (cameraRef) {
-            try {                
+            try {
                 const data = await cameraRef.current?.takePictureAsync();
-                const colorThief = new ColorThief();
-                
+
                 console.log(data);
                 setImage(data?.uri);
             }
@@ -136,7 +139,7 @@ export default function CameraScreen() {
     const pickImage = async () => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: "images",
                 quality: 1,
             });
 
@@ -178,18 +181,26 @@ export default function CameraScreen() {
     };
 
     const onSubmitCreateClothing: SubmitHandler<FormData> = async (data) => {
-        const processedImage = await removeImageBackground();
-        console.log(processedImage);
+        setLoading(true);
 
-        if (image) {
-            if (processedImage !== null && processedImage !== undefined) {
-                data.image = processedImage;
+        if (devMode === false) {
+            const processedImage = await removeImageBackground();
+            console.log(processedImage);
+
+            if (image) {
+                if (processedImage !== null && processedImage !== undefined) {
+                    data.image = processedImage;
+                }
+                else {
+                    const uploadedImageUrl = await uploadImage(image, true);
+                    alert("RemoveBG sem créditos.");
+                    data.image = uploadedImageUrl;
+                }
             }
-            else {
-                const uploadedImageUrl = await uploadImage(image, true);
-                alert("RemoveBG sem créditos.");
-                data.image = uploadedImageUrl;
-            }
+        } else if (image) {
+            const uploadedImageUrl = await uploadImage(image, true);
+            alert("DevMode ativo, créditos do RemoveBg salvos :)");
+            data.image = uploadedImageUrl;
         }
 
         if (!data.catId) { delete data.catId };
@@ -199,14 +210,15 @@ export default function CameraScreen() {
                 console.log(response.data);
                 reset();
                 getClothes();
-                router.back();
+                router.replace("/clothes");
             })
             .catch(error => {
                 console.log(error.response.data)
             })
-
+            .finally(() => {
+                setLoading(false);
+            })
     };
-
 
     return (
         <View style={styles.container}>
@@ -215,11 +227,16 @@ export default function CameraScreen() {
                     <View style={styles.cameraContainer}>
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.cameraButton} onPress={router.back}>
-                                <FontAwesome5 name="arrow-left" size={20} color="white" />
+                                <Ionicons name="chevron-back" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
 
-                        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+                        <View style={{ flex: 1, justifyContent: "center" }}>
+                            <Image source={require('@/assets/images/camera-focus.png')} style={{ width: width * 0.9, height: width * 1.5, alignSelf: "center", resizeMode: 'contain', }} />
+
+                        </View>
+
+                        <View style={{ justifyContent: 'flex-end' }}>
                             <View style={[styles.buttonContainer, { justifyContent: "center" }]}>
                                 <TouchableOpacity style={[styles.cameraButton, { position: "absolute", left: 1 }]} onPress={pickImage}>
                                     <MaterialIcons name='add-photo-alternate' size={20} color="white" />
@@ -248,7 +265,7 @@ export default function CameraScreen() {
                                     <FontAwesome6 name="repeat" size={28} color="white" />
                                     <Text style={styles.buttonText}>Alterar foto</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.textCameraButton} onPress={() => setSaveClothingScreenOpen(true)}>
+                                <TouchableOpacity style={styles.textCameraButton} onPress={() => { setSaveClothingScreenOpen(true), setValue('gender', user?.gender) }}>
                                     <FontAwesome5 name="check" size={28} color="white" />
                                     <Text style={styles.buttonText}>Salvar</Text>
                                 </TouchableOpacity>
@@ -261,29 +278,32 @@ export default function CameraScreen() {
                 <View style={styles.modalScreenContent}>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", width: "100%", marginHorizontal: 20 }}>
                         <TouchableOpacity onPress={() => { setSaveClothingScreenOpen(false) }} style={{ position: "absolute", left: 20 }}>
-                            <FontAwesome5 name="arrow-left" size={18} />
+                            <Ionicons name="chevron-back" size={26} />
                         </TouchableOpacity>
 
-                        <Text style={{ fontSize: 18, fontWeight: "500" }}>Salvar peça de roupa</Text>
+                        <Text style={globalStyles.subTitle}>Salvar peça de roupa</Text>
                     </View>
                     <ScrollView showsVerticalScrollIndicator={true} style={{ flex: 1, width: "100%", paddingHorizontal: 20 }}>
+
                         <View style={{ width: "100%", height: 450, marginTop: 10, borderRadius: 10, overflow: 'hidden' }}>
+
                             <ImageBackground source={{ uri: image }} style={{ alignItems: "flex-end", justifyContent: "flex-end", flex: 1 }} resizeMode='stretch'>
                                 <TouchableOpacity onPress={() => { setValue('fav', !favoriteValue) }}>
                                     <MaterialIcons name={favoriteValue ? 'favorite' : 'favorite-border'} size={24} color={favoriteValue ? 'red' : '#fff'} style={styles.fav} />
                                 </TouchableOpacity>
                             </ImageBackground>
+
                         </View>
 
-                        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 20 }}>
+                        <View style={styles.informacoes}>
                             <Controller
                                 control={control}
                                 name="kind"
                                 render={({ field: { value, onChange } }) => (
+
                                     <View style={[styles.controllerContainer, { width: "40%" }]}>
-                                        <View style={styles.pickerContainer}>
+                                        <View style={globalStyles.pickerContainer}>
                                             <Picker
-                                                style={styles.picker}
                                                 selectedValue={value}
                                                 onValueChange={(itemValue) => {
                                                     onChange(itemValue);
@@ -310,9 +330,8 @@ export default function CameraScreen() {
                                 name="style"
                                 render={({ field: { value, onChange } }) => (
                                     <View style={[styles.controllerContainer, { width: "40%" }]}>
-                                        <View style={styles.pickerContainer}>
+                                        <View style={globalStyles.pickerContainer}>
                                             <Picker
-                                                style={styles.picker}
                                                 selectedValue={value}
                                                 onValueChange={(itemValue) => onChange(itemValue)}
                                             >
@@ -327,129 +346,126 @@ export default function CameraScreen() {
                                 )}
                             />
 
-                            {/* Comentário: Pegar cor automaticamente e mudar para um picker de cor com um quadrado representando a selecionada*/}
+                            <TouchableOpacity style={[styles.controllerContainer, { width: "16%" }]} onPress={() => setColorPicker(true)}>
+                                <View style={styles.input}>
+                                    {watch('color') ?
+                                        <View style={[{ width: 30, height: 30, borderRadius: 100, backgroundColor: `${watch('color')}` }, watch('color') === "#FFFFFF" && { borderWidth: 1 }]}></View>
+                                        :
+                                        <Text>Cor</Text>
+                                    }
+                                </View>
+                                {errors.color && <Text style={styles.error}>{errors.color.message}</Text>}
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ flexDirection: "column", gap: 5, marginVertical: 20 }}>
+                            <Text style={styles.comment}>Opções avançadas</Text>
 
                             <Controller
                                 control={control}
-                                name="color"
+                                name="temperature"
                                 render={({ field: { value, onChange } }) => (
-                                    <View style={[styles.controllerContainer, { width: "16%" }]}>
-                                        <TextInput
-                                            style={[styles.input, { textAlign: "center", height: 70 }, color !== "" ? { borderColor: `${color}`, borderWidth: 2 } : { borderColor: "#000", borderWidth: 1 }]}
-                                            onChangeText={(text) => { onChange(text), setColor(text) }}
-                                            placeholder="Cor"
-                                            value={value}
-                                            autoCapitalize="none"
-                                        />
-                                        {errors.color && <Text style={styles.error}>{errors.color.message}</Text>}
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Temperatura " value="" />
+                                                {clothingTemperature.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                        {errors.temperature && <Text style={styles.error}>{errors.temperature.message}</Text>}
+                                    </View>
+                                )}
+                            />
+
+                            <Controller
+                                control={control}
+                                name="gender"
+                                render={({ field: { value, onChange } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Gênero" value="" />
+                                                {clothingGender.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                        {errors.gender && <Text style={styles.error}>{errors.gender.message}</Text>}
+                                    </View>
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="tissue"
+                                render={({ field: { value, onChange } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Tecido" value="" />
+                                                {clothingTissue.map(item => (
+                                                    <Picker.Item key={item.value} label={item.label} value={item.value} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                        {errors.tissue && <Text style={styles.error}>{errors.tissue.message}</Text>}
+                                    </View>
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="catId"
+                                render={({ field: { onChange, value } }) => (
+                                    <View style={[styles.controllerContainer, { width: "100%" }]}>
+                                        <View style={globalStyles.pickerContainer}>
+                                            <Picker
+                                                selectedValue={value}
+                                                onValueChange={(itemValue) => onChange(itemValue)}
+                                            >
+                                                <Picker.Item label="Categoria" value="" />
+                                                {cats.map(item => (
+                                                    <Picker.Item key={item._id} label={item.name} value={item._id} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                        {errors.tissue && <Text style={styles.error}>{errors.tissue.message}</Text>}
                                     </View>
                                 )}
                             />
                         </View>
 
-                        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", marginVertical: 10 }} onPress={() => { setMoreOptions(!moreOptions) }}>
-                            <MaterialIcons name={moreOptions ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={18} color={"grey"} />
-                            <Text style={styles.comment}>{moreOptions ? 'Menos' : 'Mais'} opções</Text>
-                        </TouchableOpacity>
-
-                        {moreOptions === true &&
-                            <View style={{ flexDirection: "column", gap: 20 }}>
-                                <Controller
-                                    control={control}
-                                    name="temperature"
-                                    render={({ field: { value, onChange } }) => (
-                                        <View style={[styles.controllerContainer, { width: "100%" }]}>
-                                            <View style={styles.pickerContainer}>
-                                                <Picker
-                                                    style={styles.picker}
-                                                    selectedValue={value}
-                                                    onValueChange={(itemValue) => onChange(itemValue)}
-                                                >
-                                                    <Picker.Item label="Temperatura " value="" />
-                                                    {clothingTemperature.map(item => (
-                                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                                    ))}
-                                                </Picker>
-                                            </View>
-                                            {errors.temperature && <Text style={styles.error}>{errors.temperature.message}</Text>}
-                                        </View>
-                                    )}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name="gender"
-                                    render={({ field: { value, onChange } }) => (
-                                        <View style={[styles.controllerContainer, { width: "100%" }]}>
-                                            <View style={styles.pickerContainer}>
-                                                <Picker
-                                                    style={styles.picker}
-                                                    selectedValue={value}
-                                                    onValueChange={(itemValue) => onChange(itemValue)}
-                                                >
-                                                    <Picker.Item label="Gênero" value="" />
-                                                    {clothingGender.map(item => (
-                                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                                    ))}
-                                                </Picker>
-                                            </View>
-                                            {errors.gender && <Text style={styles.error}>{errors.gender.message}</Text>}
-                                        </View>
-                                    )}
-                                />
-                                <Controller
-                                    control={control}
-                                    name="tissue"
-                                    render={({ field: { value, onChange } }) => (
-                                        <View style={[styles.controllerContainer, { width: "100%" }]}>
-                                            <View style={styles.pickerContainer}>
-                                                <Picker
-                                                    style={styles.picker}
-                                                    selectedValue={value}
-                                                    onValueChange={(itemValue) => onChange(itemValue)}
-                                                >
-                                                    <Picker.Item label="Tecido" value="" />
-                                                    {clothingTissue.map(item => (
-                                                        <Picker.Item key={item.value} label={item.label} value={item.value} />
-                                                    ))}
-                                                </Picker>
-                                            </View>
-                                            {errors.tissue && <Text style={styles.error}>{errors.tissue.message}</Text>}
-                                        </View>
-                                    )}
-                                />
-                                <Controller
-                                    control={control}
-                                    name="catId"
-                                    render={({ field: { onChange, value } }) => (
-                                        <>
-                                            <Dropdown
-                                                style={styles.input}
-                                                data={cats}
-                                                labelField="name"
-                                                valueField="_id"
-                                                placeholder="Selecione uma categoria"
-                                                search
-                                                searchPlaceholder='Pesquisar'
-                                                value={value}
-                                                onChange={(item: Category) => {
-                                                    onChange(item._id);
-                                                }}
-                                            />
-                                        </>
-                                    )}
-                                />
-                            </View>
-                        }
-
                     </ScrollView>
 
-                    <View style={{ width: "100%", paddingHorizontal: 20 }}>
-                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmitCreateClothing)}>
-                            <Text style={styles.submitButtonText}>Salvar</Text>
-                        </TouchableOpacity>
+                    <View style={{ width: "100%", paddingHorizontal: 20, paddingBottom: 20 }}>
+                        <MyButton title='Salvar' onPress={handleSubmit(onSubmitCreateClothing)} loading={loading} />
                     </View>
                 </View>
+
+                <Modal isOpen={colorPicker} onRequestClose={() => setColorPicker(false)}>
+                    <View style={{ backgroundColor: "#fff", width: "90%", height: "70%" }}>
+                        <FlatList
+                            data={clothingColors}
+                            keyExtractor={item => item.value}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity style={{ padding: 10, flexDirection: "row", alignItems: "center", gap: 15 }} onPress={() => { setValue("color", item.value), setColorPicker(false) }}>
+                                    <View style={[{ width: 30, height: 30, borderRadius: 100, backgroundColor: `${item.value}` }, item.value === "#FFFFFF" && { borderWidth: 1 }]}></View>
+                                    <Text style={{ fontSize: 16 }}>{item.label}</Text>
+                                </TouchableOpacity>
+                            )}
+                            contentContainerStyle={{ gap: 10 }}
+                        />
+                    </View>
+                </Modal>
             </ModalScreen >
         </View >
     );
@@ -460,6 +476,13 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
+
+    informacoes: {
+        flexDirection: 'row',
+        gap: 4,
+        justifyContent: "space-between"
+    },
+
     cameraContainer: {
         flex: 1,
         paddingVertical: 40,
@@ -506,25 +529,31 @@ const styles = StyleSheet.create({
     fav: {
         margin: 20
     },
-    submitButton: {
-        backgroundColor: "#593C9D",
-        borderRadius: 5,
-        paddingVertical: 10,
-        width: "100%",
-        alignItems: "center",
-        marginBottom: 20,
-    },
     submitButtonText: {
         color: "#fff",
         fontWeight: "500",
     },
     input: {
-        backgroundColor: "#fff",
-        padding: 10,
+        alignItems: 'center',
+        textAlign: 'center',
+        justifyContent: "center",
         borderWidth: 1,
-        borderRadius: 5,
-        width: "100%",
+        borderColor: globalColors.primary,
+        borderRadius: 10,
+        paddingVertical: 8,
+        flex: 1
     },
+
+    inputCategoria: {
+        marginTop: 10,
+        borderRadius: 10,
+        borderColor: globalColors.primary,
+        borderWidth: 1,
+        height: 45,
+        paddingHorizontal: 20,
+        marginBottom: 20,
+    },
+
     error: {
         color: 'red',
         fontSize: 10,
@@ -534,20 +563,9 @@ const styles = StyleSheet.create({
     comment: {
         color: "grey",
         fontWeight: "500",
-        marginVertical: 10
     },
     controllerContainer: {
         flexDirection: "column",
-        gap: 2,
+        marginTop: 10,
     },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: "#000",
-        borderRadius: 5,
-        height: 70
-    },
-    picker: {
-        width: "100%",
-        height: "100%"
-    }
 });

@@ -5,12 +5,11 @@ import { useEffect } from 'react';
 
 import Fonts from '../services/utils/Fonts';
 import { globalColors, globalStyles } from '../styles/global';
-import { MainButton } from './components/button/button';
 
 export default function Index() {
     const hasToken = async () => {
         const token = await AsyncStorage.getItem('jwtToken')
-        if (token) { router.replace('(tabs)') }
+        if (token) { router.replace('/(tabs)/home') }
     };
 
     useEffect(() => {
@@ -20,16 +19,16 @@ export default function Index() {
     return (
         <View style={styles.container}>
             <View style={styles.subcontainer}>
-                <Text style={styles.text}>Bem-vindo a GoDress</Text>
                 <Image source={require('../../assets/images/goroxo.png')} />
-
+                <Text style={styles.text}>O seu mais novo guarda roupa digital</Text>
             </View>
 
             <View style={styles.miniContainer}>
-                <Link href={"/auth/register"} style={styles.button}>cadastre-se</Link>
+                <Text style={styles.titulo}>Bem vindo a GoDress</Text>
+                <Link href={"/auth/register"} style={styles.button}>Cadastre-se</Link>
                 <View style={styles.containtext}>
-                    <Link href={"/auth/login"} style={styles.txtlogin}>ja possui cadastro?</Link>
-                    <Link href={"/auth/login"} style={styles.txtentrar}>entrar</Link>
+                    <Link href={"/auth/login"} style={styles.txtlogin}>Já possui cadastro?</Link>
+                    <Link href={"/auth/login"} style={styles.txtentrar}>Entrar</Link>
                 </View>
             </View>
 
@@ -46,16 +45,24 @@ const styles = StyleSheet.create({
 
     subcontainer: {
         alignItems: "center",
-        marginTop: "35%",
+        marginTop: "45%",
+        gap: 20,
+    },
+
+    titulo:{
+        fontFamily: Fonts['montserrat-extrabold'],
+        fontSize: 20,
+        color: globalColors.black,
+        marginBottom: 20,
+        
     },
 
     text: {
         fontSize: 18,
-        fontFamily: Fonts['montserrat-light'],
+        fontFamily: Fonts['montserrat-bold'],
         color: '#fff',
         paddingHorizontal: 100,
         textAlign: 'center',
-        marginBottom: 40,
     },
 
     positioncamaleao: {
@@ -95,14 +102,14 @@ const styles = StyleSheet.create({
 
     txtlogin: {
         fontSize: 16,
-        fontFamily:Fonts['montserrat-regular'],
+        fontFamily: Fonts['montserrat-regular'],
 
     },
-    txtentrar:{
-        color:globalColors.primary, 
+    txtentrar: {
+        color: globalColors.primary,
         fontSize: 16,
-        fontFamily:Fonts['montserrat-semibold'],
-        textDecorationLine:'underline',
+        fontFamily: Fonts['montserrat-semibold'],
+        textDecorationLine: 'underline',
 
     },
 
@@ -111,7 +118,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         fontFamily: Fonts['montserrat-regular'],
         fontSize: 16,
-        gap:10,
-        flexDirection:'row',
+        gap: 10,
+        flexDirection: 'row',
     },
 });

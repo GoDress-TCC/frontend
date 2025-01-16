@@ -10,15 +10,20 @@ import Fonts from '@/src/services/utils/Fonts';
 
 import Api from '@/src/services/api';
 import { router } from 'expo-router';
-import { globalColors } from '@/src/styles/global';
-import { MyButton } from '../components/button/button';
+import { globalColors, globalStyles } from '@/src/styles/global';
+import MyButton from '../components/button/button';
+import Toast from 'react-native-toast-message';
+import MainHeader from '../components/headers/mainHeader';
+import { Picker } from '@react-native-picker/picker';
+import { clothingGender } from '@/src/services/local-data/pickerData';
 
 type FormData = {
     name: string;
     surname: string;
     email: string;
     password: string;
-    confirm_password: string
+    confirm_password: string;
+    gender: string;
 }
 
 const registerSchema = yup.object({
@@ -32,13 +37,14 @@ const registerSchema = yup.object({
         .matches(/[0-9]/, 'Senha deve conter pelo menos um número')
         .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Senha deve conter pelo menos um caractere especial')
         .required('Senha é obrigatória'),
-    confirm_password: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'As senhas devem ser iguais!')
+    confirm_password: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'As senhas devem ser iguais!'),
+    gender: yup.string().required('Gênero é obrigatório')
 }).required();
 
 
 
 export default function Register() {
-    const [resultData, setResultData] = useState(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const form = useForm<FormData>({
         defaultValues: {
@@ -46,30 +52,45 @@ export default function Register() {
             surname: "",
             email: "",
             password: "",
-            confirm_password: ""
+            confirm_password: "",
+            gender: ""
         },
         resolver: yupResolver(registerSchema),
     });
 
     const { handleSubmit, control, formState: { errors }, reset } = form;
 
+
     const onSubmit: SubmitHandler<FormData> = async (data) => {
+        setLoading(true);
         await Api.post('/auth/register', {
             name: data.name,
             surname: data.surname,
             email: data.email,
-            password: data.password
+            password: data.password,
+            gender: data.gender
         })
             .then(function (response) {
                 console.log(response.data);
-                setResultData(response.data.msg);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Sucesso',
+                    text2: 'Faça login para continuar'
+                });
                 router.navigate('/auth/login')
                 reset();
             })
             .catch(function (error) {
                 console.log(error.response.data);
-                setResultData(error.response.data.msg);
-            });
+                Toast.show({
+                    type: 'error',
+                    text1: error.response.data.msg,
+                    text2: 'Tente novamente'
+                });
+            })
+            .finally(() => {
+                setLoading(false)
+            })
     };
 
     const [hidepass, setHidepass] = useState(true);
@@ -77,11 +98,8 @@ export default function Register() {
     return (
         <View style={styles.container}>
 
-
-            <TouchableOpacity style={styles.containVoltar} onPress={() => router.back()}>
-                <Image style={styles.imgVoltar} source={require('../../../assets/icons/voltar.png')} />
-            </TouchableOpacity >
-
+            <MainHeader backButton />
+        
             <View style={styles.containlogotxt}>
                 <Text style={styles.titulo} >Cadastre-se</Text>
                 <Image style={styles.logoimg} source={require('../../../assets/images/gPurple.png')} />
@@ -92,9 +110,9 @@ export default function Register() {
                 name="name"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Nome"
                                 onChangeText={onChange}
                                 value={value}
@@ -109,9 +127,9 @@ export default function Register() {
                 name="surname"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Sobrenome"
                                 onChangeText={onChange}
                                 value={value}
@@ -126,9 +144,9 @@ export default function Register() {
                 name="email"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 onChangeText={onChange}
                                 placeholder="Email"
                                 value={value}
@@ -144,9 +162,9 @@ export default function Register() {
                 name="password"
                 render={({ field: { value, onChange } }) => (
                     <>
-                        <View style={styles.inputarea}>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Senha"
                                 onChangeText={onChange}
                                 value={value}
@@ -154,11 +172,11 @@ export default function Register() {
                                 autoCapitalize="none"
                             />
                             <TouchableOpacity onPress={() => setHidepass(!hidepass)}>
-                                { hidepass ?
+                                {hidepass ?
                                     <Feather name="eye-off" size={24} color="#593C9D" />
                                     :
-                                    <Feather name="eye" size={24} color="#593C9D" />    
-                            }
+                                    <Feather name="eye" size={24} color="#593C9D" />
+                                }
 
                             </TouchableOpacity>
                         </View>
@@ -170,10 +188,10 @@ export default function Register() {
                 control={control}
                 name="confirm_password"
                 render={({ field: { value, onChange } }) => (
-                    <>
-                        <View style={styles.inputarea}>
+                    <View>
+                        <View style={globalStyles.inputArea}>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 placeholder="Confirmar senha"
                                 onChangeText={onChange}
                                 value={value}
@@ -183,18 +201,31 @@ export default function Register() {
                         </View>
 
                         {errors.confirm_password && <Text style={styles.error}>{errors.confirm_password.message}</Text>}
-                    </>
+                    </View>
+                )}
+            />
+            <Controller
+                control={control}
+                name="gender"
+                render={({ field: { value, onChange } }) => (
+                    <View style={[globalStyles.pickerContainer, { backgroundColor: "#fff" }]}>
+                        <Picker
+                            selectedValue={value}
+                            onValueChange={(itemValue) => onChange(itemValue)}
+                        >
+                            <Picker.Item label="Gênero" value="" />
+                            {clothingGender.map(item => (
+                                <Picker.Item key={item.value} label={item.label} value={item.value} />
+                            ))}
+                        </Picker>
+                    </View>
                 )}
             />
 
-            <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' />
+            <View style={{ marginTop: 40 }}>
+                <MyButton onPress={handleSubmit(onSubmit)} title='Cadastre-se ' loading={loading} />
+            </View>
 
-            {resultData && (
-                <View style={styles.resultContainer}>
-                    <Text style={{ fontWeight: "500", marginBottom: 10 }}>Status:</Text>
-                    <Text style={styles.resultText}>{resultData}</Text>
-                </View>
-            )}
         </View>
     );
 }
@@ -203,20 +234,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        gap: 10
-    },
-
-    containVoltar: {
-        paddingTop: '15%',
-    },
-
-    imgVoltar: {
-        height: 30,
-        width: 30,
+        gap: 10,
+        paddingTop: 40,
     },
 
     containlogotxt: {
-        marginTop: 70,
+        marginTop: 20,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -236,29 +259,6 @@ const styles = StyleSheet.create({
         width: 55,
         resizeMode: 'contain',
     },
-
-
-    inputarea: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: "#fff",
-        padding: 10,
-        width: "100%",
-        borderWidth: 1,
-        borderRadius: 10,
-        borderColor: globalColors.primary,
-        justifyContent: 'space-between',
-
-    },
-
-    input: {
-
-        fontFamily: Fonts['montserrat-regular'],
-        fontSize: 16,
-        flexDirection: 'row',
-        width: '90%',
-    },
-
     button: {
         backgroundColor: globalColors.secundary,
         borderRadius: 5,

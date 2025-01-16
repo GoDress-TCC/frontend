@@ -13,14 +13,34 @@ export type Category = {
 
 export type Clothing = {
     _id: string;
-    catId: string;
+    catId: Array<string>;
     image: string;
     kind: string;
     type: string;
     color: string;
     style: string;
-    temperature: string; 
+    temperature: string;
     gender: string;
     tissue: string;
-    fav: boolean
+    fav: boolean;
+    dirty: boolean
+};
+
+export type Outfit = {
+    _id: string;
+    clothingId: Clothing[];
+    name: string;
+    catId: string;
+    style: string;
+    temperature: string;
+    hour: string
+}
+
+export type Event = {
+    _id: string;
+    image: string;
+    name: string;
+    date: string;
+    location: string;
+    outfitId: string;
 };

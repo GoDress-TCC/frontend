@@ -5,12 +5,18 @@ import Api from '@/src/services/api';
 interface ClothesContextProps {
     clothes: Clothing[];
     getClothes: () => void;
+    selectedClothingId: string | undefined;
+    setSelectedClothingId: (id: string | undefined) => void;
+    selectedClothesIds: string[];
+    setSelectedClothesIds: (ids: string[]) => void;
 }
 
 const ClothesContext = createContext<ClothesContextProps | undefined>(undefined);
 
 export function ClothesProvider({ children }: { children: ReactNode }) {
     const [clothes, setClothes] = useState<Clothing[]>([]);
+    const [selectedClothingId, setSelectedClothingId] = useState<string | undefined>(undefined);
+    const [selectedClothesIds, setSelectedClothesIds] = useState<string[]>([]);
 
     const getClothes = async () => {
         await Api.get('/clothing')
@@ -28,7 +34,7 @@ export function ClothesProvider({ children }: { children: ReactNode }) {
     }, []);
 
     return (
-        <ClothesContext.Provider value={{ clothes, getClothes }}>
+        <ClothesContext.Provider value={{ clothes, getClothes, selectedClothingId, setSelectedClothingId, selectedClothesIds, setSelectedClothesIds }}>
             {children}
         </ClothesContext.Provider>
     );
@@ -37,7 +43,7 @@ export function ClothesProvider({ children }: { children: ReactNode }) {
 export function useClothes() {
     const context = useContext(ClothesContext);
     if (context === undefined) {
-        throw new Error('useClothes tem que ser usado com um ClothesProvider');
+        throw new Error('useClothes deve ser usado dentro de um ClothesProvider');
     }
     return context;
 }
