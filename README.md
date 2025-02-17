@@ -1,4 +1,4 @@
 # frontend-testes
 
-Repositório destinado a testes de conexão com os endpoints do backend (material de estudo).  
+Repositório destinado ao frontend do aplicativo GoDress.
 
